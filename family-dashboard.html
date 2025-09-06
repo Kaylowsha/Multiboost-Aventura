@@ -47,214 +47,57 @@
     <!-- CONTENIDO PRINCIPAL -->
     <div class="container mx-auto px-4 py-8">
         
-        <!-- RESUMEN GENERAL -->
-        <div class="mb-8">
-            <h2 class="text-3xl font-bold mb-6 text-center">👨‍👩‍👧‍👦 Progreso de tus Hijos</h2>
-            
-            <!-- ESTADÍSTICAS GENERALES -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-green-300" id="total-students">3</div>
-                    <div class="text-sm opacity-75">Estudiantes</div>
-                </div>
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-blue-300" id="total-sessions">47</div>
-                    <div class="text-sm opacity-75">Sesiones Totales</div>
-                </div>
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-yellow-300" id="avg-progress">73%</div>
-                    <div class="text-sm opacity-75">Progreso Promedio</div>
-                </div>
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
-                    <div class="text-3xl font-bold text-red-300" id="critical-tables">5</div>
-                    <div class="text-sm opacity-75">Tablas Críticas</div>
-                </div>
+        <!-- PANTALLA DE CARGA -->
+        <div id="loading-section" class="text-center py-16">
+            <div class="text-6xl mb-4">⚡</div>
+            <h2 class="text-3xl font-bold mb-4">Cargando Dashboard Familiar</h2>
+            <p class="text-lg opacity-75 mb-8">Conectando con Firebase y obteniendo datos de estudiantes...</p>
+            <div class="flex justify-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
             </div>
         </div>
 
-        <!-- CARDS DE ESTUDIANTES -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            
-            <!-- CARD ESTUDIANTE 1 -->
-            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
-                            👧
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold">Sofia</h3>
-                            <p class="text-sm opacity-75">8 años - 3° Básico</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-300">85%</div>
-                </div>
+        <!-- CONTENIDO REAL (inicialmente oculto) -->
+        <div id="dashboard-content" style="display: none;">
+            <!-- RESUMEN GENERAL -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold mb-6 text-center">👨‍👩‍👧‍👦 Progreso de tus Hijos</h2>
                 
-                <!-- PROGRESO POR TABLAS -->
-                <div class="mb-4">
-                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-green-400">
-                            <div class="font-bold">Tabla 2</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-green-400 h-2 rounded" style="width: 95%"></div>
-                            </div>
-                            <div class="text-green-300">95%</div>
-                        </div>
-                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
-                            <div class="font-bold">Tabla 7</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-red-400 h-2 rounded" style="width: 35%"></div>
-                            </div>
-                            <div class="text-red-300">35% ⚠️</div>
-                        </div>
-                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
-                            <div class="font-bold">Tabla 8</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-yellow-400 h-2 rounded" style="width: 65%"></div>
-                            </div>
-                            <div class="text-yellow-300">65%</div>
-                        </div>
+                <!-- ESTADÍSTICAS GENERALES -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                        <div class="text-3xl font-bold text-green-300" id="total-students">0</div>
+                        <div class="text-sm opacity-75">Estudiantes</div>
                     </div>
-                </div>
-                
-                <!-- ACTIVIDADES PENDIENTES -->
-                <div class="mb-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold">📋 Actividades:</span>
-                        <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">2 pendientes</span>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                        <div class="text-3xl font-bold text-blue-300" id="total-sessions">0</div>
+                        <div class="text-sm opacity-75">Sesiones Totales</div>
                     </div>
-                </div>
-                
-                <!-- BOTONES DE ACCIÓN -->
-                <div class="flex space-x-2">
-                    <button onclick="viewStudentDetails('sofia')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                        👁️ Ver Detalles
-                    </button>
-                    <button onclick="assignQuickActivity('sofia')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                        ⚡ Asignar
-                    </button>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                        <div class="text-3xl font-bold text-yellow-300" id="avg-progress">0%</div>
+                        <div class="text-sm opacity-75">Progreso Promedio</div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                        <div class="text-3xl font-bold text-red-300" id="critical-tables">0</div>
+                        <div class="text-sm opacity-75">Tablas Críticas</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- CARD ESTUDIANTE 2 -->
-            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center text-2xl">
-                            👦
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold">Diego</h3>
-                            <p class="text-sm opacity-75">10 años - 5° Básico</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-300">92%</div>
-                </div>
-                
-                <div class="mb-4">
-                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-green-400">
-                            <div class="font-bold">Tabla 9</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-green-400 h-2 rounded" style="width: 98%"></div>
-                            </div>
-                            <div class="text-green-300">98%</div>
-                        </div>
-                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
-                            <div class="font-bold">Tabla 11</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-red-400 h-2 rounded" style="width: 45%"></div>
-                            </div>
-                            <div class="text-red-300">45% ⚠️</div>
-                        </div>
-                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
-                            <div class="font-bold">Tabla 12</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-yellow-400 h-2 rounded" style="width: 78%"></div>
-                            </div>
-                            <div class="text-yellow-300">78%</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold">📋 Actividades:</span>
-                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">Al día</span>
-                    </div>
-                </div>
-                
-                <div class="flex space-x-2">
-                    <button onclick="viewStudentDetails('diego')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                        👁️ Ver Detalles
-                    </button>
-                    <button onclick="assignQuickActivity('diego')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                        ⚡ Asignar
-                    </button>
-                </div>
+            <!-- CARDS DE ESTUDIANTES -->
+            <div id="students-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Se llenan dinámicamente con datos reales -->
             </div>
+        </div>
 
-            <!-- CARD ESTUDIANTE 3 -->
-            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center text-2xl">
-                            👧
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold">Emma</h3>
-                            <p class="text-sm opacity-75">6 años - 1° Básico</p>
-                        </div>
-                    </div>
-                    <div class="text-2xl font-bold text-yellow-300">68%</div>
-                </div>
-                
-                <div class="mb-4">
-                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
-                            <div class="font-bold">Tabla 2</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-yellow-400 h-2 rounded" style="width: 78%"></div>
-                            </div>
-                            <div class="text-yellow-300">78%</div>
-                        </div>
-                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
-                            <div class="font-bold">Tabla 4</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-red-400 h-2 rounded" style="width: 43%"></div>
-                            </div>
-                            <div class="text-red-300">43% ⚠️</div>
-                        </div>
-                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
-                            <div class="font-bold">Tabla 5</div>
-                            <div class="w-full bg-gray-300 h-2 rounded">
-                                <div class="bg-red-400 h-2 rounded" style="width: 38%"></div>
-                            </div>
-                            <div class="text-red-300">38% ⚠️</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold">📋 Actividades:</span>
-                        <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">3 pendientes</span>
-                    </div>
-                </div>
-                
-                <div class="flex space-x-2">
-                    <button onclick="viewStudentDetails('emma')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                        👁️ Ver Detalles
-                    </button>
-                    <button onclick="assignQuickActivity('emma')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                        ⚡ Asignar
-                    </button>
-                </div>
-            </div>
-            
+        <!-- MENSAJE DE ERROR (si no se pueden cargar datos) -->
+        <div id="error-section" class="text-center py-16" style="display: none;">
+            <div class="text-6xl mb-4">❌</div>
+            <h2 class="text-3xl font-bold mb-4">Error cargando datos</h2>
+            <p class="text-lg opacity-75 mb-8">No se pudieron cargar los estudiantes desde Firebase</p>
+            <button onclick="location.reload()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold">
+                🔄 Reintentar
+            </button>
         </div>
     </div>
 
@@ -266,12 +109,12 @@
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center space-x-4">
                     <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-3xl" id="modal-avatar">
-                        👧
+                        👤
                     </div>
                     <div>
-                        <h2 class="text-3xl font-bold" id="modal-student-name">Sofia González</h2>
-                        <p class="text-lg opacity-75" id="modal-student-info">8 años - 3° Básico</p>
-                        <p class="text-sm opacity-60" id="modal-last-activity">Última actividad: Hace 2 días</p>
+                        <h2 class="text-3xl font-bold" id="modal-student-name">Cargando...</h2>
+                        <p class="text-lg opacity-75" id="modal-student-info">Cargando...</p>
+                        <p class="text-sm opacity-60" id="modal-last-activity">Última actividad: Calculando...</p>
                     </div>
                 </div>
                 <button onclick="closeStudentModal()" class="text-4xl hover:bg-white hover:bg-opacity-20 rounded-full w-12 h-12 flex items-center justify-center">
@@ -282,19 +125,19 @@
             <!-- ESTADÍSTICAS DETALLADAS -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-green-300" id="modal-correct">156</div>
+                    <div class="text-2xl font-bold text-green-300" id="modal-correct">0</div>
                     <div class="text-sm opacity-75">Ejercicios Correctos</div>
                 </div>
                 <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-blue-300" id="modal-sessions">23</div>
+                    <div class="text-2xl font-bold text-blue-300" id="modal-sessions">0</div>
                     <div class="text-sm opacity-75">Sesiones</div>
                 </div>
                 <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-yellow-300" id="modal-time">4h 23m</div>
+                    <div class="text-2xl font-bold text-yellow-300" id="modal-time">0h 0m</div>
                     <div class="text-sm opacity-75">Tiempo Total</div>
                 </div>
                 <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
-                    <div class="text-2xl font-bold text-purple-300" id="modal-accuracy">85%</div>
+                    <div class="text-2xl font-bold text-purple-300" id="modal-accuracy">0%</div>
                     <div class="text-sm opacity-75">Precisión Global</div>
                 </div>
             </div>
@@ -303,71 +146,8 @@
             <div class="mb-8">
                 <h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    
-                    <!-- TABLA CRÍTICA EJEMPLO -->
-                    <div class="critical-table bg-white bg-opacity-10 rounded-xl p-4">
-                        <div class="text-center mb-3">
-                            <div class="text-2xl font-bold">Tabla 7</div>
-                            <div class="text-3xl font-bold text-red-300">35%</div>
-                            <div class="text-red-300 text-sm font-bold">⚠️ CRÍTICA</div>
-                        </div>
-                        <div class="space-y-2 text-xs">
-                            <div>✅ Correctas: 12</div>
-                            <div>❌ Incorrectas: 22</div>
-                            <div>⏱️ Tiempo promedio: 8.2s</div>
-                            <div>📅 Última práctica: Hace 5 días</div>
-                        </div>
-                        <button onclick="assignSpecificTable('sofia', 7)" class="w-full mt-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-bold text-sm transition-all">
-                            🎯 PRACTICAR AHORA
-                        </button>
-                    </div>
-                    
-                    <!-- TABLA BUENA EJEMPLO -->
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 border-2 border-green-400">
-                        <div class="text-center mb-3">
-                            <div class="text-2xl font-bold">Tabla 2</div>
-                            <div class="text-3xl font-bold text-green-300">95%</div>
-                            <div class="text-green-300 text-sm font-bold">✅ DOMINADA</div>
-                        </div>
-                        <div class="space-y-2 text-xs">
-                            <div>✅ Correctas: 38</div>
-                            <div>❌ Incorrectas: 2</div>
-                            <div>⏱️ Tiempo promedio: 2.1s</div>
-                            <div>📅 Última práctica: Ayer</div>
-                        </div>
-                        <button onclick="assignSpecificTable('sofia', 2)" class="w-full mt-3 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-bold text-sm transition-all">
-                            🔄 Reforzar
-                        </button>
-                    </div>
-                    
-                </div>
-            </div>
-
-            <!-- HISTORIAL RECIENTE -->
-            <div class="mb-8">
-                <h3 class="text-2xl font-bold mb-4">📈 Historial Reciente</h3>
-                <div class="bg-white bg-opacity-10 rounded-xl p-4">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
-                            <div>
-                                <span class="font-bold">Tabla 5 - Sesión Libre</span>
-                                <span class="text-sm opacity-75 block">Hace 1 día</span>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-green-300 font-bold">8/10 ✅</div>
-                                <div class="text-sm opacity-75">80%</div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
-                            <div>
-                                <span class="font-bold">Tabla 7 - Actividad Asignada</span>
-                                <span class="text-sm opacity-75 block">Hace 3 días</span>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-red-300 font-bold">4/10 ❌</div>
-                                <div class="text-sm opacity-75">40%</div>
-                            </div>
-                        </div>
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                        <div class="text-lg opacity-75">Datos de tablas detalladas próximamente...</div>
                     </div>
                 </div>
             </div>
@@ -380,36 +160,25 @@
         <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 max-w-2xl w-full">
             <div class="text-center mb-6">
                 <h2 class="text-3xl font-bold mb-2">⚡ Asignar Actividad</h2>
-                <p class="text-lg opacity-75" id="assign-student-name">Para: Sofia González</p>
-            </div>
-
-            <!-- TABLAS CRÍTICAS PRIORITARIAS -->
-            <div class="mb-6">
-                <h3 class="text-xl font-bold mb-4 text-red-300">🚨 Tablas Críticas (Prioridad Alta)</h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <button onclick="assignTable('sofia', 7, 'urgent')" class="p-4 bg-red-500 hover:bg-red-600 rounded-xl text-center font-bold transition-all">
-                        <div class="text-2xl">Tabla 7</div>
-                        <div class="text-sm">35% - URGENTE</div>
-                    </button>
-                </div>
+                <p class="text-lg opacity-75" id="assign-student-name">Para: Estudiante</p>
             </div>
 
             <!-- TODAS LAS TABLAS -->
             <div class="mb-6">
-                <h3 class="text-xl font-bold mb-4">📚 Todas las Tablas</h3>
+                <h3 class="text-xl font-bold mb-4">📚 Selecciona una Tabla</h3>
                 <div class="grid grid-cols-4 md:grid-cols-6 gap-2">
-                    <button onclick="assignTable('sofia', 2, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">2</button>
-                    <button onclick="assignTable('sofia', 3, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">3</button>
-                    <button onclick="assignTable('sofia', 4, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">4</button>
-                    <button onclick="assignTable('sofia', 5, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">5</button>
-                    <button onclick="assignTable('sofia', 6, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">6</button>
-                    <button onclick="assignTable('sofia', 7, 'high')" class="p-3 bg-red-500 hover:bg-red-600 rounded-lg font-bold">7</button>
-                    <button onclick="assignTable('sofia', 8, 'normal')" class="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-bold">8</button>
-                    <button onclick="assignTable('sofia', 9, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">9</button>
-                    <button onclick="assignTable('sofia', 10, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">10</button>
-                    <button onclick="assignTable('sofia', 11, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">11</button>
-                    <button onclick="assignTable('sofia', 12, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">12</button>
-                    <button onclick="assignTable('sofia', 13, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">13</button>
+                    <button onclick="assignTable(2)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">2</button>
+                    <button onclick="assignTable(3)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">3</button>
+                    <button onclick="assignTable(4)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">4</button>
+                    <button onclick="assignTable(5)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">5</button>
+                    <button onclick="assignTable(6)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">6</button>
+                    <button onclick="assignTable(7)" class="p-3 bg-red-500 hover:bg-red-600 rounded-lg font-bold">7</button>
+                    <button onclick="assignTable(8)" class="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-bold">8</button>
+                    <button onclick="assignTable(9)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">9</button>
+                    <button onclick="assignTable(10)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">10</button>
+                    <button onclick="assignTable(11)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">11</button>
+                    <button onclick="assignTable(12)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">12</button>
+                    <button onclick="assignTable(13)" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">13</button>
                 </div>
             </div>
 
@@ -426,31 +195,27 @@
         <div class="flex items-center space-x-3">
             <div class="text-2xl" id="notification-icon">✅</div>
             <div>
-                <div class="font-bold" id="notification-title">Actividad Asignada</div>
-                <div class="text-sm opacity-75" id="notification-message">Tabla 7 asignada a Sofia</div>
+                <div class="font-bold" id="notification-title">Notificación</div>
+                <div class="text-sm opacity-75" id="notification-message">Mensaje</div>
             </div>
         </div>
     </div>
 
-    <!-- FIREBASE INTEGRATION -->
+    <!-- FIREBASE Y JAVASCRIPT LIMPIO -->
     <script type="module">
-        // Importar Firebase (usando tu configuración existente)
         import { auth, db } from './firebase-config.js';
-        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        console.log('🔥 Cargando Firebase para Family Dashboard...');
+        console.log('🚀 Dashboard Familiar - VERSIÓN LIMPIA');
 
-        // Variables globales para Firebase
         let realStudentsData = [];
-        let isFirebaseReady = false;
+        let currentStudentForModal = null;
 
-        // Función para cargar estudiantes reales
+        // Cargar estudiantes reales
         async function loadRealStudents() {
             try {
-                console.log('📊 Cargando estudiantes reales de Firebase...');
+                console.log('📊 Cargando estudiantes de Firebase...');
                 
-                // Obtener todos los estudiantes
                 const studentsSnapshot = await getDocs(collection(db, 'students'));
                 const students = [];
                 
@@ -458,50 +223,42 @@
                     const studentData = docSnap.data();
                     const studentId = docSnap.id;
                     
-                    // Obtener progreso del estudiante
                     const progressDoc = await getDoc(doc(db, 'progress', studentId));
                     const progressData = progressDoc.exists() ? progressDoc.data() : { tables: {}, totalSessions: 0 };
                     
-                    // Calcular estadísticas
                     const stats = calculateStudentStats(progressData);
                     
                     students.push({
                         id: studentId,
                         name: studentData.name,
-                        email: studentData.email,
                         code: studentData.studentCode,
-                        createdAt: studentData.createdAt,
                         progress: progressData,
                         stats: stats
                     });
                 }
                 
-                console.log(`✅ ${students.length} estudiantes cargados:`, students);
-                
-                // Actualizar la interfaz con datos reales
                 if (students.length > 0) {
                     realStudentsData = students;
-                    isFirebaseReady = true;
-                    renderRealStudents(students);
-                    updateGeneralStats(students);
+                    renderStudents(students);
+                    updateStats(students);
+                    showDashboard();
+                    console.log('✅ Estudiantes cargados y mostrados');
                 } else {
-                    console.log('ℹ️ No se encontraron estudiantes, usando datos de ejemplo');
+                    showError();
                 }
                 
             } catch (error) {
-                console.error('❌ Error cargando estudiantes:', error);
-                console.log('ℹ️ Continuando con datos de ejemplo');
+                console.error('❌ Error:', error);
+                showError();
             }
         }
 
-        // Calcular estadísticas de un estudiante
         function calculateStudentStats(progressData) {
             const tables = progressData.tables || {};
             let totalAccuracy = 0;
             let tablesWithData = 0;
             let criticalTables = 0;
             
-            // Analizar cada tabla
             for (let tableNum = 2; tableNum <= 13; tableNum++) {
                 const tableData = tables[tableNum];
                 if (tableData && tableData.sessions > 0) {
@@ -519,413 +276,151 @@
             return {
                 totalSessions: progressData.totalSessions || 0,
                 avgAccuracy: avgAccuracy,
-                criticalTables: criticalTables,
-                tablesWithData: tablesWithData
+                criticalTables: criticalTables
             };
         }
 
-        // Renderizar estudiantes reales en la interfaz
-        function renderRealStudents(students) {
-            console.log('🎨 Renderizando estudiantes reales...');
-            
-            const container = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.gap-6.mb-8');
-            if (!container) {
-                console.error('❌ Contenedor de estudiantes no encontrado');
-                return;
-            }
-            
-            // Limpiar contenido actual
+        function renderStudents(students) {
+            const container = document.getElementById('students-container');
             container.innerHTML = '';
             
-            // Crear card para cada estudiante
             students.forEach((student, index) => {
-                const studentCard = createStudentCard(student, index);
+                const avatar = ['👧', '👦', '🧒'][index % 3];
+                const accuracy = student.stats.avgAccuracy;
+                const accuracyColor = accuracy >= 80 ? 'text-green-300' : accuracy >= 60 ? 'text-yellow-300' : 'text-red-300';
+                
+                const pendingActivities = Math.floor(Math.random() * 4);
+                const pendingColor = pendingActivities > 0 ? 'bg-red-500' : 'bg-green-500';
+                const pendingText = pendingActivities > 0 ? `${pendingActivities} pendientes` : 'Al día';
+                
+                const studentCard = `
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
+                                    ${avatar}
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold">${student.name}</h3>
+                                    <p class="text-sm opacity-75">${student.code}</p>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold ${accuracyColor}">${accuracy}%</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold">📋 Actividades:</span>
+                                <span class="${pendingColor} text-white px-2 py-1 rounded-full text-xs font-bold">${pendingText}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                                👁️ Ver Detalles
+                            </button>
+                            <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                                ⚡ Asignar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
                 container.innerHTML += studentCard;
             });
-            
-            console.log('✅ Estudiantes reales renderizados');
         }
 
-        // Crear HTML de card de estudiante
-        function createStudentCard(student, index) {
-            const avatars = ['👧', '👦', '👧', '👦', '🧒']; // Avatares rotativos
-            const avatar = avatars[index % avatars.length];
-            
-            const accuracy = student.stats.avgAccuracy;
-            const accuracyColor = accuracy >= 80 ? 'text-green-300' : accuracy >= 60 ? 'text-yellow-300' : 'text-red-300';
-            
-            const pendingActivities = Math.floor(Math.random() * 4); // Simulado por ahora
-            const pendingColor = pendingActivities > 0 ? 'bg-red-500' : 'bg-green-500';
-            const pendingText = pendingActivities > 0 ? `${pendingActivities} pendientes` : 'Al día';
-            
-            // Obtener primeras 3 tablas para mostrar
-            const tablesToShow = getTopTablesForDisplay(student.progress.tables || {});
-            
-            return `
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
-                                ${avatar}
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold">${student.name}</h3>
-                                <p class="text-sm opacity-75">${student.code}</p>
-                            </div>
-                        </div>
-                        <div class="text-2xl font-bold ${accuracyColor}">${accuracy}%</div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
-                        <div class="grid grid-cols-3 gap-2 text-xs">
-                            ${tablesToShow.map(table => `
-                                <div class="${table.status === 'critical' ? 'critical-table' : table.status === 'warning' ? 'border-2 border-yellow-400' : 'border-2 border-green-400'} bg-white bg-opacity-10 p-2 rounded">
-                                    <div class="font-bold">Tabla ${table.number}</div>
-                                    <div class="w-full bg-gray-300 h-2 rounded">
-                                        <div class="bg-${table.status === 'critical' ? 'red' : table.status === 'warning' ? 'yellow' : 'green'}-400 h-2 rounded" style="width: ${table.accuracy}%"></div>
-                                    </div>
-                                    <div class="text-${table.status === 'critical' ? 'red' : table.status === 'warning' ? 'yellow' : 'green'}-300">
-                                        ${table.accuracy}%${table.status === 'critical' ? ' ⚠️' : ''}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-bold">📋 Actividades:</span>
-                            <span class="${pendingColor} text-white px-2 py-1 rounded-full text-xs font-bold">${pendingText}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex space-x-2">
-                        <button onclick="viewRealStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                            👁️ Ver Detalles
-                        </button>
-                        <button onclick="assignQuickActivityReal('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                            ⚡ Asignar
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Obtener las mejores/peores tablas para mostrar
-        function getTopTablesForDisplay(tables) {
-            const tableArray = [];
-            
-            for (let num = 2; num <= 13; num++) {
-                const tableData = tables[num];
-                if (tableData && tableData.sessions > 0) {
-                    const accuracy = tableData.accuracy || 0;
-                    let status = 'good';
-                    
-                    if (accuracy < 50) status = 'critical';
-                    else if (accuracy < 70) status = 'warning';
-                    
-                    tableArray.push({
-                        number: num,
-                        accuracy: accuracy,
-                        status: status
-                    });
-                }
-            }
-            
-            // Si no hay datos suficientes, crear algunos de ejemplo
-            if (tableArray.length < 3) {
-                for (let i = tableArray.length; i < 3; i++) {
-                    const num = i + 2;
-                    tableArray.push({
-                        number: num,
-                        accuracy: 0,
-                        status: 'critical'
-                    });
-                }
-            }
-            
-            // Ordenar por importancia (críticas primero) y tomar las primeras 3
-            tableArray.sort((a, b) => {
-                if (a.status === 'critical' && b.status !== 'critical') return -1;
-                if (b.status === 'critical' && a.status !== 'critical') return 1;
-                return b.accuracy - a.accuracy;
-            });
-            
-            return tableArray.slice(0, 3);
-        }
-
-        // Actualizar estadísticas generales
-        function updateGeneralStats(students) {
+        function updateStats(students) {
             const totalStudents = students.length;
             const totalSessions = students.reduce((sum, student) => sum + student.stats.totalSessions, 0);
             const avgProgress = students.length > 0 ? Math.round(students.reduce((sum, student) => sum + student.stats.avgAccuracy, 0) / students.length) : 0;
             const criticalTables = students.reduce((sum, student) => sum + student.stats.criticalTables, 0);
 
-            // Actualizar elementos en la interfaz
-            const elements = {
-                'total-students': totalStudents,
-                'total-sessions': totalSessions,
-                'avg-progress': avgProgress + '%',
-                'critical-tables': criticalTables
-            };
-
-            for (const [id, value] of Object.entries(elements)) {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.textContent = value;
-                }
-            }
-            
-            console.log('📊 Estadísticas generales actualizadas:', elements);
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('total-sessions').textContent = totalSessions;
+            document.getElementById('avg-progress').textContent = avgProgress + '%';
+            document.getElementById('critical-tables').textContent = criticalTables;
         }
 
-        // Función para ver detalles de estudiante real
-        window.viewRealStudentDetails = function(studentId) {
-            console.log('🔍 Ver detalles de estudiante real:', studentId);
+        function showDashboard() {
+            document.getElementById('loading-section').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+        }
+
+        function showError() {
+            document.getElementById('loading-section').style.display = 'none';
+            document.getElementById('error-section').style.display = 'block';
+        }
+
+        // Funciones globales LIMPIAS
+        window.viewStudentDetails = function(studentId) {
+            console.log('🔍 Ver detalles del estudiante:', studentId);
             
             const student = realStudentsData.find(s => s.id === studentId);
             if (!student) {
-                console.error('❌ Estudiante no encontrado:', studentId);
+                console.error('❌ Estudiante no encontrado');
                 return;
             }
             
-            // Usar la función existente pero con datos reales
-            const studentForModal = {
-                name: student.name,
-                age: 'N/A', // No tenemos edad en Firebase aún
-                grade: 'N/A', // No tenemos grado en Firebase aún
-                avatar: '👤',
-                stats: {
-                    correct: 'N/A', // Necesitaríamos calcular esto de sessions
-                    sessions: student.stats.totalSessions,
-                    time: 'N/A', // No lo tenemos calculado aún
-                    accuracy: student.stats.avgAccuracy
-                }
-            };
+            currentStudentForModal = student;
             
-            // Actualizar datos globales temporalmente para el modal
-            const originalData = window.studentsData;
-            window.studentsData = { [studentId]: studentForModal };
+            document.getElementById('modal-student-name').textContent = student.name;
+            document.getElementById('modal-student-info').textContent = `Código: ${student.code}`;
+            document.getElementById('modal-sessions').textContent = student.stats.totalSessions;
+            document.getElementById('modal-accuracy').textContent = student.stats.avgAccuracy + '%';
             
-            // Llamar a la función existente
-            viewStudentDetails(studentId);
+            document.getElementById('student-detail-modal').style.display = 'flex';
             
-            // Restaurar datos
-            window.studentsData = originalData;
+            showNotification('👁️', 'Vista Detallada', `Mostrando detalles de ${student.name}`);
         };
 
-        // Inicializar cuando Firebase esté listo
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                console.log('👤 Usuario autenticado, cargando estudiantes...');
-                loadRealStudents();
-            } else {
-                console.log('ℹ️ No hay usuario autenticado, usando datos de ejemplo');
-            }
-        });
-
-        // También intentar cargar sin autenticación (para testing)
-        setTimeout(() => {
-            if (!isFirebaseReady) {
-                console.log('🔄 Intentando cargar estudiantes sin autenticación...');
-                loadRealStudents();
-            }
-        }, 2000);
-
-        console.log('✅ Firebase integration cargado');
-    </script>
-
-    <!-- JAVASCRIPT CON DEBUG MEJORADO -->
-    <script>
-        console.log('🚀 Family Dashboard cargado - Versión COMPLETA');
-
-        // Test inmediato
-        setTimeout(() => {
-            console.log('✅ JavaScript funcionando después de 1 segundo');
+        window.assignQuickActivity = function(studentId) {
+            console.log('⚡ Asignar actividad a:', studentId);
             
-            // Test de modales
-            const detailModal = document.getElementById('student-detail-modal');
-            const assignModal = document.getElementById('quick-assign-modal');
-            console.log('🔍 Modal detalles encontrado:', !!detailModal);
-            console.log('⚡ Modal asignación encontrado:', !!assignModal);
-        }, 1000);
-
-        // Datos de ejemplo para testing
-        const studentsData = {
-            sofia: {
-                name: 'Sofia González',
-                age: 8,
-                grade: '3° Básico',
-                avatar: '👧',
-                stats: { correct: 156, sessions: 23, time: '4h 23m', accuracy: 85 }
-            },
-            diego: {
-                name: 'Diego González', 
-                age: 10,
-                grade: '5° Básico',
-                avatar: '👦',
-                stats: { correct: 203, sessions: 31, time: '6h 12m', accuracy: 92 }
-            },
-            emma: {
-                name: 'Emma González',
-                age: 6,
-                grade: '1° Básico', 
-                avatar: '👧',
-                stats: { correct: 89, sessions: 15, time: '2h 45m', accuracy: 68 }
+            const student = realStudentsData.find(s => s.id === studentId);
+            if (!student) {
+                console.error('❌ Estudiante no encontrado');
+                return;
             }
+            
+            currentStudentForModal = student;
+            
+            document.getElementById('assign-student-name').textContent = `Para: ${student.name}`;
+            document.getElementById('quick-assign-modal').style.display = 'flex';
+            
+            showNotification('⚡', 'Asignación', `Abriendo asignador para ${student.name}`);
         };
 
-        // Funciones de los modales CON DEBUG
-        function viewStudentDetails(studentName) {
-            console.log('🔍 LLAMADA A viewStudentDetails con:', studentName);
+        window.assignTable = function(tableNumber) {
+            if (!currentStudentForModal) return;
             
-            try {
-                const student = studentsData[studentName];
-                if (!student) {
-                    console.error('❌ Estudiante no encontrado:', studentName);
-                    return;
-                }
-
-                console.log('👤 Datos del estudiante:', student);
-
-                // Verificar que el modal existe
-                const modal = document.getElementById('student-detail-modal');
-                if (!modal) {
-                    console.error('❌ Modal student-detail-modal no encontrado');
-                    return;
-                }
-
-                console.log('🎯 Modal encontrado, actualizando datos...');
-
-                // Actualizar información del modal
-                const nameEl = document.getElementById('modal-student-name');
-                const infoEl = document.getElementById('modal-student-info');
-                const avatarEl = document.getElementById('modal-avatar');
-                const correctEl = document.getElementById('modal-correct');
-                const sessionsEl = document.getElementById('modal-sessions');
-                const timeEl = document.getElementById('modal-time');
-                const accuracyEl = document.getElementById('modal-accuracy');
-
-                if (nameEl) nameEl.textContent = student.name;
-                if (infoEl) infoEl.textContent = `${student.age} años - ${student.grade}`;
-                if (avatarEl) avatarEl.textContent = student.avatar;
-                if (correctEl) correctEl.textContent = student.stats.correct;
-                if (sessionsEl) sessionsEl.textContent = student.stats.sessions;
-                if (timeEl) timeEl.textContent = student.stats.time;
-                if (accuracyEl) accuracyEl.textContent = student.stats.accuracy + '%';
-
-                console.log('✅ Datos actualizados, mostrando modal...');
-
-                // Mostrar modal
-                modal.style.display = 'flex';
-                
-                console.log('✅ Modal debería estar visible ahora');
-                
-                showNotification('👁️', 'Vista Detallada', `Mostrando detalles de ${student.name}`);
-            } catch (error) {
-                console.error('❌ Error en viewStudentDetails:', error);
-            }
-        }
-
-        function assignQuickActivity(studentName) {
-            console.log('⚡ LLAMADA A assignQuickActivity con:', studentName);
-            
-            try {
-                const student = studentsData[studentName];
-                if (!student) {
-                    console.error('❌ Estudiante no encontrado:', studentName);
-                    return;
-                }
-
-                const modal = document.getElementById('quick-assign-modal');
-                if (!modal) {
-                    console.error('❌ Modal quick-assign-modal no encontrado');
-                    return;
-                }
-
-                const nameEl = document.getElementById('assign-student-name');
-                if (nameEl) nameEl.textContent = `Para: ${student.name}`;
-                
-                modal.style.display = 'flex';
-                
-                console.log('✅ Modal de asignación mostrado');
-                
-                showNotification('⚡', 'Asignación Rápida', `Abriendo asignador para ${student.name}`);
-            } catch (error) {
-                console.error('❌ Error en assignQuickActivity:', error);
-            }
-        }
-
-        function assignSpecificTable(studentName, tableNumber) {
-            console.log('📋 LLAMADA A assignSpecificTable:', studentName, tableNumber);
-            
-            const student = studentsData[studentName];
-            if (!student) return;
-
-            showNotification('✅', 'Actividad Asignada', `Tabla ${tableNumber} asignada a ${student.name.split(' ')[0]}`);
-            
-            // Cerrar modales
-            closeStudentModal();
+            showNotification('✅', 'Actividad Asignada', `Tabla ${tableNumber} asignada a ${currentStudentForModal.name}`);
             closeQuickAssignModal();
-            
-            console.log(`✅ Tabla ${tableNumber} asignada a ${studentName}`);
-        }
+        };
 
-        function assignTable(studentName, tableNumber, priority) {
-            console.log('📚 LLAMADA A assignTable:', studentName, tableNumber, priority);
-            assignSpecificTable(studentName, tableNumber);
-        }
+        window.closeStudentModal = function() {
+            document.getElementById('student-detail-modal').style.display = 'none';
+        };
 
-        function closeStudentModal() {
-            console.log('❌ Cerrando modal de estudiante');
-            const modal = document.getElementById('student-detail-modal');
-            if (modal) {
-                modal.style.display = 'none';
-                console.log('✅ Modal de estudiante cerrado');
-            }
-        }
+        window.closeQuickAssignModal = function() {
+            document.getElementById('quick-assign-modal').style.display = 'none';
+        };
 
-        function closeQuickAssignModal() {
-            console.log('❌ Cerrando modal de asignación');
-            const modal = document.getElementById('quick-assign-modal');
-            if (modal) {
-                modal.style.display = 'none';
-                console.log('✅ Modal de asignación cerrado');
-            }
-        }
+        window.refreshDashboard = function() {
+            location.reload();
+        };
 
-        function refreshDashboard() {
-            console.log('🔄 Actualizando dashboard');
-            showNotification('🔄', 'Actualizando...', 'Cargando datos más recientes');
-            setTimeout(() => {
-                showNotification('✅', 'Actualizado', 'Dashboard actualizado correctamente');
-            }, 1000);
-        }
-
-        function logout() {
-            console.log('🚪 Cerrando sesión');
-            if (confirm('¿Estás seguro que quieres cerrar sesión?')) {
+        window.logout = function() {
+            if (confirm('¿Cerrar sesión?')) {
                 window.location.href = 'index.html';
             }
-        }
+        };
 
         function showNotification(icon, title, message) {
-            console.log('🔔 Mostrando notificación:', title, message);
-            
             const notification = document.getElementById('notification');
-            if (!notification) {
-                console.error('❌ Elemento notification no encontrado');
-                return;
-            }
-
-            const iconEl = document.getElementById('notification-icon');
-            const titleEl = document.getElementById('notification-title');
-            const messageEl = document.getElementById('notification-message');
-
-            if (iconEl) iconEl.textContent = icon;
-            if (titleEl) titleEl.textContent = title;
-            if (messageEl) messageEl.textContent = message;
+            document.getElementById('notification-icon').textContent = icon;
+            document.getElementById('notification-title').textContent = title;
+            document.getElementById('notification-message').textContent = message;
 
             notification.style.transform = 'translateX(0)';
             
@@ -944,24 +439,12 @@
             }
         });
 
-        // Test de botones al cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 DOM cargado, verificando elementos...');
-            
-            const detailButtons = document.querySelectorAll('[onclick*="viewStudentDetails"]');
-            const assignButtons = document.querySelectorAll('[onclick*="assignQuickActivity"]');
-            
-            console.log('🔍 Botones "Ver Detalles" encontrados:', detailButtons.length);
-            console.log('⚡ Botones "Asignar" encontrados:', assignButtons.length);
-            
-            // Verificar modales
-            const detailModal = document.getElementById('student-detail-modal');
-            const assignModal = document.getElementById('quick-assign-modal');
-            console.log('🔍 Modal detalles encontrado:', !!detailModal);
-            console.log('⚡ Modal asignación encontrado:', !!assignModal);
-        });
+        // Inicializar
+        setTimeout(() => {
+            loadRealStudents();
+        }, 1000);
 
-        console.log('🎯 Todas las funciones definidas correctamente');
+        console.log('✅ Dashboard limpio cargado');
     </script>
 
 </body>
