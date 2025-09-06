@@ -837,7 +837,7 @@ MultiBoost.prototype.showMistakesReview = function() {
             return;
         }
         
-        mistakesContainer.style.display = 'block';
+        mistakesContainer.style.display = 'none';
         
         var html = '<h3 style="color: #ef4444; margin-bottom: 15px;">📋 Revisión de Errores:</h3>';
         
