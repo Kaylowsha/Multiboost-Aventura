@@ -20,6 +20,15 @@ this.adventureMode = localStorage.getItem('adventureMode') === 'true';
 this.userId = localStorage.getItem('userId');
 this.practiceTable = localStorage.getItem('practiceTable');
 this.practiceExercises = localStorage.getItem('practiceExercises');
+
+    // Modo Desafío
+this.challengeMode = localStorage.getItem('challengeMode') === 'true';
+this.challengeCode = localStorage.getItem('challengeCode');
+this.challengeTable = localStorage.getItem('challengeTable');
+this.challengeExercises = localStorage.getItem('challengeExercises');
+this.participantName = localStorage.getItem('participantName');
+this.participantType = localStorage.getItem('participantType');
+    
     // Estadísticas
     this.stats = {
         correct: 0,
@@ -39,22 +48,31 @@ MultiBoost.prototype.init = function() {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             self.bindEvents();
-            self.showScreen('welcome');
+            
+            // Saltar directo a ejercicios si es práctica específica o desafío
+            if (self.adventureMode && self.practiceTable && self.practiceExercises) {
+                self.autoStartSpecificPractice();
+            } else if (self.challengeMode && self.challengeTable && self.challengeExercises) {
+                self.autoStartChallenge();
+            } else {
+                self.showScreen('welcome');
+            }
             console.log('🚀 MultiBoost iniciado correctamente');
         });
     } else {
-    this.bindEvents();
-    
-    // Saltar directo a ejercicios si es práctica específica
-    if (this.adventureMode && this.practiceTable && this.practiceExercises) {
-        this.autoStartSpecificPractice();
-    } else {
-        this.showScreen('welcome');
+        this.bindEvents();
+        
+        // Saltar directo a ejercicios si es práctica específica o desafío
+        if (this.adventureMode && this.practiceTable && this.practiceExercises) {
+            this.autoStartSpecificPractice();
+        } else if (this.challengeMode && this.challengeTable && this.challengeExercises) {
+            this.autoStartChallenge();
+        } else {
+            this.showScreen('welcome');
+        }
+        console.log('🚀 MultiBoost iniciado correctamente');
     }
-    console.log('🚀 MultiBoost iniciado correctamente');
-}
 };
-
 // Vincular eventos de los botones
 MultiBoost.prototype.bindEvents = function() {
     var self = this;
@@ -790,9 +808,14 @@ MultiBoost.prototype.showResults = function() {
         
         this.showMistakesReview();
         this.configureResultsButtons(percentage);
-       // Guardar en Firebase si está en Modo Aventura
-       if (this.adventureMode && this.userId) {
-       this.saveSessionToFirebase();
+ // Guardar en Firebase si está en Modo Aventura
+if (this.adventureMode && this.userId) {
+    this.saveSessionToFirebase();
+}
+
+// Guardar resultado del desafío
+if (this.challengeMode && this.challengeCode) {
+    this.saveChallengeResult();
 }
 
         this.showScreen('results');
@@ -1110,6 +1133,76 @@ MultiBoost.prototype.autoStartSpecificPractice = function() {
         console.log('Error en auto-inicio:', error);
         // Si falla, usar flujo normal
         this.showScreen('welcome');
+    }
+};
+// Auto-iniciar desafío
+MultiBoost.prototype.autoStartChallenge = function() {
+    try {
+        console.log('🏆 Auto-iniciando desafío ' + this.challengeCode);
+        
+        // Configurar automáticamente
+        this.selectedTables = [parseInt(this.challengeTable)];
+        this.exerciseCount = parseInt(this.challengeExercises);
+        
+        // Limpiar sesión e inicializar
+        this.cleanupSession();
+        this.resetStats();
+        this.generateExercises();
+        
+        // Iniciar timers
+        this.sessionStartTime = new Date().getTime();
+        this.startSessionTimer();
+        
+        // Ir directo a ejercicios
+        this.currentExercise = 0;
+        this.showNextExercise();
+        this.showScreen('exercise');
+        
+        console.log('✅ Desafío iniciado automáticamente');
+    } catch (error) {
+        console.log('Error en auto-inicio desafío:', error);
+        this.showScreen('welcome');
+    }
+};
+// Guardar resultado del desafío
+MultiBoost.prototype.saveChallengeResult = function() {
+    var self = this;
+    
+    try {
+        if (!window.db || !window.doc || !window.updateDoc) {
+            console.log('Firebase no disponible para desafío');
+            return;
+        }
+
+        console.log('💾 Guardando resultado del desafío...');
+
+        var totalExercises = this.stats.correct + this.stats.incorrect;
+        var percentage = Math.round((this.stats.correct / totalExercises) * 100);
+        var finalTime = Math.floor((new Date().getTime() - this.sessionStartTime) / 1000);
+
+        var resultData = {
+            name: this.participantName,
+            score: percentage,
+            time: finalTime,
+            type: this.participantType,
+            timestamp: new Date().toISOString()
+        };
+
+        // Actualizar el documento del desafío añadiendo el resultado
+        window.updateDoc(window.doc(window.db, 'challenges', this.challengeCode), {
+            results: window.arrayUnion(resultData)
+        }).then(function() {
+            console.log('✅ Resultado del desafío guardado');
+            // Redirigir de vuelta al desafío para ver ranking actualizado
+            setTimeout(function() {
+                window.location.href = 'challenge.html?code=' + self.challengeCode;
+            }, 3000);
+        }).catch(function(error) {
+            console.error('Error guardando resultado del desafío:', error);
+        });
+
+    } catch (error) {
+        console.error('Error en saveChallengeResult:', error);
     }
 };
 // Función para volver al inicio
