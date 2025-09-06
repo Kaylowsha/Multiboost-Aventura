@@ -856,23 +856,45 @@ MultiBoost.prototype.showMistakesReview = function() {
     }
 };
 
-// Configurar botones de resultados
+// Configurar botones de resultados - VERSIÓN ACTUALIZADA
 MultiBoost.prototype.configureResultsButtons = function(percentage) {
     try {
-        var repeatBtn = document.getElementById('repeat-btn');
-        if (repeatBtn) {
-            if (percentage < 80) {
-                repeatBtn.style.display = 'inline-block';
-                repeatBtn.textContent = '🔄 Repetir Entrenamiento';
+        // Configurar botones según el modo
+        if (this.challengeMode && this.challengeCode) {
+            // MODO DESAFÍO
+            document.getElementById('repeat-challenge-btn').style.display = 'inline-block';
+            document.getElementById('show-mistakes-btn').style.display = 'inline-block';
+            document.getElementById('repeat-btn').style.display = 'none';
+            document.getElementById('new-training-btn').style.display = 'none';
+            
+            // Configurar botón home según usuario
+            var homeBtn = document.getElementById('home-btn');
+            if (this.adventureMode && this.userId) {
+                homeBtn.textContent = '🏠 Volver al Dashboard';
+                homeBtn.onclick = function() { window.location.href = 'dashboard.html'; };
             } else {
-                repeatBtn.style.display = 'none';
+                homeBtn.textContent = '🏠 Volver al Inicio';
+                homeBtn.onclick = function() { window.location.href = 'index.html'; };
             }
+        } else {
+            // MODO NORMAL
+            var repeatBtn = document.getElementById('repeat-btn');
+            if (repeatBtn) {
+                if (percentage < 80) {
+                    repeatBtn.style.display = 'inline-block';
+                    repeatBtn.textContent = '🔄 Repetir Entrenamiento';
+                } else {
+                    repeatBtn.style.display = 'none';
+                }
+            }
+            
+            document.getElementById('repeat-challenge-btn').style.display = 'none';
+            document.getElementById('show-mistakes-btn').style.display = 'none';
         }
     } catch (error) {
         console.log('Error configurando botones:', error);
     }
 };
-
 // Repetir entrenamiento
 MultiBoost.prototype.repeatTraining = function() {
     try {
@@ -1327,4 +1349,48 @@ MultiBoost.prototype.displayChallengeRanking = function(results) {
         console.error('Error mostrando ranking:', error);
     }
 };
+// Repetir desafío específico
+MultiBoost.prototype.repeatChallenge = function() {
+    try {
+        console.log('🔄 Repitiendo desafío...');
+        this.cleanupSession();
+        this.startTraining();
+    } catch (error) {
+        console.log('Error repitiendo desafío:', error);
+    }
+};
+
+// Mostrar errores en modal
+MultiBoost.prototype.showMistakesModal = function() {
+    try {
+        var mistakesContainer = document.getElementById('mistakes-review');
+        if (mistakesContainer && mistakesContainer.style.display === 'none') {
+            mistakesContainer.style.display = 'block';
+            document.getElementById('show-mistakes-btn').textContent = '❌ Ocultar Errores';
+        } else {
+            mistakesContainer.style.display = 'none';
+            document.getElementById('show-mistakes-btn').textContent = '📋 Ver Mis Errores';
+        }
+    } catch (error) {
+        console.log('Error mostrando errores:', error);
+    }
+};
+// Vincular eventos de nuevos botones
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        var repeatChallengeBtn = document.getElementById('repeat-challenge-btn');
+        if (repeatChallengeBtn) {
+            repeatChallengeBtn.addEventListener('click', function() {
+                if (window.multiBoost) window.multiBoost.repeatChallenge();
+            });
+        }
+        
+        var showMistakesBtn = document.getElementById('show-mistakes-btn');
+        if (showMistakesBtn) {
+            showMistakesBtn.addEventListener('click', function() {
+                if (window.multiBoost) window.multiBoost.showMistakesModal();
+            });
+        }
+    }, 1000);
+});
 })();
