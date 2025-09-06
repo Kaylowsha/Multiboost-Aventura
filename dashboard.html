@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Mi Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="text-6xl mb-4">⚡</div>
+            <div class="text-2xl font-bold">Cargando tu aventura...</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PRINCIPAL -->
+    <div id="dashboard-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-6xl mx-auto">
+            
+            <!-- HEADER -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold">👤 Bienvenido, <span id="student-name">Estudiante</span></h1>
+                        <p class="text-lg opacity-80">Código: <span id="student-code" class="font-bold">EST_ABC123</span></p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-yellow-300" id="total-sessions">0 sesiones</div>
+                        <button onclick="logout()" class="mt-2 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-bold">
+                            🚪 Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROGRESO POR TABLA -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">📊 MI PROGRESO POR TABLA</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="progress-grid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+
+            <!-- MODOS DE ENTRENAMIENTO -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">🎮 MODOS DE ENTRENAMIENTO</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Tablas de Multiplicar -->
+                    <div onclick="goToTablas()" class="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                        <div class="text-5xl mb-4 text-center">🎯</div>
+                        <h3 class="text-2xl font-bold mb-2 text-center">Tablas de Multiplicar</h3>
+                        <p class="text-center opacity-90 mb-4">
+                            Practica las tablas del 2 al 13 con opción múltiple y timer
+                        </p>
+                        <div class="text-center">
+                            <div class="text-white font-bold">🚀 ¡Comenzar Entrenamiento!</div>
+                        </div>
+                    </div>
+
+                    <!-- Multiplicación Avanzada -->
+                    <div onclick="goToAvanzado()" class="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                        <div class="text-5xl mb-4 text-center">🔥</div>
+                        <h3 class="text-2xl font-bold mb-2 text-center">Multiplicación Avanzada</h3>
+                        <p class="text-center opacity-90 mb-4">
+                            Multiplicaciones complejas con números grandes y teclado numérico
+                        </p>
+                        <div class="text-center">
+                            <div class="text-white font-bold">🔥 ¡Desafío Matemático!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL PRÁCTICA ESPECÍFICA -->
+    <div id="practice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 max-w-md w-full">
+            <h3 class="text-2xl font-bold mb-4 text-center">🎯 Practicar Tabla del <span id="practice-table">2</span></h3>
+            
+            <p class="text-center mb-6">Elige la cantidad de ejercicios:</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button onclick="startPractice(10)" class="py-3 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold">10 ejercicios</button>
+                <button onclick="startPractice(20)" class="py-3 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold">20 ejercicios</button>
+                <button onclick="startPractice(30)" class="py-3 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold">30 ejercicios</button>
+                <button onclick="startPractice(40)" class="py-3 px-4 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold">40 ejercicios</button>
+            </div>
+            
+            <button onclick="closePracticeModal()" class="w-full py-3 px-4 rounded-xl bg-gray-500 hover:bg-gray-600 font-bold">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE Y SCRIPTS -->
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Hacer disponibles globalmente
+        window.auth = auth;
+        window.db = db;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+
+        console.log('🎮 Dashboard cargado correctamente');
+    </script>
+
+    <script>
+        let currentUser = null;
+        let userProgress = null;
+        let selectedTable = null;
+
+        // Verificar autenticación
+        window.onAuthStateChanged(window.auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                showDashboard();
+            } else {
+                // No autenticado, redirigir a login
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Cargar datos del usuario
+        async function loadUserData() {
+            try {
+                // Cargar perfil
+                const profileDoc = await window.getDoc(window.doc(window.db, 'students', currentUser.uid));
+                if (profileDoc.exists()) {
+                    const profileData = profileDoc.data();
+                    document.getElementById('student-name').textContent = profileData.name;
+                    document.getElementById('student-code').textContent = profileData.studentCode;
+                }
+
+                // Cargar progreso
+                const progressDoc = await window.getDoc(window.doc(window.db, 'progress', currentUser.uid));
+                if (progressDoc.exists()) {
+                    userProgress = progressDoc.data();
+                    document.getElementById('total-sessions').textContent = userProgress.totalSessions + ' sesiones';
+                    renderProgressGrid();
+                } else {
+                    console.log('No se encontró progreso, usando valores por defecto');
+                }
+
+            } catch (error) {
+                console.error('Error cargando datos del usuario:', error);
+            }
+        }
+
+        // Mostrar dashboard
+        function showDashboard() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'block';
+        }
+
+        // Renderizar progreso por tabla
+        function renderProgressGrid() {
+            const grid = document.getElementById('progress-grid');
+            grid.innerHTML = '';
+
+            for (let table = 2; table <= 13; table++) {
+                const tableData = userProgress.tables[table] || { accuracy: 0, sessions: 0 };
+                const accuracy = Math.round(tableData.accuracy);
+                const sessions = tableData.sessions;
+
+                // Determinar color según precisión
+                let progressColor = 'bg-gray-400';
+                let stars = '⭐';
+                if (accuracy >= 90) {
+                    progressColor = 'bg-green-500';
+                    stars = '⭐⭐⭐⭐';
+                } else if (accuracy >= 80) {
+                    progressColor = 'bg-blue-500';
+                    stars = '⭐⭐⭐';
+                } else if (accuracy >= 70) {
+                    progressColor = 'bg-yellow-500';
+                    stars = '⭐⭐';
+                } else if (accuracy >= 50) {
+                    progressColor = 'bg-orange-500';
+                    stars = '⭐';
+                }
+
+                const cardHTML = `
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4">
+                        <div class="text-center mb-3">
+                            <div class="text-2xl font-bold">Tabla del ${table}</div>
+                            <div class="text-lg">${stars}</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>Precisión:</span>
+                                <span class="font-bold">${accuracy}%</span>
+                            </div>
+                            <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                                <div class="${progressColor} h-2 rounded-full transition-all duration-300" style="width: ${accuracy}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center text-sm opacity-80 mb-3">
+                            ${sessions} sesiones practicadas
+                        </div>
+                        
+                        <button onclick="openPracticeModal(${table})" class="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 font-bold text-white">
+                            💪 Practicar
+                        </button>
+                    </div>
+                `;
+
+                grid.innerHTML += cardHTML;
+            }
+        }
+
+        // Abrir modal de práctica específica
+        function openPracticeModal(table) {
+            selectedTable = table;
+            document.getElementById('practice-table').textContent = table;
+            document.getElementById('practice-modal').style.display = 'flex';
+        }
+
+        // Cerrar modal de práctica
+        function closePracticeModal() {
+            document.getElementById('practice-modal').style.display = 'none';
+            selectedTable = null;
+        }
+
+        // Iniciar práctica específica
+        function startPractice(exerciseCount) {
+            if (!selectedTable) return;
+            
+            // Guardar configuración en localStorage para tablas.html
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('practiceTable', selectedTable.toString());
+            localStorage.setItem('practiceExercises', exerciseCount.toString());
+            localStorage.setItem('userId', currentUser.uid);
+            
+            // Redirigir a tablas.html
+            window.location.href = 'tablas.html';
+        }
+
+        // Ir a entrenamiento general de tablas
+        function goToTablas() {
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('userId', currentUser.uid);
+            localStorage.removeItem('practiceTable'); // Modo general
+            window.location.href = 'tablas.html';
+        }
+
+        // Ir a multiplicación avanzada
+        function goToAvanzado() {
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('userId', currentUser.uid);
+            window.location.href = 'avanzado.html';
+        }
+
+        // Cerrar sesión
+        async function logout() {
+            try {
+                await window.signOut(window.auth);
+                localStorage.removeItem('adventureMode');
+                localStorage.removeItem('practiceTable');
+                localStorage.removeItem('practiceExercises');
+                localStorage.removeItem('userId');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error cerrando sesión:', error);
+            }
+        }
+
+        // Hacer funciones globales
+        window.openPracticeModal = openPracticeModal;
+        window.closePracticeModal = closePracticeModal;
+        window.startPractice = startPractice;
+        window.goToTablas = goToTablas;
+        window.goToAvanzado = goToAvanzado;
+        window.logout = logout;
+    </script>
+
+</body>
+</html>
