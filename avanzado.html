@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost Avanzado - Multiplicación Compleja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- PANTALLA DE BIENVENIDA -->
+    <div id="welcome-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 text-center max-w-md w-full">
+            <h1 class="text-5xl font-bold mb-4">⚡ MultiBoost ⚡</h1>
+            <h2 class="text-2xl mb-2 text-yellow-300">🎯 MULTIPLICACIÓN AVANZADA</h2>
+            <p class="text-lg mb-8 opacity-90">¡Desafía tu mente con cálculos complejos!</p>
+            
+            <div class="mb-8">
+                <div class="text-6xl mb-4">🧠💪</div>
+                <div class="text-sm opacity-75">Ejercicios desde 10 × 2 hasta 9999 × 99</div>
+            </div>
+            
+
+            <button onclick="goToConfig()" class="w-full py-4 px-6 rounded-2xl text-xl font-bold text-white shadow-lg bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500">
+                🚀 ¡COMENZAR ENTRENAMIENTO!
+            </button>
+
+            
+                        <!-- Botón Volver al Inicio -->
+          <button onclick="goToHome()" class="w-full py-3 px-6 mb-4 rounded-2xl text-lg font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-300">
+              🏠 ← Volver al Inicio
+          </button>
+            
+        </div>
+    </div>
+
+    <!-- PANTALLA DE CONFIGURACIÓN -->
+    <div id="config-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-6 mb-6">
+                <h2 class="text-3xl font-bold text-center mb-6">⚙️ Configura tu Entrenamiento</h2>
+                
+                <!-- Tipo de Multiplicación -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">🎯 Selecciona el Nivel de Dificultad:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="selectDifficulty('2x1', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">📚 BÁSICO</div>
+                            <div class="text-2xl mb-2">45 × 7 = ?</div>
+                            <div class="text-sm opacity-75">Números de 2 dígitos × 1 dígito</div>
+                        </button>
+                        
+                        <button onclick="selectDifficulty('3x1', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">📖 INTERMEDIO</div>
+                            <div class="text-2xl mb-2">147 × 8 = ?</div>
+                            <div class="text-sm opacity-75">Números de 3 dígitos × 1 dígito</div>
+                        </button>
+                        
+                        <button onclick="selectDifficulty('4x1', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">🔥 AVANZADO</div>
+                            <div class="text-2xl mb-2">2456 × 9 = ?</div>
+                            <div class="text-sm opacity-75">Números de 4 dígitos × 1 dígito</div>
+                        </button>
+                        
+                        <button onclick="selectDifficulty('2x2', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">⚡ DESAFÍO</div>
+                            <div class="text-2xl mb-2">47 × 23 = ?</div>
+                            <div class="text-sm opacity-75">Números de 2 dígitos × 2 dígitos</div>
+                        </button>
+                        
+                        <button onclick="selectDifficulty('3x2', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">🚀 EXPERTO</div>
+                            <div class="text-2xl mb-2">147 × 25 = ?</div>
+                            <div class="text-sm opacity-75">Números de 3 dígitos × 2 dígitos</div>
+                        </button>
+                        
+                        <button onclick="selectDifficulty('mixto', this)" class="difficulty-btn p-4 rounded-xl font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30 text-center">
+                            <div class="text-lg mb-1">🎲 MIXTO</div>
+                            <div class="text-2xl mb-2">¡Sorpresa!</div>
+                            <div class="text-sm opacity-75">Todos los niveles combinados</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cantidad de Ejercicios -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">📊 Cantidad de Ejercicios:</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="selectCount('10', this)" class="count-btn px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 text-white active-count">10 ejercicios</button>
+                        <button onclick="selectCount('20', this)" class="count-btn px-6 py-3 rounded-xl font-bold bg-blue-400 text-white">20 ejercicios</button>
+                        <button onclick="selectCount('30', this)" class="count-btn px-6 py-3 rounded-xl font-bold bg-blue-400 text-white">30 ejercicios</button>
+                        <button onclick="selectCount('40', this)" class="count-btn px-6 py-3 rounded-xl font-bold bg-blue-400 text-white">40 ejercicios</button>
+                        <button onclick="selectCount('libre', this)" class="count-btn px-6 py-3 rounded-xl font-bold bg-blue-400 text-white">🔓 Libre</button>
+                    </div>
+                </div>
+
+                <!-- Opciones Adicionales -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">🔧 Opciones:</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="inverse-mode" class="mr-2 w-5 h-5">
+                            <span class="font-bold">🔄 Modo Inverso (__ × 23 = 1150)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="startTraining()" id="start-training-btn" class="w-full py-4 px-6 rounded-2xl text-xl font-bold text-white shadow-lg bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 disabled:opacity-50" disabled>
+                    💪 ¡INICIAR ENTRENAMIENTO AVANZADO!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE EJERCICIOS -->
+    <div id="exercise-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header con Estadísticas (AGREGADO BOTÓN TERMINAR AQUÍ) -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-4 mb-6">
+                <div class="grid grid-cols-4 gap-3 text-center text-sm">
+                    <div>
+                        <div class="text-2xl font-bold text-green-300" id="correct-count">0</div>
+                        <div class="opacity-75">Correctas</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-red-300" id="incorrect-count">0</div>
+                        <div class="opacity-75">Incorrectas</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-blue-300" id="time-counter">00:00</div>
+                        <div class="opacity-75">Tiempo</div>
+                    </div>
+                    <div>
+                        <button onclick="finishTraining()" class="px-3 py-2 rounded-lg font-bold bg-red-500 hover:bg-red-600 text-white text-xs w-full">
+                            🏁 Terminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progreso -->
+            <div id="progress-container" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-4 mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold">Progreso:</span>
+                    <span id="progress-text" class="font-bold">Ejercicio 1 de 10</span>
+                </div>
+                <div class="w-full bg-white bg-opacity-30 rounded-full h-3">
+                    <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Ejercicio -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 text-center">
+                <div id="exercise-question" class="text-4xl md:text-6xl font-bold mb-8">147 × 23 = ?</div>
+                
+                <div class="flex justify-center items-center mb-8">
+                    <input type="text" id="answer-input" class="bg-white bg-opacity-90 border-4 border-yellow-400 text-black font-bold text-2xl text-center py-4 px-6 rounded-2xl min-w-[200px]" placeholder="Tu respuesta" readonly>
+                </div>
+
+                <!-- Teclado Numérico -->
+                <div class="max-w-sm mx-auto">
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <button onclick="addToAnswer('7')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">7</button>
+                        <button onclick="addToAnswer('8')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">8</button>
+                        <button onclick="addToAnswer('9')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">9</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <button onclick="addToAnswer('4')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">4</button>
+                        <button onclick="addToAnswer('5')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">5</button>
+                        <button onclick="addToAnswer('6')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">6</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <button onclick="addToAnswer('1')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">1</button>
+                        <button onclick="addToAnswer('2')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">2</button>
+                        <button onclick="addToAnswer('3')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">3</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <button onclick="clearAnswer()" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-red-400 text-white">⌫</button>
+                        <button onclick="addToAnswer('0')" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-white bg-opacity-90 text-black hover:bg-opacity-100">0</button>
+                        <button onclick="submitAnswer()" class="keypad-btn py-4 text-2xl font-bold rounded-xl bg-green-400 text-white">✓</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE RESULTADOS -->
+    <div id="results-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 text-center">
+                <h2 class="text-4xl font-bold mb-8">🎉 ¡Entrenamiento Completado!</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-green-500 bg-opacity-30 rounded-2xl p-6">
+                        <div class="text-3xl font-bold" id="final-correct">8</div>
+                        <div class="text-sm opacity-75">Correctas</div>
+                    </div>
+                    <div class="bg-red-500 bg-opacity-30 rounded-2xl p-6">
+                        <div class="text-3xl font-bold" id="final-incorrect">2</div>
+                        <div class="text-sm opacity-75">Incorrectas</div>
+                    </div>
+                    <div class="bg-blue-500 bg-opacity-30 rounded-2xl p-6">
+                        <div class="text-3xl font-bold" id="final-percentage">80%</div>
+                        <div class="text-sm opacity-75">Precisión</div>
+                    </div>
+                    <div class="bg-purple-500 bg-opacity-30 rounded-2xl p-6">
+                        <div class="text-3xl font-bold" id="final-time">05:23</div>
+                        <div class="text-sm opacity-75">Tiempo Total</div>
+                    </div>
+                </div>
+
+                <div id="mistakes-review" class="mb-8">
+                    <!-- Errores se mostrarán aquí -->
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+    <button onclick="goToHome()" class="px-8 py-4 rounded-2xl text-lg font-bold bg-gray-500 hover:bg-gray-600 text-white">
+        🏠 Volver al Inicio
+    </button>
+    <button onclick="goToConfig()" class="px-8 py-4 rounded-2xl text-lg font-bold bg-blue-500 text-white">
+        🔄 Repetir Configuración
+    </button>
+    <button onclick="resetApp()" class="px-8 py-4 rounded-2xl text-lg font-bold bg-gradient-to-r from-orange-400 to-yellow-400 text-white">
+        🚀 Nuevo Entrenamiento
+    </button>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 VERSIÓN DEFINITIVA CARGADA');
+        
+        // Variables globales
+        let config = {
+            type: null,
+            count: '10',
+            inverseMode: false
+        };
+        
+        let session = {
+            currentExercise: 0,
+            totalExercises: 0,
+            correctAnswers: 0,
+            incorrectAnswers: 0,
+            startTime: null,
+            exercises: [],
+            mistakes: []
+        };
+        
+        let timer = null;
+
+      function goToConfig() {
+    console.log('Navegando a configuración');
+    
+    // RESETEAR SCROLL
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('config-screen').style.display = 'block';
+    document.getElementById('exercise-screen').style.display = 'none';
+    document.getElementById('results-screen').style.display = 'none';
+}
+
+        function goToExercise() {
+            console.log('Navegando a ejercicios');
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('config-screen').style.display = 'none';
+            document.getElementById('exercise-screen').style.display = 'block';
+            document.getElementById('results-screen').style.display = 'none';
+        }
+
+        function goToResults() {
+            console.log('Navegando a resultados');
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('config-screen').style.display = 'none';
+            document.getElementById('exercise-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+        }
+
+       function goToWelcome() {
+    console.log('Navegando a bienvenida');
+    
+    // SCROLL RESET MÚLTIPLE - SAFARI MAC FIX
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    window.pageYOffset = 0;
+    window.scrollTo(0, 0);
+    
+    // Cambiar pantallas
+    document.getElementById('welcome-screen').style.display = 'block';
+    document.getElementById('config-screen').style.display = 'none';
+    document.getElementById('exercise-screen').style.display = 'none';
+    document.getElementById('results-screen').style.display = 'none';
+    
+    // FORCE SCROLL DESPUÉS DEL CAMBIO
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }, 50);
+}
+
+        // Funciones de configuración
+        function selectDifficulty(type, btn) {
+            console.log('Dificultad seleccionada:', type);
+            document.querySelectorAll('.difficulty-btn').forEach(b => {
+                b.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+            btn.style.background = 'linear-gradient(135deg, #ff6b6b, #feca57)';
+            config.type = type;
+            updateStartButton();
+        }
+
+        function selectCount(count, btn) {
+            console.log('Cantidad seleccionada:', count);
+            document.querySelectorAll('.count-btn').forEach(b => {
+                b.classList.remove('active-count');
+                b.style.background = '#3b82f6';
+            });
+            btn.classList.add('active-count');
+            btn.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+            config.count = count;
+        }
+
+        function updateStartButton() {
+            const btn = document.getElementById('start-training-btn');
+            btn.disabled = !config.type;
+        }
+
+        // Funciones del ejercicio
+        function randomBetween(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function createExercise() {
+            let num1, num2;
+            
+            switch (config.type) {
+                case '2x1':
+                    num1 = randomBetween(10, 99);
+                    num2 = randomBetween(2, 9);
+                    break;
+                case '3x1':
+                    num1 = randomBetween(100, 999);
+                    num2 = randomBetween(2, 9);
+                    break;
+                case '4x1':
+                    num1 = randomBetween(1000, 9999);
+                    num2 = randomBetween(2, 9);
+                    break;
+                case '2x2':
+                    num1 = randomBetween(10, 99);
+                    num2 = randomBetween(10, 99);
+                    break;
+                case '3x2':
+                    num1 = randomBetween(100, 999);
+                    num2 = randomBetween(10, 99);
+                    break;
+                case 'mixto':
+                    const types = ['2x1', '3x1', '4x1', '2x2', '3x2'];
+                    const randomType = types[Math.floor(Math.random() * types.length)];
+                    const oldType = config.type;
+                    config.type = randomType;
+                    const exercise = createExercise();
+                    config.type = oldType;
+                    return exercise;
+            }
+
+            const correctAnswer = num1 * num2;
+            config.inverseMode = document.getElementById('inverse-mode').checked;
+            const isInverse = config.inverseMode && Math.random() < 0.5;
+
+            return {
+                num1,
+                num2,
+                correctAnswer,
+                isInverse,
+                userAnswer: null,
+                isCorrect: null
+            };
+        }
+
+        function displayExercise(exercise) {
+            const questionEl = document.getElementById('exercise-question');
+            if (exercise.isInverse) {
+                questionEl.textContent = `__ × ${exercise.num2} = ${exercise.correctAnswer}`;
+            } else {
+                questionEl.textContent = `${exercise.num1} × ${exercise.num2} = ?`;
+            }
+        }
+
+        function startTraining() {
+            console.log('Iniciando entrenamiento');
+            session.currentExercise = 0;
+            session.totalExercises = config.count === 'libre' ? Infinity : parseInt(config.count);
+            session.correctAnswers = 0;
+            session.incorrectAnswers = 0;
+            session.startTime = Date.now();
+            session.exercises = [];
+            session.mistakes = [];
+
+            // Configurar UI (SIMPLIFICADO - SOLO PROGRESO)
+            if (config.count === 'libre') {
+                document.getElementById('progress-container').style.display = 'none';
+            } else {
+                document.getElementById('progress-container').style.display = 'block';
+            }
+
+            // Iniciar timer
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('time-counter').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+
+            generateNextExercise();
+            goToExercise();
+        }
+
+        function generateNextExercise() {
+            const exercise = createExercise();
+            session.exercises.push(exercise);
+            displayExercise(exercise);
+            updateProgress();
+            clearAnswer();
+        }
+
+        function updateProgress() {
+            if (config.count === 'libre') return;
+
+            const progressText = document.getElementById('progress-text');
+            const progressBar = document.getElementById('progress-bar');
+            
+            const current = session.currentExercise + 1;
+            const total = session.totalExercises;
+            
+            progressText.textContent = `Ejercicio ${current} de ${total}`;
+            
+            const percentage = (current / total) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // Funciones del teclado
+        function addToAnswer(digit) {
+            const input = document.getElementById('answer-input');
+            input.value += digit;
+        }
+
+        function clearAnswer() {
+            const input = document.getElementById('answer-input');
+            input.value = '';
+        }
+
+        function submitAnswer() {
+            const input = document.getElementById('answer-input');
+            const userAnswer = parseInt(input.value);
+            if (isNaN(userAnswer)) return;
+
+            const currentExercise = session.exercises[session.currentExercise];
+            currentExercise.userAnswer = userAnswer;
+
+            let expectedAnswer;
+            if (currentExercise.isInverse) {
+                expectedAnswer = currentExercise.num1;
+            } else {
+                expectedAnswer = currentExercise.correctAnswer;
+            }
+
+            currentExercise.isCorrect = userAnswer === expectedAnswer;
+
+            if (currentExercise.isCorrect) {
+                session.correctAnswers++;
+            } else {
+                session.incorrectAnswers++;
+                session.mistakes.push({
+                    ...currentExercise,
+                    expectedAnswer
+                });
+            }
+
+            // Actualizar estadísticas
+            document.getElementById('correct-count').textContent = session.correctAnswers;
+            document.getElementById('incorrect-count').textContent = session.incorrectAnswers;
+
+            session.currentExercise++;
+
+            // Continuar o terminar
+            if (config.count !== 'libre' && session.currentExercise >= session.totalExercises) {
+                finishTraining();
+            } else {
+                setTimeout(() => generateNextExercise(), 500);
+            }
+        }
+
+        function finishTraining() {
+            if (timer) {
+                clearInterval(timer);
+            }
+            showResults();
+        }
+
+        function showResults() {
+            const totalTime = Math.floor((Date.now() - session.startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            const totalAnswered = session.correctAnswers + session.incorrectAnswers;
+            const percentage = totalAnswered > 0 ? Math.round((session.correctAnswers / totalAnswered) * 100) : 0;
+
+            document.getElementById('final-correct').textContent = session.correctAnswers;
+            document.getElementById('final-incorrect').textContent = session.incorrectAnswers;
+            document.getElementById('final-percentage').textContent = `${percentage}%`;
+            document.getElementById('final-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Mostrar errores
+            const mistakesContainer = document.getElementById('mistakes-review');
+            if (session.mistakes.length === 0) {
+                mistakesContainer.innerHTML = '<div class="text-2xl">🎉 ¡Perfecto! No cometiste errores</div>';
+            } else {
+                let html = '<h3 class="text-xl font-bold mb-4">📝 Repaso de Errores:</h3><div class="space-y-2">';
+                
+                session.mistakes.forEach(mistake => {
+                    const question = mistake.isInverse 
+                        ? `__ × ${mistake.num2} = ${mistake.correctAnswer}`
+                        : `${mistake.num1} × ${mistake.num2} = ?`;
+                    
+                    html += `
+                        <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                            <div class="font-bold">${question}</div>
+                            <div class="text-red-300">Tu respuesta: ${mistake.userAnswer}</div>
+                            <div class="text-green-300">Respuesta correcta: ${mistake.expectedAnswer}</div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                mistakesContainer.innerHTML = html;
+            }
+
+            goToResults();
+        }
+
+    function resetApp() {
+    config = {
+        type: null,
+        count: '10',
+        inverseMode: false
+    };
+    
+    // Resetear UI
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.style.background = 'rgba(255, 255, 255, 0.2)';
+    });
+    document.querySelectorAll('.count-btn').forEach((btn, index) => {
+        btn.classList.remove('active-count');
+        btn.style.background = '#3b82f6';
+        if (index === 0) {
+            btn.classList.add('active-count');
+            btn.style.background = 'linear-gradient(135deg, #3b82f6, #1d4ed8)';
+        }
+    });
+    document.getElementById('inverse-mode').checked = false;
+    
+    updateStartButton();
+    goToWelcome(); // Sin delay, el scroll lo maneja goToWelcome()
+}
+        // Función para volver al inicio
+function goToHome() {
+    console.log('Navegando al inicio');
+    window.location.href = 'index.html';
+}
+    </script>
+</body>
+</html>

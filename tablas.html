@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Potencia tu mente</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+   <!-- PANTALLA DE BIENVENIDA -->
+<div id="welcome-screen" class="screen active">
+    <div class="container">
+        <h1 class="logo">⚡ MultiBoost ⚡</h1>
+        <p class="slogan">¡Potencia tu mente, domina las tablas!</p>
+        <div class="welcome-animation">
+            <div class="math-icon">🧮</div>
+        </div>
+        
+        <!-- INSTRUCCIONES MOVIDAS AQUÍ (MÁS ARRIBA) -->
+        <div style="margin: 30px 0; font-size: 1rem; opacity: 0.8;">
+            <div>✓ Elige la o las tablas que quieras practicar</div>
+            <div>✓ Selecciona la cantidad de ejercicios</div>
+            <div>✓ Presiona "COMENZAR ENTRENAMIENTO!!"</div>
+        </div>
+        
+        <!-- Botón Volver al Inicio -->
+        <button onclick="goToHome()" class="btn-secondary" style="margin-bottom: 15px;">
+            🏠 ← Volver al Inicio
+        </button>
+        <button id="start-btn" class="btn-primary">
+            🚀 ¡COMENZAR ENTRENAMIENTO!
+        </button>
+    </div>
+</div>
+
+    <!-- PANTALLA DE CONFIGURACIÓN -->
+    <div id="config-screen" class="screen">
+        <div class="container">
+            <h2>⚙️ Configura tu entrenamiento</h2>
+            
+            <!-- Selección de tablas -->
+            <div class="config-section">
+                <h3>📊 Selecciona las tablas a practicar:</h3>
+                <div class="table-grid">
+                    <button class="table-btn" data-table="2">Tabla del 2</button>
+                    <button class="table-btn" data-table="3">Tabla del 3</button>
+                    <button class="table-btn" data-table="4">Tabla del 4</button>
+                    <button class="table-btn" data-table="5">Tabla del 5</button>
+                    <button class="table-btn" data-table="6">Tabla del 6</button>
+                    <button class="table-btn" data-table="7">Tabla del 7</button>
+                    <button class="table-btn" data-table="8">Tabla del 8</button>
+                    <button class="table-btn" data-table="9">Tabla del 9</button>
+                    <button class="table-btn" data-table="10">Tabla del 10</button>
+                    <button class="table-btn" data-table="11">Tabla del 11</button>
+                    <button class="table-btn" data-table="12">Tabla del 12</button>
+                    <button class="table-btn" data-table="13">Tabla del 13</button>
+                </div>
+                
+                <div class="quick-actions">
+                    <button id="select-all-btn" class="btn-secondary">✅ Todas</button>
+                    <button id="clear-all-btn" class="btn-secondary">❌ Ninguna</button>
+                    <button id="surprise-btn" class="btn-secondary">🎲 Sorpréndeme</button>
+                </div>
+            </div>
+
+            <!-- Cantidad de ejercicios -->
+            <div class="config-section">
+                <h3>🎯 Cantidad de ejercicios:</h3>
+                <div class="exercise-options">
+                    <button class="exercise-btn active" data-count="10">10 ejercicios</button>
+                    <button class="exercise-btn" data-count="20">20 ejercicios</button>
+                    <button class="exercise-btn" data-count="30">30 ejercicios</button>
+                    <button class="exercise-btn" data-count="40">40 ejercicios</button>
+                </div>
+            </div>
+
+            <button id="start-training-btn" class="btn-primary" disabled>
+                💪 ¡INICIAR ENTRENAMIENTO!
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE EJERCICIOS -->
+    <div id="exercise-screen" class="screen">
+        <div class="container">
+            <!-- Header con estadísticas -->
+            <div class="stats-header">
+                <div class="stat">
+                    <span class="label">Correctas:</span>
+                    <span id="correct-count" class="value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Incorrectas:</span>
+                    <span id="incorrect-count" class="value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Tiempo:</span>
+                    <span id="total-time" class="value">00:00</span>
+                </div>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <p id="progress-text" class="progress-text">Ejercicio 1 de 10</p>
+            </div>
+
+            <!-- Ejercicio actual -->
+            <div class="exercise-container">
+                <div id="timer-display" class="timer">10</div>
+                <div id="exercise-question" class="question">2 × 3 = ?</div>
+                <div class="options-grid">
+                    <button class="option-btn" data-answer="6">6</button>
+                    <button class="option-btn" data-answer="8">8</button>
+                    <button class="option-btn" data-answer="5">5</button>
+                    <button class="option-btn" data-answer="7">7</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE RESULTADOS -->
+    <div id="results-screen" class="screen">
+        <div class="container">
+            <h2 id="results-title">🎉 ¡Entrenamiento Completado!</h2>
+            
+            <div class="results-summary">
+                <div class="result-stat">
+                    <div class="stat-number" id="final-correct">8</div>
+                    <div class="stat-label">Correctas</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-number" id="final-incorrect">2</div>
+                    <div class="stat-label">Incorrectas</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-number" id="final-percentage">80%</div>
+                    <div class="stat-label">Precisión</div>
+                </div>
+                <div class="result-stat">
+                    <div class="stat-number" id="final-time">02:15</div>
+                    <div class="stat-label">Tiempo Total</div>
+                </div>
+            </div>
+
+            <div id="mistakes-review" class="mistakes-section">
+                <!-- Aquí se mostrarán los errores -->
+            </div>
+
+           <div class="results-actions">
+            <button onclick="goToHome()" class="btn-secondary">🏠 Volver al Inicio</button>
+           <button id="repeat-btn" class="btn-secondary">🔄 Repetir</button>
+           <button id="new-training-btn" class="btn-primary">🚀 Nuevo Entrenamiento</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
