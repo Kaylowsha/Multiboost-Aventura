@@ -131,7 +131,22 @@ MultiBoost.prototype.bindEvents = function() {
                 self.newTraining();
             });
         }
-
+        // Vincular botón de entrenamiento específico
+           this.bindSpecificTrainingButton();
+        // Botones de cantidad en interfaz específica
+var specificExerciseBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
+for (var i = 0; i < specificExerciseBtns.length; i++) {
+    specificExerciseBtns[i].addEventListener('click', function(e) {
+        // Remover active de todos
+        var allSpecificBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
+        for (var j = 0; j < allSpecificBtns.length; j++) {
+            allSpecificBtns[j].classList.remove('active');
+        }
+        // Añadir active al clickeado
+        (e.target || e.srcElement).classList.add('active');
+        self.exerciseCount = parseInt((e.target || e.srcElement).getAttribute('data-count'));
+    });
+}
     } catch (error) {
         console.log('Error vinculando eventos:', error);
     }
@@ -153,6 +168,10 @@ MultiBoost.prototype.showScreen = function(screenName) {
             this.currentScreen = screenName;
             console.log('📺 Mostrando pantalla: ' + screenName);
         }
+        // Configurar interfaz específica si viene del dashboard
+if (screenName === 'config' && this.adventureMode && this.practiceTable) {
+    this.setupSpecificPracticeInterface();
+}
     } catch (error) {
         console.log('Error mostrando pantalla:', error);
     }
@@ -1021,6 +1040,40 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
 
     } catch (error) {
         console.error('Error en updateUserProgress:', error);
+    }
+};
+// Configurar interfaz para práctica específica
+MultiBoost.prototype.setupSpecificPracticeInterface = function() {
+    try {
+        // Ocultar configuración normal y mostrar específica
+        document.getElementById('normal-config').style.display = 'none';
+        document.getElementById('specific-practice-config').style.display = 'block';
+        
+        // Actualizar título con la tabla específica
+        document.getElementById('specific-table-title').textContent = '🎯 Practicando Tabla del ' + this.practiceTable;
+        
+        // Pre-configurar la tabla seleccionada
+        this.selectedTables = [parseInt(this.practiceTable)];
+        
+        // Configurar cantidad si viene predefinida
+        if (this.practiceExercises) {
+            this.exerciseCount = parseInt(this.practiceExercises);
+        }
+        
+        console.log('🎯 Interfaz específica configurada para tabla del ' + this.practiceTable);
+    } catch (error) {
+        console.log('Error configurando interfaz específica:', error);
+    }
+};
+
+// Vincular evento del botón específico
+MultiBoost.prototype.bindSpecificTrainingButton = function() {
+    var self = this;
+    var specificBtn = document.getElementById('start-specific-training-btn');
+    if (specificBtn) {
+        specificBtn.addEventListener('click', function() {
+            self.startTraining();
+        });
     }
 };
 // Función para volver al inicio
