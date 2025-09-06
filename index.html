@@ -89,8 +89,7 @@
                 </p>
             </div>
             
-            <!-- Opciones de Entrenamiento -->
-           <!-- MODO AVENTURA -->
+            <!-- MODO AVENTURA -->
             <div class="max-w-2xl mx-auto mb-12">
                 <div onclick="goToModoAventura()" class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-3xl p-8 cursor-pointer border border-white border-opacity-20 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
                     <div class="text-6xl mb-6 text-center">🏃‍♂️</div>
@@ -109,6 +108,38 @@
                     </div>
                     <div class="text-white font-bold text-xl text-center">
                         🚀 ¡Iniciar Mi Aventura Matemática!
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE DESAFÍOS -->
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 rounded-3xl p-8 border border-white border-opacity-20">
+                    <div class="text-6xl mb-6 text-center">🏆</div>
+                    <h2 class="text-3xl font-bold mb-4 text-white text-center">¿Tienes un Código de Desafío?</h2>
+                    <p class="text-lg mb-6 opacity-90 text-center">
+                        Únete a un desafío creado por otro usuario
+                    </p>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 items-center justify-center">
+                        <input 
+                            type="text" 
+                            id="challenge-code" 
+                            placeholder="Ingresa código D12345" 
+                            class="px-6 py-4 rounded-2xl text-black font-bold text-xl text-center min-w-[200px] border-4 border-white border-opacity-30 focus:border-yellow-400 focus:outline-none"
+                            maxlength="6"
+                            style="text-transform: uppercase;"
+                        >
+                        <button 
+                            onclick="joinChallenge()" 
+                            class="px-8 py-4 rounded-2xl text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white shadow-lg"
+                        >
+                            🎯 Unirse al Desafío
+                        </button>
+                    </div>
+                    
+                    <div class="text-center mt-4 text-sm opacity-75">
+                        Formato: D seguido de 5 números (ej: D12345)
                     </div>
                 </div>
             </div>
@@ -182,27 +213,54 @@
         
         function goToTablas() {
             console.log('Navegando a Tablas de Multiplicar');
-            // Aquí debes cambiar 'tablas.html' por el nombre que le pongas a tu archivo actual de tablas
             window.location.href = 'tablas.html';
         }
         
         function goToAvanzado() {
             console.log('Navegando a Multiplicación Avanzada');
-            // Aquí debes cambiar 'avanzado.html' por el nombre del archivo de multiplicación avanzada
             window.location.href = 'avanzado.html';
         }
+        
         function goToModoAventura() {
-    console.log('Navegando a Modo Aventura');
-    window.location.href = 'login.html';
+            console.log('Navegando a Modo Aventura');
+            window.location.href = 'login.html';
         }
+        
+        // FUNCIÓN PARA UNIRSE A DESAFÍO
         function joinChallenge() {
-    const code = document.getElementById('challenge-code').value.trim().toUpperCase();
-    if (code && code.match(/^D\d{5}$/)) {
-        window.location.href = `challenge.html?code=${code}`;
-    } else {
-        alert('Código inválido. Formato correcto: D12345');
-    }
-}
+            const code = document.getElementById('challenge-code').value.trim().toUpperCase();
+            
+            if (!code) {
+                alert('Por favor ingresa un código de desafío');
+                return;
+            }
+            
+            if (!code.match(/^D\d{5}$/)) {
+                alert('Código inválido. Formato correcto: D12345');
+                return;
+            }
+            
+            console.log('🏆 Uniéndose al desafío:', code);
+            window.location.href = `challenge.html?code=${code}`;
+        }
+        
+        // Convertir automáticamente a mayúsculas mientras escribe
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.getElementById('challenge-code');
+            if (codeInput) {
+                codeInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+                
+                // Permitir envío con Enter
+                codeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        joinChallenge();
+                    }
+                });
+            }
+        });
+        
         // Efecto visual al hacer hover
         document.querySelectorAll('.btn-card, .btn-card-secondary').forEach(card => {
             card.addEventListener('mouseenter', function() {
