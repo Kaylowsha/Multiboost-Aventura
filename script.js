@@ -867,9 +867,9 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
             document.getElementById('repeat-btn').style.display = 'none';
             document.getElementById('new-training-btn').style.display = 'none';
             
-            // Configurar botón home según usuario
+         // Configurar botón home según usuario
             var homeBtn = document.getElementById('home-btn');
-            if (this.adventureMode && this.userId) {
+            if (this.participantType === 'logged') {
                 homeBtn.textContent = '🏠 Volver al Dashboard';
                 homeBtn.onclick = function() { window.location.href = 'dashboard.html'; };
             } else {
