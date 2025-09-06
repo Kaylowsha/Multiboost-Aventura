@@ -258,6 +258,169 @@
         </div>
     </div>
 
+    <!-- MODAL VISTA DETALLADA ESTUDIANTE -->
+    <div id="student-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            
+            <!-- HEADER MODAL -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-3xl" id="modal-avatar">
+                        👧
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold" id="modal-student-name">Sofia González</h2>
+                        <p class="text-lg opacity-75" id="modal-student-info">8 años - 3° Básico</p>
+                        <p class="text-sm opacity-60" id="modal-last-activity">Última actividad: Hace 2 días</p>
+                    </div>
+                </div>
+                <button onclick="closeStudentModal()" class="text-4xl hover:bg-white hover:bg-opacity-20 rounded-full w-12 h-12 flex items-center justify-center">
+                    ×
+                </button>
+            </div>
+
+            <!-- ESTADÍSTICAS DETALLADAS -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-green-300" id="modal-correct">156</div>
+                    <div class="text-sm opacity-75">Ejercicios Correctos</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-300" id="modal-sessions">23</div>
+                    <div class="text-sm opacity-75">Sesiones</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-yellow-300" id="modal-time">4h 23m</div>
+                    <div class="text-sm opacity-75">Tiempo Total</div>
+                </div>
+                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-300" id="modal-accuracy">85%</div>
+                    <div class="text-sm opacity-75">Precisión Global</div>
+                </div>
+            </div>
+
+            <!-- ANÁLISIS POR TABLAS -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    
+                    <!-- TABLA CRÍTICA EJEMPLO -->
+                    <div class="critical-table bg-white bg-opacity-10 rounded-xl p-4">
+                        <div class="text-center mb-3">
+                            <div class="text-2xl font-bold">Tabla 7</div>
+                            <div class="text-3xl font-bold text-red-300">35%</div>
+                            <div class="text-red-300 text-sm font-bold">⚠️ CRÍTICA</div>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div>✅ Correctas: 12</div>
+                            <div>❌ Incorrectas: 22</div>
+                            <div>⏱️ Tiempo promedio: 8.2s</div>
+                            <div>📅 Última práctica: Hace 5 días</div>
+                        </div>
+                        <button onclick="assignSpecificTable('sofia', 7)" class="w-full mt-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg font-bold text-sm transition-all">
+                            🎯 PRACTICAR AHORA
+                        </button>
+                    </div>
+                    
+                    <!-- TABLA BUENA EJEMPLO -->
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4 border-2 border-green-400">
+                        <div class="text-center mb-3">
+                            <div class="text-2xl font-bold">Tabla 2</div>
+                            <div class="text-3xl font-bold text-green-300">95%</div>
+                            <div class="text-green-300 text-sm font-bold">✅ DOMINADA</div>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div>✅ Correctas: 38</div>
+                            <div>❌ Incorrectas: 2</div>
+                            <div>⏱️ Tiempo promedio: 2.1s</div>
+                            <div>📅 Última práctica: Ayer</div>
+                        </div>
+                        <button onclick="assignSpecificTable('sofia', 2)" class="w-full mt-3 py-2 bg-green-500 hover:bg-green-600 rounded-lg font-bold text-sm transition-all">
+                            🔄 Reforzar
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- HISTORIAL RECIENTE -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-4">📈 Historial Reciente</h3>
+                <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                            <div>
+                                <span class="font-bold">Tabla 5 - Sesión Libre</span>
+                                <span class="text-sm opacity-75 block">Hace 1 día</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-green-300 font-bold">8/10 ✅</div>
+                                <div class="text-sm opacity-75">80%</div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                            <div>
+                                <span class="font-bold">Tabla 7 - Actividad Asignada</span>
+                                <span class="text-sm opacity-75 block">Hace 3 días</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-red-300 font-bold">4/10 ❌</div>
+                                <div class="text-sm opacity-75">40%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL ASIGNACIÓN RÁPIDA -->
+    <div id="quick-assign-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" style="display: none;">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 max-w-2xl w-full">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold mb-2">⚡ Asignar Actividad</h2>
+                <p class="text-lg opacity-75" id="assign-student-name">Para: Sofia González</p>
+            </div>
+
+            <!-- TABLAS CRÍTICAS PRIORITARIAS -->
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-4 text-red-300">🚨 Tablas Críticas (Prioridad Alta)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <button onclick="assignTable('sofia', 7, 'urgent')" class="p-4 bg-red-500 hover:bg-red-600 rounded-xl text-center font-bold transition-all">
+                        <div class="text-2xl">Tabla 7</div>
+                        <div class="text-sm">35% - URGENTE</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TODAS LAS TABLAS -->
+            <div class="mb-6">
+                <h3 class="text-xl font-bold mb-4">📚 Todas las Tablas</h3>
+                <div class="grid grid-cols-4 md:grid-cols-6 gap-2">
+                    <button onclick="assignTable('sofia', 2, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">2</button>
+                    <button onclick="assignTable('sofia', 3, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">3</button>
+                    <button onclick="assignTable('sofia', 4, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">4</button>
+                    <button onclick="assignTable('sofia', 5, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">5</button>
+                    <button onclick="assignTable('sofia', 6, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">6</button>
+                    <button onclick="assignTable('sofia', 7, 'high')" class="p-3 bg-red-500 hover:bg-red-600 rounded-lg font-bold">7</button>
+                    <button onclick="assignTable('sofia', 8, 'normal')" class="p-3 bg-yellow-500 hover:bg-yellow-600 rounded-lg font-bold">8</button>
+                    <button onclick="assignTable('sofia', 9, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">9</button>
+                    <button onclick="assignTable('sofia', 10, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">10</button>
+                    <button onclick="assignTable('sofia', 11, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">11</button>
+                    <button onclick="assignTable('sofia', 12, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">12</button>
+                    <button onclick="assignTable('sofia', 13, 'normal')" class="p-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-bold">13</button>
+                </div>
+            </div>
+
+            <div class="flex space-x-4">
+                <button onclick="closeQuickAssignModal()" class="flex-1 py-3 px-6 bg-gray-500 hover:bg-gray-600 rounded-xl font-bold">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- NOTIFICACIÓN FLOTANTE -->
     <div id="notification" class="fixed top-4 right-4 bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-xl p-4 z-50 transform translate-x-full transition-all duration-300">
         <div class="flex items-center space-x-3">
@@ -271,11 +434,17 @@
 
     <!-- JAVASCRIPT CON DEBUG MEJORADO -->
     <script>
-        console.log('🚀 Family Dashboard cargado - Versión Debug');
+        console.log('🚀 Family Dashboard cargado - Versión COMPLETA');
 
         // Test inmediato
         setTimeout(() => {
             console.log('✅ JavaScript funcionando después de 1 segundo');
+            
+            // Test de modales
+            const detailModal = document.getElementById('student-detail-modal');
+            const assignModal = document.getElementById('quick-assign-modal');
+            console.log('🔍 Modal detalles encontrado:', !!detailModal);
+            console.log('⚡ Modal asignación encontrado:', !!assignModal);
         }, 1000);
 
         // Datos de ejemplo para testing
@@ -463,27 +632,29 @@
 
         // Cerrar modales al hacer click fuera
         document.addEventListener('click', function(e) {
-            console.log('🖱️ Click detectado en:', e.target.id);
-            
             if (e.target.id === 'student-detail-modal') {
-                console.log('🖱️ Click fuera del modal de estudiante');
                 closeStudentModal();
             }
             if (e.target.id === 'quick-assign-modal') {
-                console.log('🖱️ Click fuera del modal de asignación');
                 closeQuickAssignModal();
             }
         });
 
         // Test de botones al cargar
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 DOM cargado, verificando botones...');
+            console.log('🎯 DOM cargado, verificando elementos...');
             
             const detailButtons = document.querySelectorAll('[onclick*="viewStudentDetails"]');
             const assignButtons = document.querySelectorAll('[onclick*="assignQuickActivity"]');
             
             console.log('🔍 Botones "Ver Detalles" encontrados:', detailButtons.length);
             console.log('⚡ Botones "Asignar" encontrados:', assignButtons.length);
+            
+            // Verificar modales
+            const detailModal = document.getElementById('student-detail-modal');
+            const assignModal = document.getElementById('quick-assign-modal');
+            console.log('🔍 Modal detalles encontrado:', !!detailModal);
+            console.log('⚡ Modal asignación encontrado:', !!assignModal);
         });
 
         console.log('🎯 Todas las funciones definidas correctamente');
