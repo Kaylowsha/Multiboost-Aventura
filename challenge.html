@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Desafío</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- LOADING -->
+    <div id="loading-screen" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="text-6xl mb-4">🏆</div>
+            <div class="text-2xl font-bold">Cargando desafío...</div>
+        </div>
+    </div>
+
+    <!-- ERROR -->
+    <div id="error-screen" class="min-h-screen flex items-center justify-center" style="display: none;">
+        <div class="text-center max-w-md">
+            <div class="text-6xl mb-4">❌</div>
+            <h2 class="text-2xl font-bold mb-4">Desafío no encontrado</h2>
+            <p class="mb-6 opacity-90">El código no es válido o el desafío ha expirado</p>
+            <button onclick="goToHome()" class="px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 font-bold">
+                Volver al Inicio
+            </button>
+        </div>
+    </div>
+
+    <!-- DESAFÍO INFO -->
+    <div id="challenge-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Header -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6 text-center">
+                <h1 class="text-3xl font-bold mb-2">🏆 Desafío Matemático</h1>
+                <div class="text-xl font-bold text-yellow-300" id="challenge-code-display">Código: D12345</div>
+            </div>
+
+            <!-- Info del Desafío -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div>
+                        <div class="text-4xl mb-2">📊</div>
+                        <div class="text-lg font-bold" id="challenge-table">Tabla del 5</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl mb-2">🎯</div>
+                        <div class="text-lg font-bold" id="challenge-exercises">20 ejercicios</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl mb-2">⏰</div>
+                        <div class="text-lg font-bold" id="challenge-expiry">Expira en 2 días</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participar -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                <h3 class="text-xl font-bold mb-4 text-center">¿Listo para el desafío?</h3>
+                
+                <!-- Identificación para no logueados -->
+                <div id="guest-form" class="mb-6">
+                    <label class="block text-sm font-bold mb-2">Tu nombre para el ranking:</label>
+                    <input type="text" id="participant-name" placeholder="Escribe tu nombre" 
+                           class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold" 
+                           maxlength="20">
+                </div>
+
+                <div class="text-center">
+                    <button onclick="startChallenge()" id="start-challenge-btn" class="px-8 py-4 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 font-bold text-xl">
+                        🚀 Iniciar Desafío
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ranking Actual -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <h3 class="text-xl font-bold mb-4">🏅 Ranking Actual</h3>
+                <div id="ranking-list">
+                    <div class="text-center opacity-60">Sé el primero en participar</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { doc, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        let challengeData = null;
+        let challengeCode = null;
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // Obtener código de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        challengeCode = urlParams.get('code');
+
+        if (!challengeCode) {
+            showError();
+        } else {
+            loadChallenge();
+        }
+
+        // Verificar si está logueado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                isLoggedIn = true;
+                document.getElementById('guest-form').style.display = 'none';
+            } else {
+                isLoggedIn = false;
+            }
+        });
+
+        async function loadChallenge() {
+            try {
+                const docRef = doc(db, 'challenges', challengeCode);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    challengeData = docSnap.data();
+                    
+                    // Verificar si no ha expirado
+                    const today = new Date().toISOString().split('T')[0];
+                    if (challengeData.config.expiry < today) {
+                        showError();
+                        return;
+                    }
+
+                    showChallenge();
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error cargando desafío:', error);
+                showError();
+            }
+        }
+
+        function showChallenge() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('challenge-screen').style.display = 'block';
+
+            document.getElementById('challenge-code-display').textContent = `Código: ${challengeCode}`;
+            document.getElementById('challenge-table').textContent = `Tabla del ${challengeData.config.tabla}`;
+            document.getElementById('challenge-exercises').textContent = `${challengeData.config.ejercicios} ejercicios`;
+            
+            const expiryDate = new Date(challengeData.config.expiry);
+            const today = new Date();
+            const daysLeft = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+            document.getElementById('challenge-expiry').textContent = `Expira en ${daysLeft} día${daysLeft !== 1 ? 's' : ''}`;
+
+            renderRanking();
+        }
+
+        function showError() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'flex';
+        }
+
+        function renderRanking() {
+            const rankingDiv = document.getElementById('ranking-list');
+            if (!challengeData.results || challengeData.results.length === 0) {
+                rankingDiv.innerHTML = '<div class="text-center opacity-60">Sé el primero en participar</div>';
+                return;
+            }
+
+            const sortedResults = challengeData.results
+                .sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    return a.time - b.time;
+                });
+
+            let html = '';
+            sortedResults.forEach((result, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                const userType = result.type === 'logged' ? '👤' : '👻';
+                
+                html += `
+                    <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">${medal}</span>
+                            <span class="font-bold">${result.name}</span>
+                            <span class="text-sm opacity-60">${userType}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-300">${result.score}%</div>
+                            <div class="text-sm opacity-60">${Math.floor(result.time / 60)}:${(result.time % 60).toString().padStart(2, '0')}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            rankingDiv.innerHTML = html;
+        }
+
+        window.startChallenge = function() {
+            let participantName = '';
+            
+            if (isLoggedIn) {
+                participantName = currentUser.email.split('@')[0]; // Usar parte del email como nombre temporal
+            } else {
+                participantName = document.getElementById('participant-name').value.trim();
+                if (!participantName) {
+                    alert('Por favor escribe tu nombre para participar');
+                    return;
+                }
+            }
+
+            // Guardar datos para tablas.html
+            localStorage.setItem('challengeMode', 'true');
+            localStorage.setItem('challengeCode', challengeCode);
+            localStorage.setItem('challengeTable', challengeData.config.tabla.toString());
+            localStorage.setItem('challengeExercises', challengeData.config.ejercicios.toString());
+            localStorage.setItem('participantName', participantName);
+            localStorage.setItem('participantType', isLoggedIn ? 'logged' : 'guest');
+
+            window.location.href = 'tablas.html';
+        };
+
+        window.goToHome = function() {
+            window.location.href = 'index.html';
+        };
+    </script>
+
+</body>
+</html>
