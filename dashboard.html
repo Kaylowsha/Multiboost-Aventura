@@ -54,7 +54,7 @@
             </div>
 
             <!-- MODOS DE ENTRENAMIENTO -->
-            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">🎮 MODOS DE ENTRENAMIENTO</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -81,6 +81,7 @@
                             <div class="text-white font-bold">🔥 ¡Desafío Matemático!</div>
                         </div>
                     </div>
+                    
                     <!-- Crear Desafío -->
                     <div onclick="goToCreateChallenge()" class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
                         <div class="text-5xl mb-4 text-center">🏆</div>
@@ -91,6 +92,38 @@
                         <div class="text-center">
                             <div class="text-white font-bold text-lg">🎯 ¡Desafiar a Otros!</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NUEVA SECCIÓN: UNIRSE A DESAFÍO -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">🏆 UNIRSE A DESAFÍO</h2>
+                
+                <div class="max-w-md mx-auto">
+                    <p class="text-center mb-6 opacity-90">
+                        ¿Tienes un código de desafío? Ingrésalo aquí y compite con tu perfil
+                    </p>
+                    
+                    <div class="flex flex-col gap-4">
+                        <input 
+                            type="text" 
+                            id="dashboard-challenge-code" 
+                            placeholder="Ingresa código D12345" 
+                            class="px-6 py-4 rounded-2xl text-black font-bold text-xl text-center border-4 border-white border-opacity-30 focus:border-yellow-400 focus:outline-none"
+                            maxlength="6"
+                            style="text-transform: uppercase;"
+                        >
+                        <button 
+                            onclick="joinChallengeAsUser()" 
+                            class="px-8 py-4 rounded-2xl text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white shadow-lg"
+                        >
+                            🎯 Unirse con Mi Perfil
+                        </button>
+                    </div>
+                    
+                    <div class="text-center mt-4 text-sm opacity-75">
+                        Tu nombre de perfil aparecerá en el ranking
                     </div>
                 </div>
             </div>
@@ -263,6 +296,44 @@
             window.location.href = 'avanzado.html';
         };
 
+        window.goToCreateChallenge = function() {
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('userId', currentUser.uid);
+            window.location.href = 'create-challenge.html';
+        };
+
+        // NUEVA FUNCIÓN: UNIRSE A DESAFÍO COMO USUARIO LOGUEADO
+        window.joinChallengeAsUser = function() {
+            const code = document.getElementById('dashboard-challenge-code').value.trim().toUpperCase();
+            
+            if (!code) {
+                alert('Por favor ingresa un código de desafío');
+                return;
+            }
+            
+            if (!code.match(/^D\d{5}$/)) {
+                alert('Código inválido. Formato correcto: D12345');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('Error: No se detectó usuario logueado');
+                return;
+            }
+            
+            console.log('🏆 Usuario logueado uniéndose al desafío:', code);
+            
+            // Configurar para modo desafío con usuario logueado
+            localStorage.setItem('challengeMode', 'true');
+            localStorage.setItem('challengeCode', code);
+            localStorage.setItem('participantName', document.getElementById('student-name').textContent);
+            localStorage.setItem('participantType', 'logged');
+            localStorage.setItem('userId', currentUser.uid);
+            
+            // Ir al desafío
+            window.location.href = `challenge.html?code=${code}`;
+        };
+
         window.logout = async function() {
             try {
                 await signOut(auth);
@@ -275,11 +346,25 @@
                 console.error('Error cerrando sesión:', error);
             }
         };
-window.goToCreateChallenge = function() {
-            localStorage.setItem('adventureMode', 'true');
-            localStorage.setItem('userId', currentUser.uid);
-            window.location.href = 'create-challenge.html';
-        };
+
+        // Auto-completar mayúsculas en input del dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const dashboardCodeInput = document.getElementById('dashboard-challenge-code');
+                if (dashboardCodeInput) {
+                    dashboardCodeInput.addEventListener('input', function(e) {
+                        e.target.value = e.target.value.toUpperCase();
+                    });
+                    
+                    dashboardCodeInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            joinChallengeAsUser();
+                        }
+                    });
+                }
+            }, 1000);
+        });
+
         console.log('🎮 Dashboard cargado correctamente');
     </script>
 
