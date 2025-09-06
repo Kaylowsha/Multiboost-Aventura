@@ -1246,5 +1246,85 @@ window.goToHome = function() {
     } else {
         window.multiBoost = new MultiBoost();
     }
+    // Cargar ranking del desafío para mostrar en resultados
+MultiBoost.prototype.loadChallengeRanking = function() {
+    var self = this;
     
+    try {
+        if (!window.db || !window.doc || !window.getDoc) {
+            console.log('Firebase no disponible para ranking');
+            return;
+        }
+
+        console.log('📊 Cargando ranking del desafío...');
+
+        window.getDoc(window.doc(window.db, 'challenges', this.challengeCode))
+            .then(function(docSnapshot) {
+                if (docSnapshot.exists()) {
+                    var challengeData = docSnapshot.data();
+                    self.displayChallengeRanking(challengeData.results || []);
+                } else {
+                    console.log('Desafío no encontrado');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error cargando ranking:', error);
+            });
+
+    } catch (error) {
+        console.error('Error en loadChallengeRanking:', error);
+    }
+};
+
+// Mostrar el ranking en la pantalla de resultados
+MultiBoost.prototype.displayChallengeRanking = function(results) {
+    try {
+        // Ordenar resultados por score y tiempo
+        var sortedResults = results.sort(function(a, b) {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.time - b.time;
+        });
+
+        var rankingContainer = document.getElementById('challenge-ranking-container');
+        if (!rankingContainer) return;
+
+        var html = '<h3 style="color: #6b46c1; margin-bottom: 15px; text-align: center;">🏆 RANKING ACTUALIZADO</h3>';
+        
+        if (sortedResults.length === 0) {
+            html += '<div style="text-center; opacity: 0.6;">Sé el primero en participar</div>';
+        } else {
+            for (var i = 0; i < sortedResults.length; i++) {
+                var result = sortedResults[i];
+                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+                var userType = result.type === 'logged' ? '👤' : '👻';
+                var isCurrentUser = result.name === this.participantName;
+                var highlightClass = isCurrentUser ? 'background: rgba(255, 215, 0, 0.3); border: 2px solid gold;' : '';
+                
+                var minutes = Math.floor(result.time / 60);
+                var seconds = result.time % 60;
+                var timeStr = minutes + ':' + (seconds < 10 ? '0' + seconds : seconds);
+                
+                html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin: 5px 0; background: white; border-radius: 8px; ' + highlightClass + '">';
+                html += '<div style="display: flex; align-items: center; gap: 10px; color: #374151;">';
+                html += '<span style="font-size: 1.2rem; font-weight: bold;">' + medal + '</span>';
+                html += '<span style="font-weight: bold;">' + result.name + '</span>';
+                html += '<span style="font-size: 0.8rem; opacity: 0.6;">' + userType + '</span>';
+                if (isCurrentUser) html += '<span style="color: gold; font-weight: bold;">← TÚ</span>';
+                html += '</div>';
+                html += '<div style="text-align: right; color: #374151;">';
+                html += '<div style="font-weight: bold; color: #10b981;">' + result.score + '%</div>';
+                html += '<div style="font-size: 0.8rem; opacity: 0.6;">' + timeStr + '</div>';
+                html += '</div>';
+                html += '</div>';
+            }
+        }
+        
+        rankingContainer.innerHTML = html;
+        rankingContainer.style.display = 'block';
+        
+        console.log('✅ Ranking mostrado correctamente');
+    } catch (error) {
+        console.error('Error mostrando ranking:', error);
+    }
+};
 })();
