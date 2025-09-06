@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Crear Desafío</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
 
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <div class="text-6xl mb-4">🏆</div>
+            <div class="text-2xl font-bold">Verificando acceso...</div>
+        </div>
+    </div>
+
+    <!-- CREAR DESAFÍO -->
+    <div id="create-screen" class="min-h-screen p-4" style="display: none;">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- HEADER -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                <h1 class="text-3xl font-bold text-center mb-2">🏆 Crear Nuevo Desafío</h1>
+                <p class="text-center opacity-80">Configura un desafío personalizado y compártelo con otros</p>
+            </div>
+
+            <!-- FORMULARIO -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                
+                <!-- Selección de Tabla -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">📊 Tabla de Multiplicar:</h3>
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                        <button onclick="selectTable(2)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 2</button>
+                        <button onclick="selectTable(3)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 3</button>
+                        <button onclick="selectTable(4)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 4</button>
+                        <button onclick="selectTable(5)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 5</button>
+                        <button onclick="selectTable(6)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 6</button>
+                        <button onclick="selectTable(7)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 7</button>
+                        <button onclick="selectTable(8)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 8</button>
+                        <button onclick="selectTable(9)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 9</button>
+                        <button onclick="selectTable(10)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 10</button>
+                        <button onclick="selectTable(11)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 11</button>
+                        <button onclick="selectTable(12)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 12</button>
+                        <button onclick="selectTable(13)" class="table-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">Tabla del 13</button>
+                    </div>
+                </div>
+
+                <!-- Cantidad de Ejercicios -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">🎯 Cantidad de Ejercicios:</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="selectExercises(10)" class="exercise-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">10 ejercicios</button>
+                        <button onclick="selectExercises(20)" class="exercise-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">20 ejercicios</button>
+                        <button onclick="selectExercises(30)" class="exercise-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">30 ejercicios</button>
+                        <button onclick="selectExercises(40)" class="exercise-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">40 ejercicios</button>
+                    </div>
+                </div>
+
+                <!-- Duración del Desafío -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4">⏰ Duración del Desafío:</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="selectDuration(1)" class="duration-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">1 día</button>
+                        <button onclick="selectDuration(3)" class="duration-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">3 días</button>
+                        <button onclick="selectDuration(7)" class="duration-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">1 semana</button>
+                        <button onclick="selectDuration(30)" class="duration-selector p-3 rounded-xl border-2 border-white border-opacity-30 hover:border-yellow-400 font-bold">1 mes</button>
+                    </div>
+                </div>
+
+                <!-- Resumen y Crear -->
+                <div class="bg-white bg-opacity-20 rounded-xl p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">📋 Resumen del Desafío:</h3>
+                    <div id="challenge-summary" class="text-lg">
+                        Selecciona las opciones arriba para ver el resumen
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 justify-center">
+                    <button onclick="goToDashboard()" class="px-6 py-3 rounded-xl bg-gray-500 hover:bg-gray-600 font-bold">
+                        ← Volver al Dashboard
+                    </button>
+                    <button onclick="createChallenge()" id="create-btn" class="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 font-bold" disabled>
+                        🏆 Crear Desafío
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE RESULTADO -->
+    <div id="result-screen" class="min-h-screen p-4 flex items-center justify-center" style="display: none;">
+        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-8 text-center max-w-md">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="text-2xl font-bold mb-4">¡Desafío Creado!</h2>
+            <div class="bg-white bg-opacity-20 rounded-xl p-4 mb-6">
+                <div class="text-sm opacity-80 mb-2">Código del desafío:</div>
+                <div id="challenge-code" class="text-3xl font-bold">D12345</div>
+            </div>
+            <p class="mb-6 opacity-90">Comparte este código con otros para que se unan a tu desafío</p>
+            <button onclick="goToDashboard()" class="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-green-400 to-blue-500 font-bold">
+                Volver al Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts aquí abajo -->
+
+</body>
+</html>
