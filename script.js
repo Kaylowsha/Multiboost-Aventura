@@ -1210,10 +1210,10 @@ MultiBoost.prototype.saveChallengeResult = function() {
             console.log('✅ Resultado del desafío guardado exitosamente');
             console.log('🔄 Redirigiendo a ranking en 3 segundos...');
             
-            // Redirigir de vuelta al desafío para ver ranking actualizado
-            setTimeout(function() {
-                window.location.href = 'challenge.html?code=' + self.challengeCode;
-            }, 3000);
+          // En lugar de redireccionar, cargar ranking aquí
+if (self.challengeMode && self.challengeCode) {
+    self.loadChallengeRanking();
+}
         }).catch(function(error) {
             console.error('❌ Error guardando resultado del desafío:', error);
             console.error('Detalles del error:', error.message);
