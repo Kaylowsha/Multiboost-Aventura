@@ -115,7 +115,141 @@
         </div>
     </div>
 
-    <!-- Scripts aquí abajo -->
+    <!-- Firebase -->
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { doc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        let currentUser = null;
+        let selectedTable = null;
+        let selectedExercises = null;
+        let selectedDuration = null;
+
+        // Verificar autenticación
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                showCreateScreen();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function showCreateScreen() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('create-screen').style.display = 'block';
+        }
+
+        // Funciones de selección
+        window.selectTable = function(table) {
+            selectedTable = table;
+            document.querySelectorAll('.table-selector').forEach(btn => {
+                btn.classList.remove('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            });
+            event.target.classList.add('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            updateSummary();
+        };
+
+        window.selectExercises = function(exercises) {
+            selectedExercises = exercises;
+            document.querySelectorAll('.exercise-selector').forEach(btn => {
+                btn.classList.remove('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            });
+            event.target.classList.add('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            updateSummary();
+        };
+
+        window.selectDuration = function(days) {
+            selectedDuration = days;
+            document.querySelectorAll('.duration-selector').forEach(btn => {
+                btn.classList.remove('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            });
+            event.target.classList.add('border-yellow-400', 'bg-yellow-400', 'bg-opacity-20');
+            updateSummary();
+        };
+
+        function updateSummary() {
+            const summary = document.getElementById('challenge-summary');
+            const createBtn = document.getElementById('create-btn');
+            
+            if (selectedTable && selectedExercises && selectedDuration) {
+                const durationText = selectedDuration === 1 ? '1 día' : 
+                                   selectedDuration === 3 ? '3 días' :
+                                   selectedDuration === 7 ? '1 semana' : '1 mes';
+                
+                summary.innerHTML = `
+                    <div class="text-yellow-300">📊 Tabla del ${selectedTable}</div>
+                    <div class="text-blue-300">🎯 ${selectedExercises} ejercicios</div>
+                    <div class="text-green-300">⏰ Disponible por ${durationText}</div>
+                `;
+                createBtn.disabled = false;
+                createBtn.classList.remove('opacity-50');
+            } else {
+                summary.innerHTML = 'Selecciona las opciones arriba para ver el resumen';
+                createBtn.disabled = true;
+                createBtn.classList.add('opacity-50');
+            }
+        }
+
+        // Generar código único
+        async function generateUniqueCode() {
+            let code;
+            let exists = true;
+            
+            while (exists) {
+                const num = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+                code = 'D' + num;
+                
+                const q = query(collection(db, 'challenges'), where('__name__', '==', code));
+                const querySnapshot = await getDocs(q);
+                exists = !querySnapshot.empty;
+            }
+            
+            return code;
+        }
+
+        // Crear desafío
+        window.createChallenge = async function() {
+            if (!selectedTable || !selectedExercises || !selectedDuration) return;
+            
+            const createBtn = document.getElementById('create-btn');
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creando...';
+            
+            try {
+                const code = await generateUniqueCode();
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + selectedDuration);
+                
+                const challengeData = {
+                    config: {
+                        tabla: selectedTable,
+                        ejercicios: selectedExercises,
+                        expiry: expiryDate.toISOString().split('T')[0]
+                    },
+                    creator: currentUser.uid,
+                    results: []
+                };
+                
+                await setDoc(doc(db, 'challenges', code), challengeData);
+                
+                document.getElementById('challenge-code').textContent = code;
+                document.getElementById('create-screen').style.display = 'none';
+                document.getElementById('result-screen').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error creando desafío:', error);
+                alert('Error creando el desafío. Intenta de nuevo.');
+                createBtn.disabled = false;
+                createBtn.textContent = '🏆 Crear Desafío';
+            }
+        };
+
+        window.goToDashboard = function() {
+            window.location.href = 'dashboard.html';
+        };
+    </script>
 
 </body>
 </html>
