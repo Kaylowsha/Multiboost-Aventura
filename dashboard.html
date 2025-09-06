@@ -57,7 +57,7 @@
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">🎮 MODOS DE ENTRENAMIENTO</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Tablas de Multiplicar -->
                     <div onclick="goToTablas()" class="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
                         <div class="text-5xl mb-4 text-center">🎯</div>
@@ -79,6 +79,17 @@
                         </p>
                         <div class="text-center">
                             <div class="text-white font-bold">🔥 ¡Desafío Matemático!</div>
+                        </div>
+                    </div>
+                    <!-- Crear Desafío -->
+                    <div onclick="goToCreateChallenge()" class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                        <div class="text-5xl mb-4 text-center">🏆</div>
+                        <h3 class="text-2xl font-bold mb-2 text-center">Crear Desafío</h3>
+                        <p class="text-center opacity-90 mb-4">
+                            Crea un desafío personalizado y compártelo con código único
+                        </p>
+                        <div class="text-center">
+                            <div class="text-white font-bold text-lg">🎯 ¡Desafiar a Otros!</div>
                         </div>
                     </div>
                 </div>
@@ -264,7 +275,11 @@
                 console.error('Error cerrando sesión:', error);
             }
         };
-
+window.goToCreateChallenge = function() {
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('userId', currentUser.uid);
+            window.location.href = 'create-challenge.html';
+        };
         console.log('🎮 Dashboard cargado correctamente');
     </script>
 
