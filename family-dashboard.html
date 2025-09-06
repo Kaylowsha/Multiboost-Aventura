@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Familiar - MultiBoost</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .critical-table {
+            animation: pulse-red 2s infinite;
+            border: 2px solid #ef4444 !important;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- HEADER PRINCIPAL -->
+    <header class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 sticky top-0 z-50 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-2xl font-bold">⚡ MultiBoost Familiar</h1>
+                <span id="parent-name" class="text-lg opacity-80">Familia González</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="refreshDashboard()" class="px-4 py-2 bg-white bg-opacity-20 rounded-xl hover:bg-opacity-30 transition-all">
+                    🔄 Actualizar
+                </button>
+                <button onclick="logout()" class="px-4 py-2 bg-red-500 rounded-xl hover:bg-red-600 transition-all">
+                    🚪 Salir
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- RESUMEN GENERAL -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">👨‍👩‍👧‍👦 Progreso de tus Hijos</h2>
+            
+            <!-- ESTADÍSTICAS GENERALES -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl font-bold text-green-300" id="total-students">3</div>
+                    <div class="text-sm opacity-75">Estudiantes</div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-300" id="total-sessions">47</div>
+                    <div class="text-sm opacity-75">Sesiones Totales</div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl font-bold text-yellow-300" id="avg-progress">73%</div>
+                    <div class="text-sm opacity-75">Progreso Promedio</div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl font-bold text-red-300" id="critical-tables">5</div>
+                    <div class="text-sm opacity-75">Tablas Críticas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARDS DE ESTUDIANTES -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- CARD ESTUDIANTE 1 -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
+                            👧
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Sofia</h3>
+                            <p class="text-sm opacity-75">8 años - 3° Básico</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-300">85%</div>
+                </div>
+                
+                <!-- PROGRESO POR TABLAS -->
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-green-400">
+                            <div class="font-bold">Tabla 2</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-green-400 h-2 rounded" style="width: 95%"></div>
+                            </div>
+                            <div class="text-green-300">95%</div>
+                        </div>
+                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
+                            <div class="font-bold">Tabla 7</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-red-400 h-2 rounded" style="width: 35%"></div>
+                            </div>
+                            <div class="text-red-300">35% ⚠️</div>
+                        </div>
+                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
+                            <div class="font-bold">Tabla 8</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-yellow-400 h-2 rounded" style="width: 65%"></div>
+                            </div>
+                            <div class="text-yellow-300">65%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ACTIVIDADES PENDIENTES -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold">📋 Actividades:</span>
+                        <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">2 pendientes</span>
+                    </div>
+                </div>
+                
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="flex space-x-2">
+                    <button onclick="viewStudentDetails('sofia')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                        👁️ Ver Detalles
+                    </button>
+                    <button onclick="assignQuickActivity('sofia')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                        ⚡ Asignar
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARD ESTUDIANTE 2 -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-green-400 rounded-full flex items-center justify-center text-2xl">
+                            👦
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Diego</h3>
+                            <p class="text-sm opacity-75">10 años - 5° Básico</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-300">92%</div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-green-400">
+                            <div class="font-bold">Tabla 9</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-green-400 h-2 rounded" style="width: 98%"></div>
+                            </div>
+                            <div class="text-green-300">98%</div>
+                        </div>
+                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
+                            <div class="font-bold">Tabla 11</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-red-400 h-2 rounded" style="width: 45%"></div>
+                            </div>
+                            <div class="text-red-300">45% ⚠️</div>
+                        </div>
+                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
+                            <div class="font-bold">Tabla 12</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-yellow-400 h-2 rounded" style="width: 78%"></div>
+                            </div>
+                            <div class="text-yellow-300">78%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold">📋 Actividades:</span>
+                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">Al día</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="viewStudentDetails('diego')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                        👁️ Ver Detalles
+                    </button>
+                    <button onclick="assignQuickActivity('diego')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                        ⚡ Asignar
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARD ESTUDIANTE 3 -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center text-2xl">
+                            👧
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Emma</h3>
+                            <p class="text-sm opacity-75">6 años - 1° Básico</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-yellow-300">68%</div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <div class="bg-white bg-opacity-10 p-2 rounded border-2 border-yellow-400">
+                            <div class="font-bold">Tabla 2</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-yellow-400 h-2 rounded" style="width: 78%"></div>
+                            </div>
+                            <div class="text-yellow-300">78%</div>
+                        </div>
+                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
+                            <div class="font-bold">Tabla 4</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-red-400 h-2 rounded" style="width: 43%"></div>
+                            </div>
+                            <div class="text-red-300">43% ⚠️</div>
+                        </div>
+                        <div class="critical-table bg-white bg-opacity-10 p-2 rounded">
+                            <div class="font-bold">Tabla 5</div>
+                            <div class="w-full bg-gray-300 h-2 rounded">
+                                <div class="bg-red-400 h-2 rounded" style="width: 38%"></div>
+                            </div>
+                            <div class="text-red-300">38% ⚠️</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold">📋 Actividades:</span>
+                        <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">3 pendientes</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button onclick="viewStudentDetails('emma')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                        👁️ Ver Detalles
+                    </button>
+                    <button onclick="assignQuickActivity('emma')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                        ⚡ Asignar
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN FLOTANTE -->
+    <div id="notification" class="fixed top-4 right-4 bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-xl p-4 z-50 transform translate-x-full transition-all duration-300">
+        <div class="flex items-center space-x-3">
+            <div class="text-2xl" id="notification-icon">✅</div>
+            <div>
+                <div class="font-bold" id="notification-title">Actividad Asignada</div>
+                <div class="text-sm opacity-75" id="notification-message">Tabla 7 asignada a Sofia</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT BÁSICO -->
+    <script>
+        console.log('🚀 Family Dashboard cargado');
+
+        // Funciones básicas para testing
+        function viewStudentDetails(studentName) {
+            showNotification('👁️', 'Vista Detallada', `Abriendo detalles de ${studentName}`);
+            console.log('Ver detalles de:', studentName);
+        }
+
+        function assignQuickActivity(studentName) {
+            showNotification('⚡', 'Asignación Rápida', `Abriendo asignador para ${studentName}`);
+            console.log('Asignar actividad a:', studentName);
+        }
+
+        function refreshDashboard() {
+            showNotification('🔄', 'Actualizando...', 'Cargando datos más recientes');
+            setTimeout(() => {
+                showNotification('✅', 'Actualizado', 'Dashboard actualizado correctamente');
+            }, 1000);
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro que quieres cerrar sesión?')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function showNotification(icon, title, message) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notification-icon').textContent = icon;
+            document.getElementById('notification-title').textContent = title;
+            document.getElementById('notification-message').textContent = message;
+
+            notification.style.transform = 'translateX(0)';
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>
