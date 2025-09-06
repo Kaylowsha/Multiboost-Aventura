@@ -432,6 +432,310 @@
         </div>
     </div>
 
+    <!-- FIREBASE INTEGRATION -->
+    <script type="module">
+        // Importar Firebase (usando tu configuración existente)
+        import { auth, db } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        console.log('🔥 Cargando Firebase para Family Dashboard...');
+
+        // Variables globales para Firebase
+        let realStudentsData = [];
+        let isFirebaseReady = false;
+
+        // Función para cargar estudiantes reales
+        async function loadRealStudents() {
+            try {
+                console.log('📊 Cargando estudiantes reales de Firebase...');
+                
+                // Obtener todos los estudiantes
+                const studentsSnapshot = await getDocs(collection(db, 'students'));
+                const students = [];
+                
+                for (const docSnap of studentsSnapshot.docs) {
+                    const studentData = docSnap.data();
+                    const studentId = docSnap.id;
+                    
+                    // Obtener progreso del estudiante
+                    const progressDoc = await getDoc(doc(db, 'progress', studentId));
+                    const progressData = progressDoc.exists() ? progressDoc.data() : { tables: {}, totalSessions: 0 };
+                    
+                    // Calcular estadísticas
+                    const stats = calculateStudentStats(progressData);
+                    
+                    students.push({
+                        id: studentId,
+                        name: studentData.name,
+                        email: studentData.email,
+                        code: studentData.studentCode,
+                        createdAt: studentData.createdAt,
+                        progress: progressData,
+                        stats: stats
+                    });
+                }
+                
+                console.log(`✅ ${students.length} estudiantes cargados:`, students);
+                
+                // Actualizar la interfaz con datos reales
+                if (students.length > 0) {
+                    realStudentsData = students;
+                    isFirebaseReady = true;
+                    renderRealStudents(students);
+                    updateGeneralStats(students);
+                } else {
+                    console.log('ℹ️ No se encontraron estudiantes, usando datos de ejemplo');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error cargando estudiantes:', error);
+                console.log('ℹ️ Continuando con datos de ejemplo');
+            }
+        }
+
+        // Calcular estadísticas de un estudiante
+        function calculateStudentStats(progressData) {
+            const tables = progressData.tables || {};
+            let totalAccuracy = 0;
+            let tablesWithData = 0;
+            let criticalTables = 0;
+            
+            // Analizar cada tabla
+            for (let tableNum = 2; tableNum <= 13; tableNum++) {
+                const tableData = tables[tableNum];
+                if (tableData && tableData.sessions > 0) {
+                    totalAccuracy += tableData.accuracy || 0;
+                    tablesWithData++;
+                    
+                    if ((tableData.accuracy || 0) < 50) {
+                        criticalTables++;
+                    }
+                }
+            }
+            
+            const avgAccuracy = tablesWithData > 0 ? Math.round(totalAccuracy / tablesWithData) : 0;
+            
+            return {
+                totalSessions: progressData.totalSessions || 0,
+                avgAccuracy: avgAccuracy,
+                criticalTables: criticalTables,
+                tablesWithData: tablesWithData
+            };
+        }
+
+        // Renderizar estudiantes reales en la interfaz
+        function renderRealStudents(students) {
+            console.log('🎨 Renderizando estudiantes reales...');
+            
+            const container = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.gap-6.mb-8');
+            if (!container) {
+                console.error('❌ Contenedor de estudiantes no encontrado');
+                return;
+            }
+            
+            // Limpiar contenido actual
+            container.innerHTML = '';
+            
+            // Crear card para cada estudiante
+            students.forEach((student, index) => {
+                const studentCard = createStudentCard(student, index);
+                container.innerHTML += studentCard;
+            });
+            
+            console.log('✅ Estudiantes reales renderizados');
+        }
+
+        // Crear HTML de card de estudiante
+        function createStudentCard(student, index) {
+            const avatars = ['👧', '👦', '👧', '👦', '🧒']; // Avatares rotativos
+            const avatar = avatars[index % avatars.length];
+            
+            const accuracy = student.stats.avgAccuracy;
+            const accuracyColor = accuracy >= 80 ? 'text-green-300' : accuracy >= 60 ? 'text-yellow-300' : 'text-red-300';
+            
+            const pendingActivities = Math.floor(Math.random() * 4); // Simulado por ahora
+            const pendingColor = pendingActivities > 0 ? 'bg-red-500' : 'bg-green-500';
+            const pendingText = pendingActivities > 0 ? `${pendingActivities} pendientes` : 'Al día';
+            
+            // Obtener primeras 3 tablas para mostrar
+            const tablesToShow = getTopTablesForDisplay(student.progress.tables || {});
+            
+            return `
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-2xl">
+                                ${avatar}
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold">${student.name}</h3>
+                                <p class="text-sm opacity-75">${student.code}</p>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-bold ${accuracyColor}">${accuracy}%</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold mb-2">📊 Progreso por Tabla:</h4>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            ${tablesToShow.map(table => `
+                                <div class="${table.status === 'critical' ? 'critical-table' : table.status === 'warning' ? 'border-2 border-yellow-400' : 'border-2 border-green-400'} bg-white bg-opacity-10 p-2 rounded">
+                                    <div class="font-bold">Tabla ${table.number}</div>
+                                    <div class="w-full bg-gray-300 h-2 rounded">
+                                        <div class="bg-${table.status === 'critical' ? 'red' : table.status === 'warning' ? 'yellow' : 'green'}-400 h-2 rounded" style="width: ${table.accuracy}%"></div>
+                                    </div>
+                                    <div class="text-${table.status === 'critical' ? 'red' : table.status === 'warning' ? 'yellow' : 'green'}-300">
+                                        ${table.accuracy}%${table.status === 'critical' ? ' ⚠️' : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold">📋 Actividades:</span>
+                            <span class="${pendingColor} text-white px-2 py-1 rounded-full text-xs font-bold">${pendingText}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="viewRealStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                            👁️ Ver Detalles
+                        </button>
+                        <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                            ⚡ Asignar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Obtener las mejores/peores tablas para mostrar
+        function getTopTablesForDisplay(tables) {
+            const tableArray = [];
+            
+            for (let num = 2; num <= 13; num++) {
+                const tableData = tables[num];
+                if (tableData && tableData.sessions > 0) {
+                    const accuracy = tableData.accuracy || 0;
+                    let status = 'good';
+                    
+                    if (accuracy < 50) status = 'critical';
+                    else if (accuracy < 70) status = 'warning';
+                    
+                    tableArray.push({
+                        number: num,
+                        accuracy: accuracy,
+                        status: status
+                    });
+                }
+            }
+            
+            // Si no hay datos suficientes, crear algunos de ejemplo
+            if (tableArray.length < 3) {
+                for (let i = tableArray.length; i < 3; i++) {
+                    const num = i + 2;
+                    tableArray.push({
+                        number: num,
+                        accuracy: 0,
+                        status: 'critical'
+                    });
+                }
+            }
+            
+            // Ordenar por importancia (críticas primero) y tomar las primeras 3
+            tableArray.sort((a, b) => {
+                if (a.status === 'critical' && b.status !== 'critical') return -1;
+                if (b.status === 'critical' && a.status !== 'critical') return 1;
+                return b.accuracy - a.accuracy;
+            });
+            
+            return tableArray.slice(0, 3);
+        }
+
+        // Actualizar estadísticas generales
+        function updateGeneralStats(students) {
+            const totalStudents = students.length;
+            const totalSessions = students.reduce((sum, student) => sum + student.stats.totalSessions, 0);
+            const avgProgress = students.length > 0 ? Math.round(students.reduce((sum, student) => sum + student.stats.avgAccuracy, 0) / students.length) : 0;
+            const criticalTables = students.reduce((sum, student) => sum + student.stats.criticalTables, 0);
+
+            // Actualizar elementos en la interfaz
+            const elements = {
+                'total-students': totalStudents,
+                'total-sessions': totalSessions,
+                'avg-progress': avgProgress + '%',
+                'critical-tables': criticalTables
+            };
+
+            for (const [id, value] of Object.entries(elements)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+            
+            console.log('📊 Estadísticas generales actualizadas:', elements);
+        }
+
+        // Función para ver detalles de estudiante real
+        window.viewRealStudentDetails = function(studentId) {
+            console.log('🔍 Ver detalles de estudiante real:', studentId);
+            
+            const student = realStudentsData.find(s => s.id === studentId);
+            if (!student) {
+                console.error('❌ Estudiante no encontrado:', studentId);
+                return;
+            }
+            
+            // Usar la función existente pero con datos reales
+            const studentForModal = {
+                name: student.name,
+                age: 'N/A', // No tenemos edad en Firebase aún
+                grade: 'N/A', // No tenemos grado en Firebase aún
+                avatar: '👤',
+                stats: {
+                    correct: 'N/A', // Necesitaríamos calcular esto de sessions
+                    sessions: student.stats.totalSessions,
+                    time: 'N/A', // No lo tenemos calculado aún
+                    accuracy: student.stats.avgAccuracy
+                }
+            };
+            
+            // Actualizar datos globales temporalmente para el modal
+            const originalData = window.studentsData;
+            window.studentsData = { [studentId]: studentForModal };
+            
+            // Llamar a la función existente
+            viewStudentDetails(studentId);
+            
+            // Restaurar datos
+            window.studentsData = originalData;
+        };
+
+        // Inicializar cuando Firebase esté listo
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                console.log('👤 Usuario autenticado, cargando estudiantes...');
+                loadRealStudents();
+            } else {
+                console.log('ℹ️ No hay usuario autenticado, usando datos de ejemplo');
+            }
+        });
+
+        // También intentar cargar sin autenticación (para testing)
+        setTimeout(() => {
+            if (!isFirebaseReady) {
+                console.log('🔄 Intentando cargar estudiantes sin autenticación...');
+                loadRealStudents();
+            }
+        }, 2000);
+
+        console.log('✅ Firebase integration cargado');
+    </script>
+
     <!-- JAVASCRIPT CON DEBUG MEJORADO -->
     <script>
         console.log('🚀 Family Dashboard cargado - Versión COMPLETA');
