@@ -12,7 +12,7 @@
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { doc, setDoc, getDoc, updateDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    
+    import { doc, setDoc, getDoc, updateDoc, collection, addDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
     window.auth = auth;
     window.db = db;
     window.onAuthStateChanged = onAuthStateChanged;
@@ -22,7 +22,7 @@
     window.updateDoc = updateDoc;
     window.collection = collection;
     window.addDoc = addDoc;
-    
+    window.arrayUnion = arrayUnion;
     console.log('🔥 Firebase cargado para tablas.html');
 </script>
 </head>
