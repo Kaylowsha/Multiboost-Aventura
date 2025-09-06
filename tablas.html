@@ -58,6 +58,29 @@
     <div id="config-screen" class="screen">
         <div class="container">
             <h2>⚙️ Configura tu entrenamiento</h2>
+            <!-- CONFIGURACIÓN MODO PRÁCTICA ESPECÍFICA -->
+<div id="specific-practice-config" style="display: none;">
+    <div class="config-section">
+        <h3 id="specific-table-title">🎯 Practicando Tabla del 2</h3>
+        <p class="text-center" style="font-size: 1.1rem; margin-bottom: 30px; opacity: 0.9;">
+            Solo elige la cantidad de ejercicios para comenzar
+        </p>
+        
+        <div class="exercise-options">
+            <button class="exercise-btn active" data-count="10">10 ejercicios</button>
+            <button class="exercise-btn" data-count="20">20 ejercicios</button>
+            <button class="exercise-btn" data-count="30">30 ejercicios</button>
+            <button class="exercise-btn" data-count="40">40 ejercicios</button>
+        </div>
+    </div>
+
+    <button id="start-specific-training-btn" class="btn-primary">
+        💪 ¡INICIAR ENTRENAMIENTO!
+    </button>
+</div>
+
+<!-- CONFIGURACIÓN MODO NORMAL -->
+<div id="normal-config">
             
             <!-- Selección de tablas -->
             <div class="config-section">
@@ -95,9 +118,10 @@
                 </div>
             </div>
 
-            <button id="start-training-btn" class="btn-primary" disabled>
-                💪 ¡INICIAR ENTRENAMIENTO!
-            </button>
+        <button id="start-training-btn" class="btn-primary" disabled>
+    💪 ¡INICIAR ENTRENAMIENTO!
+</button>
+</div> <!-- Cierre de normal-config -->
         </div>
     </div>
 
