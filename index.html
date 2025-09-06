@@ -195,7 +195,14 @@
     console.log('Navegando a Modo Aventura');
     window.location.href = 'login.html';
         }
-        
+        function joinChallenge() {
+    const code = document.getElementById('challenge-code').value.trim().toUpperCase();
+    if (code && code.match(/^D\d{5}$/)) {
+        window.location.href = `challenge.html?code=${code}`;
+    } else {
+        alert('Código inválido. Formato correcto: D12345');
+    }
+}
         // Efecto visual al hacer hover
         document.querySelectorAll('.btn-card, .btn-card-secondary').forEach(card => {
             card.addEventListener('mouseenter', function() {
