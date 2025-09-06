@@ -1164,17 +1164,30 @@ MultiBoost.prototype.autoStartChallenge = function() {
         this.showScreen('welcome');
     }
 };
-// Guardar resultado del desafío
+// Guardar resultado del desafío - VERSIÓN CON DEBUG MEJORADO
 MultiBoost.prototype.saveChallengeResult = function() {
     var self = this;
     
     try {
-        if (!window.db || !window.doc || !window.updateDoc) {
-            console.log('Firebase no disponible para desafío');
+        // Verificar que estamos en modo desafío
+        if (!this.challengeMode || !this.challengeCode) {
+            console.log('❌ No estamos en modo desafío');
+            return;
+        }
+
+        // Verificar que Firebase esté disponible
+        if (!window.db || !window.doc || !window.updateDoc || !window.arrayUnion) {
+            console.log('❌ Firebase no disponible. Verificando...');
+            console.log('db:', !!window.db);
+            console.log('doc:', !!window.doc);
+            console.log('updateDoc:', !!window.updateDoc);
+            console.log('arrayUnion:', !!window.arrayUnion);
             return;
         }
 
         console.log('💾 Guardando resultado del desafío...');
+        console.log('🏆 Código del desafío:', this.challengeCode);
+        console.log('👤 Participante:', this.participantName);
 
         var totalExercises = this.stats.correct + this.stats.incorrect;
         var percentage = Math.round((this.stats.correct / totalExercises) * 100);
@@ -1184,25 +1197,33 @@ MultiBoost.prototype.saveChallengeResult = function() {
             name: this.participantName,
             score: percentage,
             time: finalTime,
-            type: this.participantType,
+            type: this.participantType || 'guest',
             timestamp: new Date().toISOString()
         };
+
+        console.log('📊 Datos a guardar:', resultData);
 
         // Actualizar el documento del desafío añadiendo el resultado
         window.updateDoc(window.doc(window.db, 'challenges', this.challengeCode), {
             results: window.arrayUnion(resultData)
         }).then(function() {
-            console.log('✅ Resultado del desafío guardado');
+            console.log('✅ Resultado del desafío guardado exitosamente');
+            console.log('🔄 Redirigiendo a ranking en 3 segundos...');
+            
             // Redirigir de vuelta al desafío para ver ranking actualizado
             setTimeout(function() {
                 window.location.href = 'challenge.html?code=' + self.challengeCode;
             }, 3000);
         }).catch(function(error) {
-            console.error('Error guardando resultado del desafío:', error);
+            console.error('❌ Error guardando resultado del desafío:', error);
+            console.error('Detalles del error:', error.message);
+            
+            // Si falla, al menos mostrar que completó el desafío
+            alert('Desafío completado, pero hubo un problema guardando el resultado. Código: ' + self.challengeCode);
         });
 
     } catch (error) {
-        console.error('Error en saveChallengeResult:', error);
+        console.error('❌ Error crítico en saveChallengeResult:', error);
     }
 };
 // Función para volver al inicio
