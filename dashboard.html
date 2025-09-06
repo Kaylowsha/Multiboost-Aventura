@@ -107,37 +107,23 @@
         </div>
     </div>
 
-    <!-- FIREBASE Y SCRIPTS -->
+   <!-- FIREBASE Y SCRIPTS -->
     <script type="module">
         import { auth, db } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Hacer disponibles globalmente
-        window.auth = auth;
-        window.db = db;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.signOut = signOut;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-
-        console.log('🎮 Dashboard cargado correctamente');
-    </script>
-
-    <script>
         let currentUser = null;
         let userProgress = null;
         let selectedTable = null;
 
         // Verificar autenticación
-        window.onAuthStateChanged(window.auth, async (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 await loadUserData();
                 showDashboard();
             } else {
-                // No autenticado, redirigir a login
                 window.location.href = 'login.html';
             }
         });
@@ -145,24 +131,23 @@
         // Cargar datos del usuario
         async function loadUserData() {
             try {
-                // Cargar perfil
-                const profileDoc = await window.getDoc(window.doc(window.db, 'students', currentUser.uid));
+                const profileDoc = await getDoc(doc(db, 'students', currentUser.uid));
                 if (profileDoc.exists()) {
                     const profileData = profileDoc.data();
                     document.getElementById('student-name').textContent = profileData.name;
                     document.getElementById('student-code').textContent = profileData.studentCode;
                 }
 
-                // Cargar progreso
-                const progressDoc = await window.getDoc(window.doc(window.db, 'progress', currentUser.uid));
+                const progressDoc = await getDoc(doc(db, 'progress', currentUser.uid));
                 if (progressDoc.exists()) {
                     userProgress = progressDoc.data();
                     document.getElementById('total-sessions').textContent = userProgress.totalSessions + ' sesiones';
                     renderProgressGrid();
                 } else {
                     console.log('No se encontró progreso, usando valores por defecto');
+                    userProgress = { tables: {}, totalSessions: 0 };
+                    renderProgressGrid();
                 }
-
             } catch (error) {
                 console.error('Error cargando datos del usuario:', error);
             }
@@ -184,7 +169,6 @@
                 const accuracy = Math.round(tableData.accuracy);
                 const sessions = tableData.sessions;
 
-                // Determinar color según precisión
                 let progressColor = 'bg-gray-400';
                 let stars = '⭐';
                 if (accuracy >= 90) {
@@ -232,52 +216,45 @@
             }
         }
 
-        // Abrir modal de práctica específica
-        function openPracticeModal(table) {
+        // Funciones globales
+        window.openPracticeModal = function(table) {
             selectedTable = table;
             document.getElementById('practice-table').textContent = table;
             document.getElementById('practice-modal').style.display = 'flex';
-        }
+        };
 
-        // Cerrar modal de práctica
-        function closePracticeModal() {
+        window.closePracticeModal = function() {
             document.getElementById('practice-modal').style.display = 'none';
             selectedTable = null;
-        }
+        };
 
-        // Iniciar práctica específica
-        function startPractice(exerciseCount) {
+        window.startPractice = function(exerciseCount) {
             if (!selectedTable) return;
             
-            // Guardar configuración en localStorage para tablas.html
             localStorage.setItem('adventureMode', 'true');
             localStorage.setItem('practiceTable', selectedTable.toString());
             localStorage.setItem('practiceExercises', exerciseCount.toString());
             localStorage.setItem('userId', currentUser.uid);
             
-            // Redirigir a tablas.html
             window.location.href = 'tablas.html';
-        }
+        };
 
-        // Ir a entrenamiento general de tablas
-        function goToTablas() {
+        window.goToTablas = function() {
             localStorage.setItem('adventureMode', 'true');
             localStorage.setItem('userId', currentUser.uid);
-            localStorage.removeItem('practiceTable'); // Modo general
+            localStorage.removeItem('practiceTable');
             window.location.href = 'tablas.html';
-        }
+        };
 
-        // Ir a multiplicación avanzada
-        function goToAvanzado() {
+        window.goToAvanzado = function() {
             localStorage.setItem('adventureMode', 'true');
             localStorage.setItem('userId', currentUser.uid);
             window.location.href = 'avanzado.html';
-        }
+        };
 
-        // Cerrar sesión
-        async function logout() {
+        window.logout = async function() {
             try {
-                await window.signOut(window.auth);
+                await signOut(auth);
                 localStorage.removeItem('adventureMode');
                 localStorage.removeItem('practiceTable');
                 localStorage.removeItem('practiceExercises');
@@ -286,15 +263,9 @@
             } catch (error) {
                 console.error('Error cerrando sesión:', error);
             }
-        }
+        };
 
-        // Hacer funciones globales
-        window.openPracticeModal = openPracticeModal;
-        window.closePracticeModal = closePracticeModal;
-        window.startPractice = startPractice;
-        window.goToTablas = goToTablas;
-        window.goToAvanzado = goToAvanzado;
-        window.logout = logout;
+        console.log('🎮 Dashboard cargado correctamente');
     </script>
 
 </body>
