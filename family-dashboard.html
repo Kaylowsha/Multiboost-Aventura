@@ -273,15 +273,84 @@
     <script>
         console.log('🚀 Family Dashboard cargado');
 
-        // Funciones básicas para testing
+        // Datos de ejemplo para testing
+        const studentsData = {
+            sofia: {
+                name: 'Sofia González',
+                age: 8,
+                grade: '3° Básico',
+                avatar: '👧',
+                stats: { correct: 156, sessions: 23, time: '4h 23m', accuracy: 85 }
+            },
+            diego: {
+                name: 'Diego González', 
+                age: 10,
+                grade: '5° Básico',
+                avatar: '👦',
+                stats: { correct: 203, sessions: 31, time: '6h 12m', accuracy: 92 }
+            },
+            emma: {
+                name: 'Emma González',
+                age: 6,
+                grade: '1° Básico', 
+                avatar: '👧',
+                stats: { correct: 89, sessions: 15, time: '2h 45m', accuracy: 68 }
+            }
+        };
+
+        // Funciones de los modales
         function viewStudentDetails(studentName) {
-            showNotification('👁️', 'Vista Detallada', `Abriendo detalles de ${studentName}`);
-            console.log('Ver detalles de:', studentName);
+            const student = studentsData[studentName];
+            if (!student) return;
+
+            // Actualizar información del modal
+            document.getElementById('modal-student-name').textContent = student.name;
+            document.getElementById('modal-student-info').textContent = `${student.age} años - ${student.grade}`;
+            document.getElementById('modal-avatar').textContent = student.avatar;
+            document.getElementById('modal-correct').textContent = student.stats.correct;
+            document.getElementById('modal-sessions').textContent = student.stats.sessions;
+            document.getElementById('modal-time').textContent = student.stats.time;
+            document.getElementById('modal-accuracy').textContent = student.stats.accuracy + '%';
+
+            // Mostrar modal
+            document.getElementById('student-detail-modal').style.display = 'flex';
+            
+            showNotification('👁️', 'Vista Detallada', `Mostrando detalles de ${student.name}`);
         }
 
         function assignQuickActivity(studentName) {
-            showNotification('⚡', 'Asignación Rápida', `Abriendo asignador para ${studentName}`);
-            console.log('Asignar actividad a:', studentName);
+            const student = studentsData[studentName];
+            if (!student) return;
+
+            document.getElementById('assign-student-name').textContent = `Para: ${student.name}`;
+            document.getElementById('quick-assign-modal').style.display = 'flex';
+            
+            showNotification('⚡', 'Asignación Rápida', `Abriendo asignador para ${student.name}`);
+        }
+
+        function assignSpecificTable(studentName, tableNumber) {
+            const student = studentsData[studentName];
+            if (!student) return;
+
+            showNotification('✅', 'Actividad Asignada', `Tabla ${tableNumber} asignada a ${student.name.split(' ')[0]}`);
+            
+            // Cerrar modales
+            closeStudentModal();
+            closeQuickAssignModal();
+            
+            console.log(`Tabla ${tableNumber} asignada a ${studentName}`);
+        }
+
+        function assignTable(studentName, tableNumber, priority) {
+            assignSpecificTable(studentName, tableNumber);
+        }
+
+        function closeStudentModal() {
+            document.getElementById('student-detail-modal').style.display = 'none';
+        }
+
+        function closeQuickAssignModal() {
+            document.getElementById('quick-assign-modal').style.display = 'none';
         }
 
         function refreshDashboard() {
@@ -309,6 +378,16 @@
                 notification.style.transform = 'translateX(100%)';
             }, 3000);
         }
+
+        // Cerrar modales al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'student-detail-modal') {
+                closeStudentModal();
+            }
+            if (e.target.id === 'quick-assign-modal') {
+                closeQuickAssignModal();
+            }
+        });
     </script>
 
 </body>
