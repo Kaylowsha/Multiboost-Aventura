@@ -15,7 +15,11 @@ function MultiBoost() {
     this.sessionStartTime = null;
     this.sessionTimer = null;
     this.lastCorrectPosition = -1;
-    
+    // Modo Aventura
+this.adventureMode = localStorage.getItem('adventureMode') === 'true';
+this.userId = localStorage.getItem('userId');
+this.practiceTable = localStorage.getItem('practiceTable');
+this.practiceExercises = localStorage.getItem('practiceExercises');
     // Estadísticas
     this.stats = {
         correct: 0,
@@ -275,7 +279,12 @@ MultiBoost.prototype.startTraining = function() {
         console.log('🚀 Iniciando entrenamiento...');
         console.log('📊 Tablas:', this.selectedTables);
         console.log('🎯 Ejercicios:', this.exerciseCount);
-
+// Configurar para práctica específica si viene del dashboard
+if (this.adventureMode && this.practiceTable && this.practiceExercises) {
+    this.selectedTables = [parseInt(this.practiceTable)];
+    this.exerciseCount = parseInt(this.practiceExercises);
+    console.log('🎯 Modo práctica específica: Tabla del ' + this.practiceTable + ' con ' + this.practiceExercises + ' ejercicios');
+}
         // LIMPIEZA AUTOMÁTICA ANTES DE EMPEZAR
         this.cleanupSession();
         
@@ -756,7 +765,14 @@ MultiBoost.prototype.showResults = function() {
         
         this.showMistakesReview();
         this.configureResultsButtons(percentage);
+       // Guardar en Firebase si está en Modo Aventura
+       if (this.adventureMode && this.userId) {
+       this.saveSessionToFirebase();
+}
+
         this.showScreen('results');
+
+
     } catch (error) {
         console.log('Error mostrando resultados:', error);
     }
@@ -911,10 +927,111 @@ MultiBoost.prototype.playIncorrectSound = function() {
 MultiBoost.prototype.playCelebrationSound = function() {
     console.log('🔊 ♪ Sonido: ¡Celebración!');
 };
+// Guardar sesión en Firebase
+MultiBoost.prototype.saveSessionToFirebase = function() {
+    var self = this;
+    
+    try {
+        if (!window.db || !window.doc || !window.setDoc) {
+            console.log('Firebase no disponible, modo público');
+            return;
+        }
+
+        console.log('💾 Guardando sesión en Firebase...');
+
+        var totalExercises = this.stats.correct + this.stats.incorrect;
+        var percentage = Math.round((this.stats.correct / totalExercises) * 100);
+        var finalTime = Math.floor((new Date().getTime() - this.sessionStartTime) / 1000);
+
+        // Datos de la sesión
+        var sessionData = {
+            date: new Date().toISOString(),
+            tables: this.selectedTables,
+            exerciseCount: this.exerciseCount,
+            correct: this.stats.correct,
+            incorrect: this.stats.incorrect,
+            percentage: percentage,
+            totalTime: finalTime,
+            mistakes: this.stats.mistakes,
+            practiceTable: this.practiceTable || null,
+            mode: this.practiceTable ? 'specific' : 'general'
+        };
+
+        // Generar ID único para la sesión
+        var sessionId = 'session_' + Date.now();
+
+        // Guardar sesión en Firestore
+        window.setDoc(window.doc(window.db, 'sessions', this.userId + '_' + sessionId), sessionData)
+            .then(function() {
+                console.log('✅ Sesión guardada exitosamente');
+                self.updateUserProgress(percentage);
+            })
+            .catch(function(error) {
+                console.error('Error guardando sesión:', error);
+            });
+
+    } catch (error) {
+        console.error('Error en saveSessionToFirebase:', error);
+    }
+};
+
+// Actualizar progreso del usuario
+MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
+    var self = this;
+    
+    try {
+        // Obtener progreso actual
+        window.getDoc(window.doc(window.db, 'progress', this.userId))
+            .then(function(docSnapshot) {
+                var currentProgress = docSnapshot.exists() ? docSnapshot.data() : {
+                    tables: {},
+                    totalSessions: 0
+                };
+
+                // Actualizar progreso por tabla
+                for (var i = 0; i < self.selectedTables.length; i++) {
+                    var table = self.selectedTables[i];
+                    
+                    if (!currentProgress.tables[table]) {
+                        currentProgress.tables[table] = { accuracy: 0, sessions: 0 };
+                    }
+
+                    var tableData = currentProgress.tables[table];
+                    var newAccuracy = Math.round(((tableData.accuracy * tableData.sessions) + sessionPercentage) / (tableData.sessions + 1));
+                    
+                    currentProgress.tables[table] = {
+                        accuracy: newAccuracy,
+                        sessions: tableData.sessions + 1
+                    };
+                }
+
+                // Actualizar sesiones totales
+                currentProgress.totalSessions = (currentProgress.totalSessions || 0) + 1;
+                currentProgress.lastUpdated = new Date().toISOString();
+
+                // Guardar progreso actualizado
+                return window.setDoc(window.doc(window.db, 'progress', self.userId), currentProgress);
+            })
+            .then(function() {
+                console.log('✅ Progreso actualizado exitosamente');
+            })
+            .catch(function(error) {
+                console.error('Error actualizando progreso:', error);
+            });
+
+    } catch (error) {
+        console.error('Error en updateUserProgress:', error);
+    }
+};
 // Función para volver al inicio
 window.goToHome = function() {
     console.log('Navegando al inicio desde tablas');
-    window.location.href = 'index.html';
+    // Si está en Modo Aventura, volver al dashboard
+    if (localStorage.getItem('adventureMode') === 'true') {
+        window.location.href = 'dashboard.html';
+    } else {
+        window.location.href = 'index.html';
+    }
 };
 
 // Inicializar MultiBoost
