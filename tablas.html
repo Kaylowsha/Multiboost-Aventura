@@ -7,24 +7,26 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
   
-    <!-- Firebase para Modo Aventura -->
-<script type="module" id="firebase-script" style="display: none;">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { doc, setDoc, getDoc, updateDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { doc, setDoc, getDoc, updateDoc, collection, addDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    window.auth = auth;
-    window.db = db;
-    window.onAuthStateChanged = onAuthStateChanged;
-    window.doc = doc;
-    window.setDoc = setDoc;
-    window.getDoc = getDoc;
-    window.updateDoc = updateDoc;
-    window.collection = collection;
-    window.addDoc = addDoc;
-    window.arrayUnion = arrayUnion;
-    console.log('🔥 Firebase cargado para tablas.html');
-</script>
+    <!-- Firebase para Modo Aventura - CORREGIDO -->
+    <script type="module" id="firebase-script" style="display: none;">
+        import { auth, db } from './firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { doc, setDoc, getDoc, updateDoc, collection, addDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Hacer disponibles globalmente
+        window.auth = auth;
+        window.db = db;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.arrayUnion = arrayUnion;  // ← FUNCIÓN CRÍTICA PARA DESAFÍOS
+        
+        console.log('🔥 Firebase cargado correctamente con arrayUnion para tablas.html');
+    </script>
 </head>
 <body>
     
