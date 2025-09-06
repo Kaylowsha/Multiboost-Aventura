@@ -43,10 +43,16 @@ MultiBoost.prototype.init = function() {
             console.log('🚀 MultiBoost iniciado correctamente');
         });
     } else {
-        this.bindEvents();
+    this.bindEvents();
+    
+    // Saltar directo a ejercicios si es práctica específica
+    if (this.adventureMode && this.practiceTable && this.practiceExercises) {
+        this.autoStartSpecificPractice();
+    } else {
         this.showScreen('welcome');
-        console.log('🚀 MultiBoost iniciado correctamente');
     }
+    console.log('🚀 MultiBoost iniciado correctamente');
+}
 };
 
 // Vincular eventos de los botones
@@ -1074,6 +1080,36 @@ MultiBoost.prototype.bindSpecificTrainingButton = function() {
         specificBtn.addEventListener('click', function() {
             self.startTraining();
         });
+    }
+};
+// Auto-iniciar práctica específica
+MultiBoost.prototype.autoStartSpecificPractice = function() {
+    try {
+        console.log('🚀 Auto-iniciando práctica específica para tabla del ' + this.practiceTable);
+        
+        // Configurar automáticamente
+        this.selectedTables = [parseInt(this.practiceTable)];
+        this.exerciseCount = parseInt(this.practiceExercises);
+        
+        // Limpiar sesión e inicializar
+        this.cleanupSession();
+        this.resetStats();
+        this.generateExercises();
+        
+        // Iniciar timers
+        this.sessionStartTime = new Date().getTime();
+        this.startSessionTimer();
+        
+        // Ir directo a ejercicios
+        this.currentExercise = 0;
+        this.showNextExercise();
+        this.showScreen('exercise');
+        
+        console.log('✅ Práctica específica iniciada automáticamente');
+    } catch (error) {
+        console.log('Error en auto-inicio:', error);
+        // Si falla, usar flujo normal
+        this.showScreen('welcome');
     }
 };
 // Función para volver al inicio
