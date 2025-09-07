@@ -258,26 +258,36 @@
             let totalAccuracy = 0;
             let tablesWithData = 0;
             let criticalTables = 0;
+            let totalSessions = 0;
+            
+            console.log('📊 Calculando estadísticas de:', tables);
             
             for (let tableNum = 2; tableNum <= 13; tableNum++) {
                 const tableData = tables[tableNum];
-                if (tableData && tableData.sessions > 0) {
-                    totalAccuracy += tableData.accuracy || 0;
+                if (tableData && typeof tableData.accuracy === 'number' && tableData.sessions > 0) {
+                    totalAccuracy += tableData.accuracy;
                     tablesWithData++;
+                    totalSessions += tableData.sessions;
                     
-                    if ((tableData.accuracy || 0) < 50) {
+                    if (tableData.accuracy < 50) {
                         criticalTables++;
                     }
+                    
+                    console.log(`📈 Tabla ${tableNum}: ${tableData.accuracy}% en ${tableData.sessions} sesiones`);
                 }
             }
             
             const avgAccuracy = tablesWithData > 0 ? Math.round(totalAccuracy / tablesWithData) : 0;
             
-            return {
-                totalSessions: progressData.totalSessions || 0,
+            const stats = {
+                totalSessions: totalSessions,
                 avgAccuracy: avgAccuracy,
-                criticalTables: criticalTables
+                criticalTables: criticalTables,
+                tablesWithData: tablesWithData
             };
+            
+            console.log('📊 Estadísticas calculadas:', stats);
+            return stats;
         }
 
         function renderStudents(students) {
