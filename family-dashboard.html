@@ -542,11 +542,16 @@
                         </div>
                     `;
                     actionButtons = `
-                        <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                            👁️ Ver Detalles
-                        </button>
-                        <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                            ⚡ Asignar
+                        <div class="flex space-x-2 mb-2">
+                            <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                                👁️ Ver Detalles
+                            </button>
+                            <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                                ⚡ Asignar
+                            </button>
+                        </div>
+                        <button onclick="confirmRemoveStudent('${student.id}', '${student.name}')" class="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded-xl font-bold text-sm transition-all">
+                            🗑️ Dejar de Seguir
                         </button>
                     `;
                 } else {
@@ -559,11 +564,16 @@
                         </div>
                     `;
                     actionButtons = `
-                        <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded-xl font-bold text-sm transition-all">
-                            👁️ Ver Perfil
-                        </button>
-                        <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-green-500 hover:bg-green-600 rounded-xl font-bold text-sm transition-all">
-                            🎯 Primera Tarea
+                        <div class="flex space-x-2 mb-2">
+                            <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded-xl font-bold text-sm transition-all">
+                                👁️ Ver Perfil
+                            </button>
+                            <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-green-500 hover:bg-green-600 rounded-xl font-bold text-sm transition-all">
+                                🎯 Primera Tarea
+                            </button>
+                        </div>
+                        <button onclick="confirmRemoveStudent('${student.id}', '${student.name}')" class="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded-xl font-bold text-sm transition-all">
+                            🗑️ Dejar de Seguir
                         </button>
                     `;
                 }
@@ -827,73 +837,89 @@ function showEmptyState() {
             showNotification('⚡', 'Asignación', `Abriendo asignador para ${student.name}`);
         };
 
-        window.assignTable = async function(tableNumber) {
-            if (!currentStudentForModal) {
-                console.error('❌ No hay estudiante seleccionado');
-                return;
-            }
+       // 🗑️ FUNCIÓN: Confirmar eliminación de estudiante
+        window.confirmRemoveStudent = function(studentId, studentName) {
+            console.log('🗑️ Solicitando confirmación para eliminar:', studentName);
             
-            console.log(`🎯 Asignando tabla ${tableNumber} a ${currentStudentForModal.name}`);
+            // Crear modal de confirmación dinámico
+            const confirmationModal = `
+                <div id="remove-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 max-w-md w-full text-center">
+                        <div class="text-6xl mb-4">⚠️</div>
+                        <h2 class="text-2xl font-bold mb-4">¿Dejar de seguir a ${studentName}?</h2>
+                        <p class="text-lg opacity-80 mb-6">
+                            Esta acción eliminará a <strong>${studentName}</strong> de tu dashboard familiar.
+                        </p>
+                        <div class="bg-white bg-opacity-10 rounded-xl p-4 mb-6">
+                            <p class="text-sm opacity-75">
+                                ⚠️ <strong>Importante:</strong> Esto NO borra al estudiante ni su progreso. 
+                                Solo deja de aparecer en tu seguimiento familiar.
+                            </p>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button onclick="closeRemoveModal()" class="flex-1 py-3 px-6 bg-gray-500 hover:bg-gray-600 rounded-xl font-bold text-white">
+                                ❌ Cancelar
+                            </button>
+                            <button onclick="executeRemoveStudent('${studentId}', '${studentName}')" class="flex-1 py-3 px-6 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-white">
+                                🗑️ Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Agregar modal al DOM
+            document.body.insertAdjacentHTML('beforeend', confirmationModal);
+        };
+
+        // 🗑️ FUNCIÓN: Ejecutar eliminación
+        window.executeRemoveStudent = async function(studentId, studentName) {
+            console.log('🗑️ Ejecutando eliminación de:', studentName);
             
             try {
-                // Determinar prioridad basada en el progreso actual
-                const tableData = currentStudentForModal.progress?.tables?.[tableNumber];
-                let priority = 'normal';
-                if (!tableData || tableData.sessions === 0) {
-                    priority = 'high'; // Nueva tabla
-                } else if (tableData.accuracy < 50) {
-                    priority = 'urgent'; // Tabla crítica
-                } else if (tableData.accuracy < 80) {
-                    priority = 'high'; // Necesita mejora
+                const familyId = 'family_demo';
+                const linkId = `${familyId}_${studentId}`;
+                
+                // Mostrar loading en el botón
+                const confirmBtn = document.querySelector('#remove-confirmation-modal button[onclick*="executeRemoveStudent"]');
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = '⏳ Eliminando...';
                 }
                 
-                // Crear datos de la asignación
-                const assignmentData = {
-                    studentId: currentStudentForModal.id,
-                    studentName: currentStudentForModal.name,
-                    assignedBy: 'family_dashboard',
-                    table: tableNumber,
-                    exercises: 20, // Por defecto 20 ejercicios
-                    priority: priority,
-                    status: 'pending',
-                    createdAt: new Date().toISOString(),
-                    description: `Practicar tabla del ${tableNumber}`,
-                    completedAt: null
-                };
+                // Eliminar vínculo de Firebase
+                await deleteDoc(doc(db, 'family_links', linkId));
+                console.log('✅ Vínculo eliminado de Firebase:', linkId);
                 
-                // Generar ID único para la asignación
-                const assignmentId = 'assignment_' + Date.now() + '_' + tableNumber;
-                
-                // Guardar en Firebase
-                await setDoc(doc(db, 'assigned_activities', assignmentId), assignmentData);
-                
-                console.log('✅ Asignación guardada en Firebase:', assignmentId);
-                
-                // Determinar emoji y mensaje según prioridad
-                let emoji = '✅';
-                let priorityText = 'Normal';
-                if (priority === 'urgent') {
-                    emoji = '🚨';
-                    priorityText = 'URGENTE';
-                } else if (priority === 'high') {
-                    emoji = '⚡';
-                    priorityText = 'Alta';
-                }
+                // Cerrar modal
+                closeRemoveModal();
                 
                 // Mostrar notificación de éxito
-                showNotification(
-                    emoji,
-                    'Actividad Asignada',
-                    `Tabla ${tableNumber} asignada a ${currentStudentForModal.name} (Prioridad: ${priorityText})`
-                );
+                showNotification('✅', 'Estudiante Eliminado', `${studentName} ya no aparece en tu seguimiento`);
                 
-                // Cerrar modal de asignación
-                window.closeStudentModal();
-                window.closeQuickAssignModal();
+                // Recargar lista de estudiantes
+                setTimeout(() => {
+                    loadRealStudents();
+                }, 1500);
                 
             } catch (error) {
-                console.error('❌ Error guardando asignación:', error);
-                showNotification('❌', 'Error', 'Error asignando actividad. Intenta de nuevo.');
+                console.error('❌ Error eliminando estudiante:', error);
+                showNotification('❌', 'Error', 'No se pudo eliminar el estudiante. Intenta de nuevo.');
+                
+                // Restaurar botón
+                const confirmBtn = document.querySelector('#remove-confirmation-modal button[onclick*="executeRemoveStudent"]');
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = '🗑️ Confirmar';
+                }
+            }
+        };
+
+        // 🗑️ FUNCIÓN: Cerrar modal de confirmación
+        window.closeRemoveModal = function() {
+            const modal = document.getElementById('remove-confirmation-modal');
+            if (modal) {
+                modal.remove();
             }
         };
 
