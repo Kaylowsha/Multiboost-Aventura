@@ -219,7 +219,7 @@
     </div>
 
     <!-- Firebase SDKs -->
-    <!-- Firebase SDKs -->
+    
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { 
@@ -303,7 +303,55 @@
 
     <script>
         console.log('👨‍👩‍👧‍👦 Family Login - Página cargada');
+// AGREGAR ESTA FUNCIÓN AL INICIO DE LA SECCIÓN JAVASCRIPT EN family-login.html
+function createFamilySession(user, familyData) {
+    const sessionData = {
+        uid: user.uid,
+        email: user.email,
+        familyName: familyData.familyName,
+        emailVerified: familyData.emailVerified,
+        authMethod: familyData.authMethod,
+        isFamilyAccount: true,
+        loginTime: Date.now()
+    };
+    
+    localStorage.setItem('multiboost_family_session', JSON.stringify(sessionData));
+    console.log('✅ Sesión familiar guardada en localStorage');
+}
 
+// MODIFICAR LA FUNCIÓN createFamilyFromGoogle - AGREGAR ESTAS LÍNEAS ANTES DE LA REDIRECCIÓN:
+// ...código existente...
+await setDoc(doc(db, 'families', user.uid), familyData);
+
+// ⭐ AGREGAR ESTAS LÍNEAS:
+createFamilySession(user, familyData);
+
+console.log('✅ Familia creada exitosamente en Firestore');
+// ...resto del código...
+
+// MODIFICAR LA FUNCIÓN registerFamilyManually - AGREGAR ESTAS LÍNEAS ANTES DE LA REDIRECCIÓN:
+// ...código existente...
+await setDoc(doc(db, 'families', user.uid), familyData);
+
+// ⭐ AGREGAR ESTAS LÍNEAS:
+createFamilySession(user, familyData);
+
+console.log('✅ Familia registrada exitosamente');
+// ...resto del código...
+
+// MODIFICAR LA FUNCIÓN loginFamilyManually - AGREGAR ESTAS LÍNEAS ANTES DE LA REDIRECCIÓN:
+// ...código existente...
+if (!familyDoc.exists()) {
+    showFamilyMessage('❌ Cuenta no encontrada como familia. ¿Eres estudiante?', 'error');
+    return;
+}
+
+// ⭐ AGREGAR ESTAS LÍNEAS:
+const familyData = familyDoc.data();
+createFamilySession(user, familyData);
+
+showFamilyMessage('🎉 ¡Bienvenido! Redirigiendo...', 'success');
+// ...resto del código...
         // Funciones de UI
         function showTab(tabName) {
             const loginTab = document.getElementById('login-tab');
@@ -394,6 +442,7 @@
                 };
                 
                 await setDoc(doc(db, 'families', user.uid), familyData);
+                createFamilySession(user, familyData);
                 
                 console.log('✅ Familia creada exitosamente en Firestore');
                 showFamilyMessage('🎉 ¡Cuenta familiar creada! Redirigiendo a dashboard...', 'success');
@@ -454,6 +503,7 @@
                 };
                 
                 await setDoc(doc(db, 'families', user.uid), familyData);
+                createFamilySession(user, familyData);
                 
                 console.log('✅ Familia registrada exitosamente');
                 showFamilyMessage('🎉 ¡Cuenta familiar creada exitosamente! Redirigiendo...', 'success');
@@ -505,7 +555,8 @@
                     showFamilyMessage('❌ Cuenta no encontrada como familia. ¿Eres estudiante?', 'error');
                     return;
                 }
-                
+                const familyData = familyDoc.data();
+createFamilySession(user, familyData);
                 showFamilyMessage('🎉 ¡Bienvenido! Redirigiendo...', 'success');
                 
                 setTimeout(() => {
