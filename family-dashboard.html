@@ -491,6 +491,9 @@ function renderDetailedTables(progressData) {
                         <div class="${colorClass} h-2 rounded-full" style="width: ${accuracy}%"></div>
                     </div>
                     <div class="font-bold">${accuracy}%</div>
+                    <button onclick="assignTableDirect(${tableNum})" class="mt-2 px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-white text-sm font-bold">
+    ⚡ Asignar
+</button>
                 </div>
             `;
         } else {
@@ -565,6 +568,11 @@ function renderDetailedTables(progressData) {
             description: `Practicar tabla del ${tableNumber}`,
             completedAt: null
         };
+// FUNCIÓN AUXILIAR PARA ASIGNACIÓN DIRECTA DESDE TABLAS
+window.assignTableDirect = function(tableNumber) {
+    assignTable(tableNumber);
+};
+
         
         // Generar ID único para la asignación
         const assignmentId = 'assignment_' + Date.now() + '_' + tableNumber;
@@ -593,7 +601,7 @@ function renderDetailedTables(progressData) {
         );
         
         // Cerrar modal de asignación
-        closeQuickAssignModal();
+        closeStudentModal();
         
     } catch (error) {
         console.error('❌ Error guardando asignación:', error);
@@ -620,7 +628,7 @@ function renderDetailedTables(progressData) {
                 closeStudentModal();
             }
             if (e.target.id === 'quick-assign-modal') {
-                closeQuickAssignModal();
+                closeStudentModal();
             }
         });
 
