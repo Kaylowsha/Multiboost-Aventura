@@ -12,6 +12,18 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
+        
+        .google-btn {
+            background: white;
+            color: #757575;
+            border: 1px solid #dadce0;
+            transition: all 0.3s ease;
+        }
+        
+        .google-btn:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body class="text-white">
@@ -25,49 +37,81 @@
             <h2 class="text-2xl mb-2 text-yellow-300">🏃‍♂️ MODO AVENTURA</h2>
             <p class="text-lg mb-8 opacity-90">Registra tu progreso y mejora día a día</p>
 
-            <!-- PESTAÑAS -->
-            <div class="flex mb-6">
-                <button onclick="showLogin()" id="login-tab" class="flex-1 py-3 px-4 rounded-l-xl bg-white bg-opacity-30 font-bold">
-                    Iniciar Sesión
-                </button>
-                <button onclick="showRegister()" id="register-tab" class="flex-1 py-3 px-4 rounded-r-xl bg-white bg-opacity-10 font-bold">
-                    Registrarse
-                </button>
-            </div>
+            <!-- MÉTODOS DE AUTENTICACIÓN -->
+            <div class="space-y-6">
+                
+                <!-- LOGIN CON GOOGLE (PRINCIPAL) -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold mb-4">🚀 Acceso Rápido</h3>
+                    
+                    <button onclick="loginWithGoogle()" id="google-login-btn" 
+                            class="google-btn w-full py-4 px-6 rounded-2xl text-lg font-bold flex items-center justify-center space-x-3 hover:shadow-lg transition-all">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span>Continuar con Google</span>
+                    </button>
+                    
+                    <p class="text-sm opacity-75">
+                        ✅ Sin contraseñas • ✅ Inicio rápido • ✅ Totalmente seguro
+                    </p>
+                </div>
 
-            <!-- FORMULARIO LOGIN -->
-            <div id="login-form" class="space-y-4">
-                <h3 class="text-xl font-bold mb-4">Bienvenido de vuelta</h3>
-                
-                <input type="email" id="login-email" placeholder="Tu email" 
-                       class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
-                
-                <input type="password" id="login-password" placeholder="Tu contraseña" 
-                       class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
-                
-                <button onclick="loginUser()" id="login-btn" 
-                        class="w-full py-4 px-6 rounded-2xl text-xl font-bold text-white shadow-lg bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600">
-                    🚀 Entrar a Mi Aventura
-                </button>
-            </div>
+                <!-- SEPARADOR -->
+                <div class="flex items-center my-6">
+                    <div class="flex-1 border-t border-white border-opacity-30"></div>
+                    <span class="px-4 text-sm opacity-60">o</span>
+                    <div class="flex-1 border-t border-white border-opacity-30"></div>
+                </div>
 
-            <!-- FORMULARIO REGISTRO -->
-            <div id="register-form" class="space-y-4" style="display: none;">
-                <h3 class="text-xl font-bold mb-4">Comienza tu aventura</h3>
-                
-                <input type="text" id="register-name" placeholder="Tu nombre" 
-                       class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
-                
-                <input type="email" id="register-email" placeholder="Tu email" 
-                       class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
-                
-                <input type="password" id="register-password" placeholder="Crea una contraseña" 
-                       class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
-                
-                <button onclick="registerUser()" id="register-btn"
-                        class="w-full py-4 px-6 rounded-2xl text-xl font-bold text-white shadow-lg bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600">
-                    ✨ Crear Mi Aventura
-                </button>
+                <!-- REGISTRO MANUAL (SECUNDARIO) -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold mb-4">📝 Registro Manual</h3>
+                    
+                    <div id="manual-form" class="space-y-3">
+                        <input type="text" id="manual-name" placeholder="Tu nombre completo" 
+                               class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
+                        
+                        <input type="email" id="manual-email" placeholder="Tu email" 
+                               class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
+                        
+                        <input type="password" id="manual-password" placeholder="Crear contraseña (min 6 caracteres)" 
+                               class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
+                        
+                        <button onclick="registerManually()" id="manual-register-btn"
+                                class="w-full py-3 px-6 rounded-2xl text-lg font-bold text-white shadow-lg bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600">
+                            ✨ Crear Cuenta Manual
+                        </button>
+                    </div>
+
+                    <!-- LOGIN MANUAL -->
+                    <div class="text-center mt-4">
+                        <button onclick="showManualLogin()" id="show-login-btn" class="text-yellow-300 underline font-bold">
+                            ¿Ya tienes cuenta manual? Inicia sesión
+                        </button>
+                    </div>
+
+                    <!-- FORMULARIO LOGIN MANUAL (OCULTO) -->
+                    <div id="manual-login-form" class="space-y-3" style="display: none;">
+                        <input type="email" id="login-email" placeholder="Tu email" 
+                               class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
+                        
+                        <input type="password" id="login-password" placeholder="Tu contraseña" 
+                               class="w-full px-4 py-3 rounded-xl bg-white bg-opacity-90 text-black font-bold placeholder-gray-500">
+                        
+                        <button onclick="loginManually()" id="manual-login-btn"
+                                class="w-full py-3 px-6 rounded-2xl text-lg font-bold text-white shadow-lg bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600">
+                            🚀 Entrar a Mi Aventura
+                        </button>
+                        
+                        <button onclick="showManualRegister()" class="text-yellow-300 underline font-bold">
+                            ← Volver al registro
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- MENSAJES -->
@@ -81,14 +125,14 @@
         </div>
     </div>
 
-    <!-- FIREBASE Y SCRIPTS -->
-   <script type="module">
+    <!-- FIREBASE SCRIPTS -->
+    <script type="module">
         import { auth, db } from './firebase-config.js';
         import { 
             createUserWithEmailAndPassword, 
             signInWithEmailAndPassword,
-            sendEmailVerification,
-            reload
+            GoogleAuthProvider,
+            signInWithPopup
         } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
@@ -97,38 +141,261 @@
         window.db = db;
         window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
         window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.sendEmailVerification = sendEmailVerification;
-        window.reload = reload;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signInWithPopup = signInWithPopup;
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
 
-        console.log('🔥 Modo Aventura cargado correctamente');
+        console.log('🔥 Modo Aventura con Google Auth cargado');
     </script>
 
     <script>
-        // Cambiar entre pestañas
-        function showLogin() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('login-tab').classList.add('bg-white', 'bg-opacity-30');
-            document.getElementById('login-tab').classList.remove('bg-opacity-10');
-            document.getElementById('register-tab').classList.add('bg-opacity-10');
-            document.getElementById('register-tab').classList.remove('bg-white', 'bg-opacity-30');
-            hideMessage();
+        // === GOOGLE AUTH ===
+        async function loginWithGoogle() {
+            console.log('🚀 Iniciando login con Google...');
+            
+            const googleBtn = document.getElementById('google-login-btn');
+            googleBtn.disabled = true;
+            googleBtn.innerHTML = `
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                <span>Conectando con Google...</span>
+            `;
+
+            try {
+                const provider = new window.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                const result = await window.signInWithPopup(window.auth, provider);
+                const user = result.user;
+                
+                console.log('✅ Login exitoso con Google:', user.uid);
+                console.log('📧 Email:', user.email);
+                console.log('👤 Nombre:', user.displayName);
+                
+                // Verificar si ya existe el estudiante
+                const studentDoc = await window.getDoc(window.doc(window.db, 'students', user.uid));
+                
+                if (!studentDoc.exists()) {
+                    // Crear nuevo estudiante
+                    await createStudentFromGoogle(user);
+                } else {
+                    console.log('✅ Estudiante existente encontrado');
+                }
+                
+                showMessage(`¡Bienvenido ${user.displayName}! Redirigiendo...`, 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Error con Google Auth:', error);
+                
+                let errorMessage = 'Error conectando con Google';
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Login cancelado por el usuario';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Popup bloqueado. Permite popups e intenta de nuevo';
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+            
+            // Restaurar botón
+            googleBtn.disabled = false;
+            googleBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Continuar con Google</span>
+            `;
         }
 
-        function showRegister() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
-            document.getElementById('register-tab').classList.add('bg-white', 'bg-opacity-30');
-            document.getElementById('register-tab').classList.remove('bg-opacity-10');
-            document.getElementById('login-tab').classList.add('bg-opacity-10');
-            document.getElementById('login-tab').classList.remove('bg-white', 'bg-opacity-30');
-            hideMessage();
+        // Crear estudiante desde Google
+        async function createStudentFromGoogle(user) {
+            console.log('📝 Creando nuevo estudiante desde Google...');
+            
+            const studentCode = generateStudentCode();
+            
+            // Crear perfil en Firestore
+            await window.setDoc(window.doc(window.db, 'students', user.uid), {
+                name: user.displayName,
+                email: user.email,
+                studentCode: studentCode,
+                createdAt: new Date().toISOString(),
+                emailVerified: true, // Google ya verifica emails
+                authMethod: 'google',
+                photoURL: user.photoURL || null
+            });
+
+            // Inicializar progreso
+            await window.setDoc(window.doc(window.db, 'progress', user.uid), {
+                tables: {
+                    2: { accuracy: 0, sessions: 0 },
+                    3: { accuracy: 0, sessions: 0 },
+                    4: { accuracy: 0, sessions: 0 },
+                    5: { accuracy: 0, sessions: 0 },
+                    6: { accuracy: 0, sessions: 0 },
+                    7: { accuracy: 0, sessions: 0 },
+                    8: { accuracy: 0, sessions: 0 },
+                    9: { accuracy: 0, sessions: 0 },
+                    10: { accuracy: 0, sessions: 0 },
+                    11: { accuracy: 0, sessions: 0 },
+                    12: { accuracy: 0, sessions: 0 },
+                    13: { accuracy: 0, sessions: 0 }
+                },
+                totalSessions: 0,
+                lastUpdated: new Date().toISOString()
+            });
+            
+            console.log(`✅ Estudiante creado: ${user.displayName} (${studentCode})`);
         }
 
-        // Mostrar mensajes
+        // === REGISTRO MANUAL ===
+        async function registerManually() {
+            const name = document.getElementById('manual-name').value.trim();
+            const email = document.getElementById('manual-email').value.trim();
+            const password = document.getElementById('manual-password').value;
+
+            if (!name || !email || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            document.getElementById('manual-register-btn').disabled = true;
+            document.getElementById('manual-register-btn').textContent = 'Creando cuenta...';
+
+            try {
+                const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
+                const user = userCredential.user;
+
+                const studentCode = generateStudentCode();
+
+                await window.setDoc(window.doc(window.db, 'students', user.uid), {
+                    name: name,
+                    email: email,
+                    studentCode: studentCode,
+                    createdAt: new Date().toISOString(),
+                    emailVerified: true, // Sin verificación por ahora
+                    authMethod: 'manual'
+                });
+
+                await window.setDoc(window.doc(window.db, 'progress', user.uid), {
+                    tables: {
+                        2: { accuracy: 0, sessions: 0 },
+                        3: { accuracy: 0, sessions: 0 },
+                        4: { accuracy: 0, sessions: 0 },
+                        5: { accuracy: 0, sessions: 0 },
+                        6: { accuracy: 0, sessions: 0 },
+                        7: { accuracy: 0, sessions: 0 },
+                        8: { accuracy: 0, sessions: 0 },
+                        9: { accuracy: 0, sessions: 0 },
+                        10: { accuracy: 0, sessions: 0 },
+                        11: { accuracy: 0, sessions: 0 },
+                        12: { accuracy: 0, sessions: 0 },
+                        13: { accuracy: 0, sessions: 0 }
+                    },
+                    totalSessions: 0,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                showMessage(`¡Bienvenido ${name}! Tu código es: ${studentCode}. Redirigiendo...`, 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error registrando manualmente:', error);
+                let errorMessage = 'Error creando la cuenta';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Este email ya está registrado';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Email inválido';
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+
+            document.getElementById('manual-register-btn').disabled = false;
+            document.getElementById('manual-register-btn').textContent = '✨ Crear Cuenta Manual';
+        }
+
+        // === LOGIN MANUAL ===
+        async function loginManually() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            document.getElementById('manual-login-btn').disabled = true;
+            document.getElementById('manual-login-btn').textContent = 'Entrando...';
+
+            try {
+                const userCredential = await window.signInWithEmailAndPassword(window.auth, email, password);
+                const user = userCredential.user;
+
+                showMessage('¡Bienvenido de vuelta! Redirigiendo...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error en login manual:', error);
+                let errorMessage = 'Error iniciando sesión';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Usuario no encontrado';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Contraseña incorrecta';
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+
+            document.getElementById('manual-login-btn').disabled = false;
+            document.getElementById('manual-login-btn').textContent = '🚀 Entrar a Mi Aventura';
+        }
+
+        // === NAVEGACIÓN ENTRE FORMULARIOS ===
+        function showManualLogin() {
+            document.getElementById('manual-form').style.display = 'none';
+            document.getElementById('show-login-btn').style.display = 'none';
+            document.getElementById('manual-login-form').style.display = 'block';
+        }
+
+        function showManualRegister() {
+            document.getElementById('manual-form').style.display = 'block';
+            document.getElementById('show-login-btn').style.display = 'block';
+            document.getElementById('manual-login-form').style.display = 'none';
+        }
+
+        // === UTILIDADES ===
+        function generateStudentCode() {
+            const prefix = 'EST_';
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = prefix;
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
@@ -141,309 +408,19 @@
             }
         }
 
-        function hideMessage() {
-            document.getElementById('message').style.display = 'none';
-        }
-
-        // Generar código único de estudiante
-        function generateStudentCode() {
-            const prefix = 'EST_';
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = prefix;
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        }
-
-      // REEMPLAZAR LA FUNCIÓN registerUser EN login.html (línea ~95)
-async function registerUser() {
-    const name = document.getElementById('register-name').value.trim();
-    const email = document.getElementById('register-email').value.trim();
-    const password = document.getElementById('register-password').value;
-
-    if (!name || !email || !password) {
-        showMessage('Por favor completa todos los campos', 'error');
-        return;
-    }
-
-    if (password.length < 6) {
-        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
-        return;
-    }
-
-    document.getElementById('register-btn').disabled = true;
-    document.getElementById('register-btn').textContent = 'Creando cuenta...';
-
-    try {
-        // Crear usuario en Firebase Auth
-        const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
-        const user = userCredential.user;
-
-        // 🆕 ENVIAR EMAIL DE VERIFICACIÓN
-        await window.sendEmailVerification(user);
-        console.log('📧 Email de verificación enviado a:', email);
-
-        // Generar código único
-        const studentCode = generateStudentCode();
-
-        // Crear perfil en Firestore (PERO marcado como no verificado)
-        await window.setDoc(window.doc(window.db, 'students', user.uid), {
-            name: name,
-            email: email,
-            studentCode: studentCode,
-            createdAt: new Date().toISOString(),
-            emailVerified: false, // 🆕 CAMPO NUEVO
-            parentId: null
-        });
-
-        // Inicializar progreso
-        await window.setDoc(window.doc(window.db, 'progress', user.uid), {
-            tables: {
-                2: { accuracy: 0, sessions: 0 },
-                3: { accuracy: 0, sessions: 0 },
-                4: { accuracy: 0, sessions: 0 },
-                5: { accuracy: 0, sessions: 0 },
-                6: { accuracy: 0, sessions: 0 },
-                7: { accuracy: 0, sessions: 0 },
-                8: { accuracy: 0, sessions: 0 },
-                9: { accuracy: 0, sessions: 0 },
-                10: { accuracy: 0, sessions: 0 },
-                11: { accuracy: 0, sessions: 0 },
-                12: { accuracy: 0, sessions: 0 },
-                13: { accuracy: 0, sessions: 0 }
-            },
-            totalSessions: 0,
-            lastUpdated: new Date().toISOString()
-        });
-
-        // 🆕 MOSTRAR MENSAJE DE VERIFICACIÓN EN LUGAR DE REDIRIGIR
-        showMessage(`¡Cuenta creada! Hemos enviado un email de verificación a ${email}. Revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.`, 'success');
-        
-        // 🆕 CAMBIAR A PANTALLA DE VERIFICACIÓN
-        showEmailVerificationScreen(email);
-
-    } catch (error) {
-        console.error('Error registrando usuario:', error);
-        let errorMessage = 'Error creando la cuenta. Intenta de nuevo.';
-        
-        if (error.code === 'auth/email-already-in-use') {
-            errorMessage = 'Este email ya está registrado. Usa el Login.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = 'Email inválido. Verifica el formato.';
-        }
-        
-        showMessage(errorMessage, 'error');
-    }
-
-    document.getElementById('register-btn').disabled = false;
-    document.getElementById('register-btn').textContent = '✨ Crear Mi Aventura';
-}
-       // REEMPLAZAR LA FUNCIÓN loginUser EN login.html (línea ~140)
-async function loginUser() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    if (!email || !password) {
-        showMessage('Por favor completa todos los campos', 'error');
-        return;
-    }
-
-    document.getElementById('login-btn').disabled = true;
-    document.getElementById('login-btn').textContent = 'Entrando...';
-
-    try {
-        const userCredential = await window.signInWithEmailAndPassword(window.auth, email, password);
-        const user = userCredential.user;
-
-        // 🆕 VERIFICAR QUE EL EMAIL ESTÉ VERIFICADO
-        if (!user.emailVerified) {
-            console.log('❌ Email no verificado para:', email);
-            
-            // Ofrecer reenviar verificación
-            showMessage('Tu email aún no está verificado. Revisa tu bandeja de entrada o reenvía el email de verificación.', 'error');
-            
-            // Mostrar pantalla de verificación
-            showEmailVerificationScreen(email);
-            return;
-        }
-
-        console.log('✅ Email verificado - permitiendo acceso');
-        showMessage('¡Bienvenido de vuelta! Redirigiendo...', 'success');
-        
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 1500);
-
-    } catch (error) {
-        console.error('Error en login:', error);
-        let errorMessage = 'Error iniciando sesión. Verifica tus datos.';
-        
-        if (error.code === 'auth/user-not-found') {
-            errorMessage = 'Usuario no encontrado. ¿Necesitas registrarte?';
-        } else if (error.code === 'auth/wrong-password') {
-            errorMessage = 'Contraseña incorrecta. Intenta de nuevo.';
-        } else if (error.code === 'auth/invalid-email') {
-            errorMessage = 'Email inválido. Verifica el formato.';
-        }
-        
-        showMessage(errorMessage, 'error');
-    }
-
-    document.getElementById('login-btn').disabled = false;
-    document.getElementById('login-btn').textContent = '🚀 Entrar a Mi Aventura';
-}
-        // Volver al inicio
         function goToHome() {
             window.location.href = 'index.html';
         }
 
         // Hacer funciones globales
-        window.showLogin = showLogin;
-        window.showRegister = showRegister;
-        window.registerUser = registerUser;
-        window.loginUser = loginUser;
+        window.loginWithGoogle = loginWithGoogle;
+        window.registerManually = registerManually;
+        window.loginManually = loginManually;
+        window.showManualLogin = showManualLogin;
+        window.showManualRegister = showManualRegister;
         window.goToHome = goToHome;
-// 🆕 FUNCIONES DE VERIFICACIÓN DE EMAIL - AGREGAR AL FINAL DEL SCRIPT
 
-        // Mostrar pantalla de verificación
-        function showEmailVerificationScreen(email) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('email-verification-screen').style.display = 'flex';
-            document.getElementById('verification-email').textContent = email;
-        }
-
-        // Volver al login
-        function backToLogin() {
-            document.getElementById('email-verification-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            hideMessage();
-        }
-
-        // Reenviar email de verificación
-        async function resendVerificationEmail() {
-            const resendBtn = document.getElementById('resend-btn');
-            resendBtn.disabled = true;
-            resendBtn.textContent = '📤 Enviando...';
-
-            try {
-                const user = window.auth.currentUser;
-                if (user) {
-                    await window.sendEmailVerification(user);
-                    showVerificationMessage('Email de verificación reenviado. Revisa tu bandeja de entrada.', 'success');
-                } else {
-                    showVerificationMessage('Error: Usuario no encontrado. Intenta registrarte de nuevo.', 'error');
-                }
-            } catch (error) {
-                console.error('Error reenviando email:', error);
-                showVerificationMessage('Error enviando email. Intenta de nuevo.', 'error');
-            }
-
-            setTimeout(() => {
-                resendBtn.disabled = false;
-                resendBtn.textContent = '📤 Reenviar Email';
-            }, 5000); // Cooldown de 5 segundos
-        }
-
-        // Verificar estado de verificación
-        async function checkVerificationStatus() {
-            const checkBtn = document.getElementById('check-btn');
-            checkBtn.disabled = true;
-            checkBtn.textContent = '🔍 Verificando...';
-
-            try {
-                const user = window.auth.currentUser;
-                if (user) {
-                    // Recargar los datos del usuario para obtener estado actualizado
-                    await window.reload(user);
-                    
-                    if (user.emailVerified) {
-                        showVerificationMessage('¡Email verificado exitosamente! Redirigiendo...', 'success');
-                        
-                        setTimeout(() => {
-                            window.location.href = 'dashboard.html';
-                        }, 2000);
-                    } else {
-                        showVerificationMessage('Email aún no verificado. Revisa tu bandeja de entrada y haz clic en el enlace.', 'error');
-                    }
-                } else {
-                    showVerificationMessage('Error: Usuario no encontrado. Vuelve al login.', 'error');
-                }
-            } catch (error) {
-                console.error('Error verificando estado:', error);
-                showVerificationMessage('Error verificando estado. Intenta de nuevo.', 'error');
-            }
-
-            checkBtn.disabled = false;
-            checkBtn.textContent = '✅ Ya Verifiqué - Entrar';
-        }
-
-        // Mostrar mensajes en pantalla de verificación
-        function showVerificationMessage(text, type) {
-            const messageEl = document.getElementById('verification-message');
-            messageEl.textContent = text;
-            messageEl.style.display = 'block';
-            
-            if (type === 'success') {
-                messageEl.className = 'mt-4 p-3 rounded-lg bg-green-500 bg-opacity-80 text-white font-bold';
-            } else {
-                messageEl.className = 'mt-4 p-3 rounded-lg bg-red-500 bg-opacity-80 text-white font-bold';
-            }
-        }
-
-        // Hacer funciones globales
-        window.showEmailVerificationScreen = showEmailVerificationScreen;
-        window.backToLogin = backToLogin;
-        window.resendVerificationEmail = resendVerificationEmail;
-        window.checkVerificationStatus = checkVerificationStatus;
-        window.showVerificationMessage = showVerificationMessage;
-
+        console.log('✅ Login con Google Auth completamente cargado');
     </script>
-<!-- PANTALLA DE VERIFICACIÓN DE EMAIL - AGREGAR ANTES DE </body> -->
-    <div id="email-verification-screen" class="min-h-screen flex items-center justify-center p-4" style="display: none;">
-        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 text-center max-w-md w-full">
-            
-            <!-- HEADER -->
-            <div class="text-6xl mb-4">📧</div>
-            <h2 class="text-3xl font-bold mb-4">Verifica tu Email</h2>
-            <p class="text-lg mb-6 opacity-90">
-                Hemos enviado un enlace de verificación a: 
-                <br><strong id="verification-email">tu@email.com</strong>
-            </p>
-
-            <!-- INSTRUCCIONES -->
-            <div class="bg-white bg-opacity-20 rounded-xl p-4 mb-6 text-left">
-                <div class="text-sm font-bold mb-2">📋 Pasos a seguir:</div>
-                <div class="text-sm space-y-1">
-                    <div>1. Revisa tu bandeja de entrada</div>
-                    <div>2. Busca el email de "MultiBoost"</div>
-                    <div>3. Haz clic en "Verificar Email"</div>
-                    <div>4. Regresa aquí e inicia sesión</div>
-                </div>
-            </div>
-
-            <!-- BOTONES -->
-            <div class="space-y-4">
-                <button onclick="resendVerificationEmail()" id="resend-btn"
-                        class="w-full py-3 px-6 rounded-2xl text-lg font-bold text-white bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600">
-                    📤 Reenviar Email
-                </button>
-                
-                <button onclick="checkVerificationStatus()" id="check-btn"
-                        class="w-full py-3 px-6 rounded-2xl text-lg font-bold text-white bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600">
-                    ✅ Ya Verifiqué - Entrar
-                </button>
-                
-                <button onclick="backToLogin()" 
-                        class="w-full py-3 px-6 rounded-2xl text-lg font-bold text-white bg-white bg-opacity-20 hover:bg-opacity-30">
-                    ← Volver al Login
-                </button>
-            </div>
-
-            <!-- MENSAJE -->
-            <div id="verification-message" class="mt-4 p-3 rounded-lg" style="display: none;"></div>
-
-        </div>
-    </div>
 </body>
 </html>
