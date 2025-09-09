@@ -457,7 +457,53 @@ const familyId = session.uid; // ← USAR UID REAL
                 console.error('❌ No hay estudiante seleccionado para asignación directa');
             }
         };
-
+           // 🎯 FUNCIÓN PRINCIPAL: Asignar tabla específica a estudiante
+window.assignTable = async function(tableNumber) {
+    console.log('🎯 Asignando tabla', tableNumber, 'al estudiante:', currentStudentForModal?.name);
+    
+    if (!currentStudentForModal) {
+        console.error('❌ No hay estudiante seleccionado');
+        showNotification('❌', 'Error', 'No hay estudiante seleccionado');
+        return;
+    }
+    
+    try {
+        // Obtener datos de la familia
+        const familySession = localStorage.getItem('multiboost_family_session');
+        const session = JSON.parse(familySession);
+        const familyId = session.uid;
+        
+        // Crear la actividad asignada
+        const activityData = {
+            familyId: familyId,
+            studentId: currentStudentForModal.id,
+            studentName: currentStudentForModal.name,
+            tableNumber: tableNumber,
+            assignedAt: new Date().toISOString(),
+            status: 'pending',
+            assignedBy: session.email
+        };
+        
+        // Generar ID único para la actividad
+        const activityId = `${familyId}_${currentStudentForModal.id}_table${tableNumber}_${Date.now()}`;
+        
+        // Guardar en Firebase
+        await setDoc(doc(db, 'assigned_activities', activityId), activityData);
+        
+        console.log('✅ Actividad asignada correctamente:', activityId);
+        
+        // Mostrar notificación de éxito
+        showNotification('✅', 'Tabla Asignada', `Tabla ${tableNumber} asignada a ${currentStudentForModal.name}`);
+        
+        // Cerrar modales
+        closeQuickAssignModal();
+        closeStudentModal();
+        
+    } catch (error) {
+        console.error('❌ Error asignando tabla:', error);
+        showNotification('❌', 'Error', 'No se pudo asignar la tabla');
+    }
+};
         // Definir funciones de cierre de modales en scope global
         window.closeStudentModal = function() {
             document.getElementById('student-detail-modal').style.display = 'none';
