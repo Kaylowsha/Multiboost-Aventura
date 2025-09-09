@@ -236,12 +236,119 @@
     <!-- FIREBASE Y JAVASCRIPT - SOLO ARREGLO DEL ERROR -->
     <script type="module">
         import { auth, db } from './firebase-config.js';
-        import { collection, getDocs, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { collection, getDocs, doc, getDoc, setDoc, query, where, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         console.log('🚀 Dashboard Familiar - VERSIÓN LIMPIA');
 
         let realStudentsData = [];
         let currentStudentForModal = null;
+
+        // 🔥 NUEVA FUNCIÓN: Agregar estudiante por código
+        window.addStudentByCode = async function() {
+            const codeInput = document.getElementById('student-code-input');
+            const addBtn = document.getElementById('add-student-btn');
+            const studentCode = codeInput.value.trim().toUpperCase();
+
+            if (!studentCode) {
+                showNotification('⚠️', 'Error', 'Por favor ingresa un código de estudiante');
+                return;
+            }
+
+            if (!studentCode.startsWith('EST_') || studentCode.length !== 10) {
+                showNotification('❌', 'Código Inválido', 'El código debe tener formato EST_ABC123');
+                return;
+            }
+
+            // Deshabilitar botón durante búsqueda
+            addBtn.disabled = true;
+            addBtn.textContent = '🔍 Buscando...';
+
+            try {
+                console.log('🔍 Buscando estudiante con código:', studentCode);
+
+                // Buscar estudiante por código
+                const studentsRef = collection(db, 'students');
+                const q = query(studentsRef, where('studentCode', '==', studentCode));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showNotification('❌', 'No Encontrado', 'No existe un estudiante con ese código');
+                    resetAddButton();
+                    return;
+                }
+
+                const studentDoc = querySnapshot.docs[0];
+                const studentData = studentDoc.data();
+                const studentId = studentDoc.id;
+
+                console.log('✅ Estudiante encontrado:', studentData.name);
+
+                // Verificar si ya está vinculado
+                const isAlreadyLinked = realStudentsData.some(s => s.id === studentId);
+                if (isAlreadyLinked) {
+                    showNotification('⚠️', 'Ya Vinculado', 'Este estudiante ya está en tu dashboard');
+                    resetAddButton();
+                    return;
+                }
+
+                // Crear vínculo en Firebase (opcional: guardar relación familia-estudiante)
+                // Por ahora solo lo agregamos a la lista local y recargamos
+
+                showNotification('✅', 'Estudiante Agregado', `${studentData.name} vinculado exitosamente`);
+                
+                // Limpiar input
+                codeInput.value = '';
+                resetAddButton();
+
+                // Recargar estudiantes para mostrar el nuevo
+                setTimeout(() => {
+                    loadRealStudents();
+                }, 1500);
+
+            } catch (error) {
+                console.error('❌ Error buscando estudiante:', error);
+                showNotification('❌', 'Error', 'Error conectando con la base de datos');
+                resetAddButton();
+            }
+        };
+
+        // 🔧 FUNCIÓN AUXILIAR: Resetear botón
+        function resetAddButton() {
+            const addBtn = document.getElementById('add-student-btn');
+            addBtn.disabled = false;
+            addBtn.textContent = '➕ Agregar Estudiante';
+        }
+
+        // 🔧 FUNCIÓN: Formatear input automáticamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const codeInput = document.getElementById('student-code-input');
+            if (codeInput) {
+                codeInput.addEventListener('input', function(e) {
+                    let value = e.target.value.toUpperCase();
+                    
+                    // Auto-agregar prefijo EST_ si no está
+                    if (value.length > 0 && !value.startsWith('EST_')) {
+                        if (value.length <= 6) { // EST_ + hasta 6 caracteres
+                            value = 'EST_' + value;
+                        }
+                    }
+                    
+                    // Limitar longitud
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+                    
+                    e.target.value = value;
+                });
+
+                // Permitir envío con Enter
+                codeInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        window.addStudentByCode();
+                    }
+                });
+            }
+        });
 
         // ✅ FIX CRÍTICO: Definir assignTableDirect en scope global AL INICIO
         window.assignTableDirect = function(tableNumber) {
@@ -263,20 +370,35 @@
             document.getElementById('quick-assign-modal').style.display = 'none';
         };
 
-        // Cargar estudiantes reales
-        async function loadRealStudents() {
+       async function loadRealStudents() {
             try {
                 console.log('📊 Cargando estudiantes de Firebase...');
                 
                 const studentsSnapshot = await getDocs(collection(db, 'students'));
                 const students = [];
                 
+                // 🔧 FILTRO: Solo mostrar estudiantes que ya han usado la app
                 for (const docSnap of studentsSnapshot.docs) {
                     const studentData = docSnap.data();
                     const studentId = docSnap.id;
                     
+                    // Verificar que el estudiante tenga datos de progreso
                     const progressDoc = await getDoc(doc(db, 'progress', studentId));
-                    const progressData = progressDoc.exists() ? progressDoc.data() : { tables: {}, totalSessions: 0 };
+                    if (!progressDoc.exists()) {
+                        console.log(`⏭️ Saltando ${studentData.name} - Sin datos de progreso`);
+                        continue; // Saltar estudiantes sin datos
+                    }
+                    
+                    const progressData = progressDoc.data();
+                    
+                    // Solo incluir si tiene al menos una sesión
+                    const hasAnySessions = progressData.tables && 
+                        Object.values(progressData.tables).some(table => table.sessions > 0);
+                    
+                    if (!hasAnySessions) {
+                        console.log(`⏭️ Saltando ${studentData.name} - Sin sesiones practicadas`);
+                        continue;
+                    }
                     
                     const stats = calculateStudentStats(progressData);
                     
@@ -287,6 +409,8 @@
                         progress: progressData,
                         stats: stats
                     });
+                    
+                    console.log(`✅ Incluido: ${studentData.name} (${stats.totalSessions} sesiones)`);
                 }
                 
                 if (students.length > 0) {
@@ -294,9 +418,10 @@
                     renderStudents(students);
                     updateStats(students);
                     showDashboard();
-                    console.log('✅ Estudiantes cargados y mostrados');
+                    console.log(`✅ ${students.length} estudiantes cargados y mostrados`);
                 } else {
-                    showError();
+                    console.log('ℹ️ No hay estudiantes con datos para mostrar');
+                    showEmptyState();
                 }
                 
             } catch (error) {
@@ -413,7 +538,38 @@
             document.getElementById('loading-section').style.display = 'none';
             document.getElementById('error-section').style.display = 'block';
         }
-
+function showEmptyState() {
+            document.getElementById('loading-section').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+            
+            // Mostrar mensaje en el contenedor de estudiantes
+            const container = document.getElementById('students-container');
+            container.innerHTML = `
+                <div class="col-span-full text-center py-16">
+                    <div class="text-6xl mb-4">👨‍👩‍👧‍👦</div>
+                    <h3 class="text-2xl font-bold mb-4">¡Bienvenido al Dashboard Familiar!</h3>
+                    <p class="text-lg opacity-75 mb-8">
+                        Aún no tienes estudiantes vinculados.<br>
+                        Usa el código de tu hijo/a para agregarlo y hacer seguimiento de su progreso.
+                    </p>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 max-w-md mx-auto">
+                        <h4 class="text-lg font-bold mb-3">📝 ¿Cómo obtener el código?</h4>
+                        <div class="text-sm opacity-90 space-y-2 text-left">
+                            <div>1. Tu hijo debe jugar Modo Aventura primero</div>
+                            <div>2. Al crear su perfil, recibirá un código EST_ABC123</div>
+                            <div>3. Usa ese código aquí arriba para vincularlo</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Actualizar estadísticas con ceros
+            document.getElementById('total-students').textContent = '0';
+            document.getElementById('total-sessions').textContent = '0';
+            document.getElementById('avg-progress').textContent = '0%';
+            document.getElementById('critical-tables').textContent = '0';
+        }
+        
         window.viewStudentDetails = async function(studentId) {
             console.log('🔍 Cargando detalles REALES del estudiante:', studentId);
             
