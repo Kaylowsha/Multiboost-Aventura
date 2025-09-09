@@ -13,12 +13,6 @@
             min-height: 100vh;
         }
         
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
         .btn-card {
             background: linear-gradient(135deg, #ff6b6b, #feca57);
             transition: all 0.3s ease;
@@ -40,16 +34,18 @@
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
+        
         .btn-card-family {
-    background: linear-gradient(135deg, #10b981, #059669);
-    transition: all 0.3s ease;
-    transform: translateY(0);
-       }
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
 
-         .btn-card-family:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
-           }
+        .btn-card-family:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
+        }
+        
         .floating-emoji {
             animation: float 3s ease-in-out infinite;
         }
@@ -68,7 +64,7 @@
         }
         
         @media (max-width: 768px) {
-            .btn-card, .btn-card-secondary {
+            .btn-card, .btn-card-secondary, .btn-card-family {
                 margin-bottom: 20px;
             }
         }
@@ -174,9 +170,9 @@
                         <div class="text-sm opacity-80 mb-2">Características:</div>
                         <div class="text-sm space-y-1">
                             <div>✓ Elige la o las tablas que quieras practicar</div>
-                             <div>✓ Selecciona la cantidad de ejercicios</div>
+                            <div>✓ Selecciona la cantidad de ejercicios</div>
                             <div>✓ Opción múltiple</div>
-                            <div>✓ Timer de 30 segundos</div>
+                            <div>✓ Timer de 10 segundos</div>
                         </div>
                     </div>
                     <div class="text-white font-bold text-lg">
@@ -204,26 +200,27 @@
                         🔥 ¡Desafío Matemático Avanzado!
                     </div>
                 </div>
+                
                 <!-- Opción 3: Seguimiento Parental -->
-<div onclick="openFamilyLogin()" class="btn-card-family rounded-3xl p-8 cursor-pointer border border-white border-opacity-20">
-    <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
-    <h2 class="text-3xl font-bold mb-4 text-white">Seguimiento Parental</h2>
-    <p class="text-lg mb-6 opacity-90">
-        Dashboard familiar para seguir el progreso y asignar tareas a tus hijos
-    </p>
-    <div class="bg-white bg-opacity-20 rounded-2xl p-4 mb-6">
-        <div class="text-sm opacity-80 mb-2">Características:</div>
-        <div class="text-sm space-y-1">
-            <div>✓ Ver progreso de todos los hijos</div>
-            <div>✓ Asignar tareas personalizadas</div>
-            <div>✓ Reportes de rendimiento</div>
-            <div>✓ Control total familiar</div>
-        </div>
-    </div>
-    <div class="text-white font-bold text-lg">
-        👨‍👩‍👧‍👦 ¡Acceder al Dashboard Familiar!
-    </div>
-</div>
+                <div onclick="openFamilyLogin()" class="btn-card-family rounded-3xl p-8 cursor-pointer border border-white border-opacity-20">
+                    <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
+                    <h2 class="text-3xl font-bold mb-4 text-white">Seguimiento Parental</h2>
+                    <p class="text-lg mb-6 opacity-90">
+                        Dashboard familiar para seguir el progreso y asignar tareas a tus hijos
+                    </p>
+                    <div class="bg-white bg-opacity-20 rounded-2xl p-4 mb-6">
+                        <div class="text-sm opacity-80 mb-2">Características:</div>
+                        <div class="text-sm space-y-1">
+                            <div>✓ Ver progreso de todos los hijos</div>
+                            <div>✓ Asignar tareas personalizadas</div>
+                            <div>✓ Reportes de rendimiento</div>
+                            <div>✓ Control total familiar</div>
+                        </div>
+                    </div>
+                    <div class="text-white font-bold text-lg">
+                        👨‍👩‍👧‍👦 ¡Acceder al Dashboard Familiar!
+                    </div>
+                </div>
             </div>
             
             <!-- Footer info -->
@@ -236,9 +233,128 @@
         </div>
     </div>
     
+    <!-- MODAL DE LOGIN/REGISTRO FAMILIAR -->
+    <div id="family-login-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-auto">
+            <!-- Header del Modal -->
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">👨‍👩‍👧‍👦 Acceso Familiar</h2>
+                <p class="text-gray-600" id="modal-subtitle">Inicia sesión para acceder al dashboard</p>
+            </div>
+
+            <!-- PESTAÑAS -->
+            <div class="flex mb-6">
+                <button onclick="showFamilyLogin()" id="family-login-tab" class="flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold">
+                    Iniciar Sesión
+                </button>
+                <button onclick="showFamilyRegister()" id="family-register-tab" class="flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold">
+                    Registrarse
+                </button>
+            </div>
+
+            <!-- FORMULARIO DE LOGIN -->
+            <form id="family-login-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
+                    <input type="email" id="family-email" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="familia@ejemplo.com"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">🔒 Contraseña:</label>
+                    <input type="password" id="family-password" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="Tu contraseña familiar"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <!-- Mensaje de Error -->
+                <div id="login-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+                    <span id="error-message">Error de autenticación</span>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex flex-col space-y-3 pt-4">
+                    <button type="submit" id="login-btn" 
+                            class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all">
+                        🚀 Acceder al Dashboard
+                    </button>
+                    
+                    <button type="button" onclick="closeFamilyLogin()" 
+                            class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </form>
+
+            <!-- FORMULARIO DE REGISTRO -->
+            <form id="family-register-form" class="space-y-4" style="display: none;">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">👨‍👩‍👧‍👦 Nombre de la Familia:</label>
+                    <input type="text" id="family-name" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="Familia García"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
+                    <input type="email" id="register-family-email" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="familia@ejemplo.com"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">🔒 Crear Contraseña:</label>
+                    <input type="password" id="register-family-password" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="Mínimo 6 caracteres"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">🔒 Confirmar Contraseña:</label>
+                    <input type="password" id="confirm-family-password" required 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                           placeholder="Repite la contraseña"
+                           style="color: #1f2937 !important; background-color: white !important;">
+                </div>
+
+                <!-- Mensaje de Error -->
+                <div id="register-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+                    <span id="register-error-message">Error en el registro</span>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex flex-col space-y-3 pt-4">
+                    <button type="submit" id="register-btn" 
+                            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all">
+                        ✨ Crear Cuenta Familiar
+                    </button>
+                    
+                    <button type="button" onclick="closeFamilyLogin()" 
+                            class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading Spinner -->
+            <div id="login-loading" class="hidden text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <p class="text-gray-600 mt-2">Procesando...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
     <script>
         console.log('🏠 MultiBoost - Página Principal Cargada');
         
+        // === NAVEGACIÓN PRINCIPAL ===
         function goToTablas() {
             console.log('Navegando a Tablas de Multiplicar');
             window.location.href = 'tablas.html';
@@ -254,7 +370,7 @@
             window.location.href = 'login.html';
         }
         
-        // FUNCIÓN PARA UNIRSE A DESAFÍO
+        // === DESAFÍOS ===
         function joinChallenge() {
             const code = document.getElementById('challenge-code').value.trim().toUpperCase();
             
@@ -272,656 +388,433 @@
             window.location.href = `challenge.html?code=${code}`;
         }
         
-        // Convertir automáticamente a mayúsculas mientras escribe
+        // === SISTEMA DE LOGIN FAMILIAR ===
+        
+        // Abrir/Cerrar modal
+        function openFamilyLogin() {
+            console.log('🔐 Abriendo modal de login/registro familiar');
+            const modal = document.getElementById('family-login-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Limpiar todos los campos
+            document.getElementById('family-email').value = '';
+            document.getElementById('family-password').value = '';
+            document.getElementById('family-name').value = '';
+            document.getElementById('register-family-email').value = '';
+            document.getElementById('register-family-password').value = '';
+            document.getElementById('confirm-family-password').value = '';
+            
+            // Ocultar errores y loading
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('register-error').classList.add('hidden');
+            document.getElementById('login-loading').classList.add('hidden');
+            
+            // Mostrar login por defecto
+            showFamilyLogin();
+        }
+
+        function closeFamilyLogin() {
+            console.log('❌ Cerrando modal de login familiar');
+            const modal = document.getElementById('family-login-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        
+        // Cambiar entre pestañas
+        function showFamilyLogin() {
+            document.getElementById('family-login-form').style.display = 'block';
+            document.getElementById('family-register-form').style.display = 'none';
+            
+            document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold';
+            document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold';
+            
+            document.getElementById('modal-subtitle').textContent = 'Inicia sesión para acceder al dashboard';
+            
+            // Limpiar errores
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('register-error').classList.add('hidden');
+        }
+
+        function showFamilyRegister() {
+            document.getElementById('family-login-form').style.display = 'none';
+            document.getElementById('family-register-form').style.display = 'block';
+            
+            document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-gray-300 text-gray-700 font-bold';
+            document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-purple-500 text-white font-bold';
+            
+            document.getElementById('modal-subtitle').textContent = 'Crea una nueva cuenta familiar';
+            
+            // Limpiar errores
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('register-error').classList.add('hidden');
+        }
+        
+        // === FIREBASE FUNCTIONS ===
+        
+        // Cargar Firebase de forma segura
+        async function loadFirebaseIfNeeded() {
+            try {
+                if (window.firebase && window.firebase.auth && window.firebase.firestore) {
+                    console.log('🔥 Firebase ya está cargado');
+                    return;
+                }
+                
+                console.log('📦 Cargando Firebase desde CDN...');
+                
+                await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+                await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js');
+                await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js');
+                
+                if (!window.firebase) {
+                    throw new Error('Firebase no se cargó correctamente');
+                }
+                
+                if (firebase.apps.length === 0) {
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyAcEfiepMniuaDnI9Ze-h7S-KAwGltJnEA",
+                        authDomain: "multiboost-aventura.firebaseapp.com",
+                        projectId: "multiboost-aventura",
+                        storageBucket: "multiboost-aventura.firebasestorage.app",
+                        messagingSenderId: "277366007404",
+                        appId: "1:277366007404:web:68d582b212e76d066d9a49"
+                    };
+                    
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('✅ Firebase inicializado');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error cargando Firebase:', error);
+                throw new Error('No se pudo cargar Firebase: ' + error.message);
+            }
+        }
+        
+        // Cargar script dinámicamente
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Login con Firebase Auth
+        async function handleFamilyLogin() {
+            console.log('🚀 Iniciando login familiar con Firebase');
+            
+            const email = document.getElementById('family-email').value.trim().toLowerCase();
+            const password = document.getElementById('family-password').value;
+            const loginBtn = document.getElementById('login-btn');
+            const loadingDiv = document.getElementById('login-loading');
+            const errorDiv = document.getElementById('login-error');
+            
+            // Validaciones
+            if (!email || !password) {
+                showLoginError('Por favor completa todos los campos');
+                return;
+            }
+            
+            if (!email.includes('@') || !email.includes('.')) {
+                showLoginError('Por favor ingresa un email válido');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showLoginError('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            // Loading
+            loginBtn.style.display = 'none';
+            loadingDiv.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            
+            try {
+                await loadFirebaseIfNeeded();
+                
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ Login exitoso:', user.uid);
+                
+                // Verificar/crear familia
+                const familyDoc = await firebase.firestore()
+                    .collection('families')
+                    .where('email', '==', email)
+                    .get();
+                
+                if (familyDoc.empty) {
+                    await createFamilyForUser(user.uid, email);
+                }
+                
+                // Guardar sesión
+                const familySession = {
+                    uid: user.uid,
+                    email: email,
+                    familyName: email.split('@')[0],
+                    loginTime: Date.now(),
+                    isAuthenticated: true,
+                    isFamilyAccount: true
+                };
+                
+                localStorage.setItem('multiboost_family_session', JSON.stringify(familySession));
+                
+                // Éxito
+                loadingDiv.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-green-500 text-4xl mb-2">✅</div>
+                        <p class="text-green-600 font-bold">¡Bienvenido!</p>
+                        <p class="text-gray-600">Redirigiendo...</p>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    window.location.href = 'family-dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Error en login:', error);
+                
+                let errorMessage = 'Error de autenticación';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Usuario no encontrado. ¿Necesitas registrarte?';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Contraseña incorrecta';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Email inválido';
+                        break;
+                    case 'auth/invalid-login-credentials':
+                        errorMessage = 'Credenciales incorrectas. Verifica email y contraseña';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Demasiados intentos. Espera un momento';
+                        break;
+                    default:
+                        errorMessage = 'Error de conexión. Verifica tu internet';
+                }
+                
+                showLoginError(errorMessage);
+                loginBtn.style.display = 'block';
+                loadingDiv.classList.add('hidden');
+            }
+        }
+        
+        // Registro con Firebase Auth
+        async function handleFamilyRegister() {
+            console.log('✨ Iniciando registro familiar');
+            
+            const familyName = document.getElementById('family-name').value.trim();
+            const email = document.getElementById('register-family-email').value.trim().toLowerCase();
+            const password = document.getElementById('register-family-password').value;
+            const confirmPassword = document.getElementById('confirm-family-password').value;
+            
+            const registerBtn = document.getElementById('register-btn');
+            const loadingDiv = document.getElementById('login-loading');
+            const errorDiv = document.getElementById('register-error');
+            
+            // Validaciones
+            if (!familyName || !email || !password || !confirmPassword) {
+                showRegisterError('Por favor completa todos los campos');
+                return;
+            }
+            
+            if (!email.includes('@') || !email.includes('.')) {
+                showRegisterError('Por favor ingresa un email válido');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showRegisterError('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showRegisterError('Las contraseñas no coinciden');
+                return;
+            }
+            
+            // Loading
+            registerBtn.style.display = 'none';
+            loadingDiv.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+            
+            try {
+                await loadFirebaseIfNeeded();
+                
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ Usuario creado:', user.uid);
+                
+                // Crear documento familia
+                await firebase.firestore()
+                    .collection('families')
+                    .doc(user.uid)
+                    .set({
+                        uid: user.uid,
+                        email: email,
+                        familyName: familyName,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
+                        studentsCount: 0
+                    });
+                
+                console.log('✅ Familia creada en Firestore');
+                
+                // Guardar sesión
+                const familySession = {
+                    uid: user.uid,
+                    email: email,
+                    familyName: familyName,
+                    loginTime: Date.now(),
+                    isAuthenticated: true,
+                    isFamilyAccount: true
+                };
+                
+                localStorage.setItem('multiboost_family_session', JSON.stringify(familySession));
+                
+                // Éxito
+                loadingDiv.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-green-500 text-4xl mb-2">✅</div>
+                        <p class="text-green-600 font-bold">¡Cuenta creada!</p>
+                        <p class="text-gray-600">Redirigiendo...</p>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    window.location.href = 'family-dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Error en registro:', error);
+                
+                let errorMessage = 'Error creando la cuenta';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Este email ya está registrado. Usa el Login';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Email inválido';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Contraseña muy débil. Mínimo 6 caracteres';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = 'Error de conexión. Verifica tu internet';
+                        break;
+                    default:
+                        errorMessage = 'Error: ' + error.message;
+                }
+                
+                showRegisterError(errorMessage);
+                registerBtn.style.display = 'block';
+                loadingDiv.classList.add('hidden');
+            }
+        }
+        
+        // Crear familia en Firestore
+        async function createFamilyForUser(uid, email) {
+            try {
+                const familyData = {
+                    uid: uid,
+                    email: email,
+                    familyName: email.split('@')[0],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
+                    studentsCount: 0
+                };
+                
+                await firebase.firestore()
+                    .collection('families')
+                    .doc(uid)
+                    .set(familyData);
+                
+                console.log('✅ Familia creada automáticamente');
+                
+            } catch (error) {
+                console.error('❌ Error creando familia:', error);
+            }
+        }
+        
+        // Mostrar errores
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('login-error');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+        
+        function showRegisterError(message) {
+            const errorDiv = document.getElementById('register-error');
+            const errorMessage = document.getElementById('register-error-message');
+            errorMessage.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+        
+        // === EVENT LISTENERS ===
         document.addEventListener('DOMContentLoaded', function() {
+            // Challenge code uppercase
             const codeInput = document.getElementById('challenge-code');
             if (codeInput) {
                 codeInput.addEventListener('input', function(e) {
                     e.target.value = e.target.value.toUpperCase();
                 });
                 
-                // Permitir envío con Enter
                 codeInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         joinChallenge();
                     }
                 });
             }
-        });
-        
-        // Efecto visual al hacer hover
-        document.querySelectorAll('.btn-card, .btn-card-secondary').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-8px) scale(1.02)';
-            });
             
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-
-        // === FUNCIONES DE ACCESO FAMILIAR ===
-
-// Abrir modal de login familiar
-function openFamilyLogin() {
-    console.log('🔐 Abriendo modal de login familiar');
-    const modal = document.getElementById('family-login-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Limpiar campos
-    document.getElementById('family-email').value = '';
-    document.getElementById('family-password').value = '';
-    document.getElementById('login-error').classList.add('hidden');
-}
-
-// Cerrar modal de login familiar  
-function closeFamilyLogin() {
-    console.log('❌ Cerrando modal de login familiar');
-    const modal = document.getElementById('family-login-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-// Manejar el formulario de login
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('family-login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleFamilyLogin();
-        });
-    }
-});
-
-// Función principal de login
-async function handleFamilyLogin() {
-    console.log('🚀 Iniciando proceso de login familiar');
-    
-    const email = document.getElementById('family-email').value;
-    const password = document.getElementById('family-password').value;
-    const loginBtn = document.getElementById('login-btn');
-    const loadingDiv = document.getElementById('login-loading');
-    const errorDiv = document.getElementById('login-error');
-    
-    // Validaciones básicas
-    if (!email || !password) {
-        showLoginError('Por favor completa todos los campos');
-        return;
-    }
-    
-    if (!email.includes('@')) {
-        showLoginError('Por favor ingresa un email válido');
-        return;
-    }
-    
-    // Mostrar loading
-    loginBtn.style.display = 'none';
-    loadingDiv.classList.remove('hidden');
-    errorDiv.classList.add('hidden');
-    
-    try {
-        // SIMULACIÓN DE LOGIN (TEMPORAL)
-        // En el siguiente paso implementaremos Firebase Auth real
-        await simulateLogin(email, password);
-        
-        console.log('✅ Login exitoso');
-        
-        // Redireccionar al dashboard
-        window.location.href = 'family-dashboard.html';
-        
-    } catch (error) {
-        console.error('❌ Error en login:', error);
-        showLoginError(error.message || 'Error de autenticación');
-        
-        // Restaurar UI
-        loginBtn.style.display = 'block';
-        loadingDiv.classList.add('hidden');
-    }
-}
-
-// === SISTEMA DE LOGIN FAMILIAR REAL CON FIREBASE ===
-
-// Función principal de login mejorada con Firebase Auth real
-async function handleFamilyLogin() {
-    console.log('🚀 Iniciando proceso de login familiar con Firebase Auth');
-    
-    const email = document.getElementById('family-email').value.trim().toLowerCase();
-    const password = document.getElementById('family-password').value;
-    const loginBtn = document.getElementById('login-btn');
-    const loadingDiv = document.getElementById('login-loading');
-    const errorDiv = document.getElementById('login-error');
-    
-    // Validaciones básicas
-    if (!email || !password) {
-        showLoginError('Por favor completa todos los campos');
-        return;
-    }
-    
-    if (!email.includes('@') || !email.includes('.')) {
-        showLoginError('Por favor ingresa un email válido');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showLoginError('La contraseña debe tener al menos 6 caracteres');
-        return;
-    }
-    
-    // Mostrar loading
-    loginBtn.style.display = 'none';
-    loadingDiv.classList.remove('hidden');
-    errorDiv.classList.add('hidden');
-    
-    try {
-        // 🔥 USAR FIREBASE AUTH REAL
-        console.log('🔐 Intentando login con Firebase Auth...');
-        
-        // Primero cargar Firebase si no está disponible
-        if (!window.firebase) {
-            console.log('📦 Cargando Firebase...');
-            await loadFirebaseIfNeeded();
-        }
-        
-        // Autenticar con Firebase
-        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        
-        console.log('✅ Login exitoso en Firebase Auth:', user.uid);
-        
-        // Verificar si el usuario tiene permisos familiares
-        const familyDoc = await firebase.firestore()
-            .collection('families')
-            .where('email', '==', email)
-            .get();
-        
-        if (familyDoc.empty) {
-            // Crear familia automáticamente si no existe
-            console.log('👨‍👩‍👧‍👦 Creando nueva familia...');
-            await createFamilyForUser(user.uid, email);
-        }
-        
-        // Guardar sesión de familia
-        const familySession = {
-            uid: user.uid,
-            email: email,
-            familyName: email.split('@')[0],
-            loginTime: Date.now(),
-            isAuthenticated: true,
-            isFamilyAccount: true
-        };
-        
-        localStorage.setItem('multiboost_family_session', JSON.stringify(familySession));
-        
-        // Mostrar mensaje de éxito
-        loadingDiv.innerHTML = `
-            <div class="text-center py-4">
-                <div class="text-green-500 text-4xl mb-2">✅</div>
-                <p class="text-green-600 font-bold">¡Bienvenido!</p>
-                <p class="text-gray-600">Redirigiendo al dashboard familiar...</p>
-            </div>
-        `;
-        
-        // Redireccionar después de 2 segundos
-        setTimeout(() => {
-            window.location.href = 'family-dashboard.html';
-        }, 2000);
-        
-    } catch (error) {
-        console.error('❌ Error en login Firebase:', error);
-        
-        let errorMessage = 'Error de autenticación';
-        
-        // Manejar errores específicos de Firebase
-        switch (error.code) {
-            case 'auth/user-not-found':
-                errorMessage = 'Usuario no encontrado. ¿Necesitas registrarte?';
-                break;
-            case 'auth/wrong-password':
-                errorMessage = 'Contraseña incorrecta. Intenta de nuevo.';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = 'Email inválido. Verifica el formato.';
-                break;
-            case 'auth/too-many-requests':
-                errorMessage = 'Demasiados intentos. Espera un momento.';
-                break;
-            default:
-                errorMessage = 'Error de conexión. Verifica tu internet.';
-        }
-        
-        showLoginError(errorMessage);
-        
-        // Restaurar UI
-        loginBtn.style.display = 'block';
-        loadingDiv.classList.add('hidden');
-    }
-}
-// === FUNCIONES DE REGISTRO FAMILIAR ===
-
-// Cambiar entre pestañas de login y registro
-function showFamilyLogin() {
-    document.getElementById('family-login-form').style.display = 'block';
-    document.getElementById('family-register-form').style.display = 'none';
-    
-    document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold';
-    document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold';
-    
-    document.getElementById('modal-subtitle').textContent = 'Inicia sesión para acceder al dashboard';
-    
-    // Limpiar errores
-    document.getElementById('login-error').classList.add('hidden');
-    document.getElementById('register-error').classList.add('hidden');
-}
-
-function showFamilyRegister() {
-    document.getElementById('family-login-form').style.display = 'none';
-    document.getElementById('family-register-form').style.display = 'block';
-    
-    document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-gray-300 text-gray-700 font-bold';
-    document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-purple-500 text-white font-bold';
-    
-    document.getElementById('modal-subtitle').textContent = 'Crea una nueva cuenta familiar';
-    
-    // Limpiar errores
-    document.getElementById('login-error').classList.add('hidden');
-    document.getElementById('register-error').classList.add('hidden');
-}
-
-// Función de registro familiar
-async function handleFamilyRegister() {
-    console.log('✨ Iniciando proceso de registro familiar');
-    
-    const familyName = document.getElementById('family-name').value.trim();
-    const email = document.getElementById('register-family-email').value.trim().toLowerCase();
-    const password = document.getElementById('register-family-password').value;
-    const confirmPassword = document.getElementById('confirm-family-password').value;
-    
-    const registerBtn = document.getElementById('register-btn');
-    const loadingDiv = document.getElementById('login-loading');
-    const errorDiv = document.getElementById('register-error');
-    
-    // Validaciones básicas
-    if (!familyName || !email || !password || !confirmPassword) {
-        showRegisterError('Por favor completa todos los campos');
-        return;
-    }
-    
-    if (!email.includes('@') || !email.includes('.')) {
-        showRegisterError('Por favor ingresa un email válido');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showRegisterError('La contraseña debe tener al menos 6 caracteres');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showRegisterError('Las contraseñas no coinciden');
-        return;
-    }
-    
-    // Mostrar loading
-    registerBtn.style.display = 'none';
-    loadingDiv.classList.remove('hidden');
-    errorDiv.classList.add('hidden');
-    
-    try {
-        // Cargar Firebase si no está disponible
-        if (!window.firebase) {
-            console.log('📦 Cargando Firebase para registro...');
-            await loadFirebaseIfNeeded();
-        }
-        
-        console.log('👨‍👩‍👧‍👦 Creando cuenta familiar en Firebase Auth...');
-        
-        // Crear usuario en Firebase Auth
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        const user = userCredential.user;
-        
-        console.log('✅ Usuario creado en Firebase Auth:', user.uid);
-        
-        // Crear documento de familia en Firestore
-        await firebase.firestore()
-            .collection('families')
-            .doc(user.uid)
-            .set({
-                uid: user.uid,
-                email: email,
-                familyName: familyName,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
-                studentsCount: 0
-            });
-        
-        console.log('✅ Documento de familia creado en Firestore');
-        
-        // Crear sesión familiar
-        const familySession = {
-            uid: user.uid,
-            email: email,
-            familyName: familyName,
-            loginTime: Date.now(),
-            isAuthenticated: true,
-            isFamilyAccount: true
-        };
-        
-        localStorage.setItem('multiboost_family_session', JSON.stringify(familySession));
-        
-        // Mostrar mensaje de éxito
-        loadingDiv.innerHTML = `
-            <div class="text-center py-4">
-                <div class="text-green-500 text-4xl mb-2">✅</div>
-                <p class="text-green-600 font-bold">¡Cuenta familiar creada!</p>
-                <p class="text-gray-600">Redirigiendo al dashboard...</p>
-            </div>
-        `;
-        
-        // Redireccionar después de 2 segundos
-        setTimeout(() => {
-            window.location.href = 'family-dashboard.html';
-        }, 2000);
-        
-    } catch (error) {
-        console.error('❌ Error en registro familiar:', error);
-        
-        let errorMessage = 'Error creando la cuenta familiar';
-        
-        // Manejar errores específicos de Firebase
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage = 'Este email ya está registrado. Usa el Login.';
-                break;
-            case 'auth/invalid-email':
-                errorMessage = 'Email inválido. Verifica el formato.';
-                break;
-            case 'auth/weak-password':
-                errorMessage = 'Contraseña muy débil. Usa al menos 6 caracteres.';
-                break;
-            case 'auth/network-request-failed':
-                errorMessage = 'Error de conexión. Verifica tu internet.';
-                break;
-            default:
-                errorMessage = 'Error creando la cuenta: ' + error.message;
-        }
-        
-        showRegisterError(errorMessage);
-        
-        // Restaurar UI
-        registerBtn.style.display = 'block';
-        loadingDiv.classList.add('hidden');
-    }
-}
-
-// Mostrar error de registro
-function showRegisterError(message) {
-    const errorDiv = document.getElementById('register-error');
-    const errorMessage = document.getElementById('register-error-message');
-    
-    errorMessage.textContent = message;
-    errorDiv.classList.remove('hidden');
-}
-
-// Configurar formulario de registro al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    const registerForm = document.getElementById('family-register-form');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleFamilyRegister();
-        });
-    }
-});
-// Función para cargar Firebase si no está disponible - VERSIÓN CORREGIDA
-async function loadFirebaseIfNeeded() {
-    try {
-        // 🔥 VERIFICAR SI FIREBASE YA ESTÁ CARGADO
-        if (window.firebase && window.firebase.auth && window.firebase.firestore) {
-            console.log('🔥 Firebase ya está completamente cargado');
-            return;
-        }
-        
-        console.log('📦 Firebase no encontrado, cargando desde CDN...');
-        
-        // Cargar Firebase SDK v8 (compat)
-        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
-        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js');
-        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js');
-        
-        console.log('📦 Firebase scripts cargados, inicializando...');
-        
-        // Verificar que Firebase esté disponible
-        if (!window.firebase) {
-            throw new Error('Firebase no se cargó correctamente');
-        }
-        
-        // Configurar Firebase solo si no está inicializado
-        if (firebase.apps.length === 0) {
-            const firebaseConfig = {
-                apiKey: "AIzaSyAcEfiepMniuaDnI9Ze-h7S-KAwGltJnEA",
-                authDomain: "multiboost-aventura.firebaseapp.com",
-                projectId: "multiboost-aventura",
-                storageBucket: "multiboost-aventura.firebasestorage.app",
-                messagingSenderId: "277366007404",
-                appId: "1:277366007404:web:68d582b212e76d066d9a49"
-            };
-            
-            firebase.initializeApp(firebaseConfig);
-            console.log('✅ Firebase inicializado por primera vez');
-        } else {
-            console.log('✅ Firebase ya estaba inicializado');
-        }
-        
-    } catch (error) {
-        console.error('❌ Error cargando Firebase:', error);
-        throw new Error('No se pudo cargar Firebase: ' + error.message);
-    }
-}
-// Función auxiliar para cargar scripts
-function loadScript(src) {
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-}
-
-// Función para crear familia nueva
-async function createFamilyForUser(uid, email) {
-    try {
-        const familyData = {
-            uid: uid,
-            email: email,
-            familyName: email.split('@')[0],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
-            studentsCount: 0
-        };
-        
-        await firebase.firestore()
-            .collection('families')
-            .doc(uid)
-            .set(familyData);
-        
-        console.log('✅ Familia creada exitosamente');
-        
-    } catch (error) {
-        console.error('❌ Error creando familia:', error);
-        // No lanzar error, el usuario puede usar el dashboard aunque no se cree la familia
-    }
-}
-
-// Las demás funciones permanecen igual
-function showLoginError(message) {
-    const errorDiv = document.getElementById('login-error');
-    const errorMessage = document.getElementById('error-message');
-    
-    errorMessage.textContent = message;
-    errorDiv.classList.remove('hidden');
-}
-
-function openFamilyLogin() {
-    console.log('🔐 Abriendo modal de login familiar');
-    const modal = document.getElementById('family-login-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    // Limpiar campos
-    document.getElementById('family-email').value = '';
-    document.getElementById('family-password').value = '';
-    document.getElementById('login-error').classList.add('hidden');
-}
-
-function closeFamilyLogin() {
-    console.log('❌ Cerrando modal de login familiar');
-    const modal = document.getElementById('family-login-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-// Configurar formulario al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('family-login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleFamilyLogin();
-        });
-    }
-    
-    // Cerrar modal con Escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('family-login-modal');
-            if (modal && !modal.classList.contains('hidden')) {
-                closeFamilyLogin();
+            // Login form
+            const loginForm = document.getElementById('family-login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleFamilyLogin();
+                });
             }
-        }
-    });
-});
-
-console.log('✅ Sistema de login familiar con Firebase Auth cargado');
-
+            
+            // Register form
+            const registerForm = document.getElementById('family-register-form');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleFamilyRegister();
+                });
+            }
+            
+            // Escape key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('family-login-modal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        closeFamilyLogin();
+                    }
+                }
+            });
+            
+            // Hover effects
+            document.querySelectorAll('.btn-card, .btn-card-secondary, .btn-card-family').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
         
+        console.log('✅ MultiBoost index.html completamente cargado');
     </script>
-    <!-- MODAL DE LOGIN/REGISTRO FAMILIAR -->
-<div id="family-login-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-auto">
-        <!-- Header del Modal -->
-        <div class="text-center mb-6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">👨‍👩‍👧‍👦 Acceso Familiar</h2>
-            <p class="text-gray-600" id="modal-subtitle">Inicia sesión para acceder al dashboard</p>
-        </div>
-
-        <!-- PESTAÑAS -->
-        <div class="flex mb-6">
-            <button onclick="showFamilyLogin()" id="family-login-tab" class="flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold">
-                Iniciar Sesión
-            </button>
-            <button onclick="showFamilyRegister()" id="family-register-tab" class="flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold">
-                Registrarse
-            </button>
-        </div>
-
-        <!-- FORMULARIO DE LOGIN -->
-        <form id="family-login-form" class="space-y-4">
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
-                <input type="email" id="family-email" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="familia@ejemplo.com"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">🔒 Contraseña:</label>
-                <input type="password" id="family-password" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="Tu contraseña familiar"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <!-- Mensaje de Error -->
-            <div id="login-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
-                <span id="error-message">Error de autenticación</span>
-            </div>
-
-            <!-- Botones -->
-            <div class="flex flex-col space-y-3 pt-4">
-                <button type="submit" id="login-btn" 
-                        class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all">
-                    🚀 Acceder al Dashboard
-                </button>
-                
-                <button type="button" onclick="closeFamilyLogin()" 
-                        class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
-                    ❌ Cancelar
-                </button>
-            </div>
-        </form>
-
-        <!-- FORMULARIO DE REGISTRO -->
-        <form id="family-register-form" class="space-y-4" style="display: none;">
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">👨‍👩‍👧‍👦 Nombre de la Familia:</label>
-                <input type="text" id="family-name" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="Familia García"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
-                <input type="email" id="register-family-email" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="familia@ejemplo.com"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">🔒 Crear Contraseña:</label>
-                <input type="password" id="register-family-password" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="Mínimo 6 caracteres"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">🔒 Confirmar Contraseña:</label>
-                <input type="password" id="confirm-family-password" required 
-                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-                       placeholder="Repite la contraseña"
-                       style="color: #1f2937 !important; background-color: white !important;">
-            </div>
-
-            <!-- Mensaje de Error -->
-            <div id="register-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
-                <span id="register-error-message">Error en el registro</span>
-            </div>
-
-            <!-- Botones -->
-            <div class="flex flex-col space-y-3 pt-4">
-                <button type="submit" id="register-btn" 
-                        class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all">
-                    ✨ Crear Cuenta Familiar
-                </button>
-                
-                <button type="button" onclick="closeFamilyLogin()" 
-                        class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
-                    ❌ Cancelar
-                </button>
-            </div>
-        </form>
-
-        <!-- Loading Spinner -->
-        <div id="login-loading" class="hidden text-center py-4">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p class="text-gray-600 mt-2">Procesando...</p>
-        </div>
-    </div>
-</div>
 </body>
 </html>
