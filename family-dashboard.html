@@ -370,35 +370,25 @@
             document.getElementById('quick-assign-modal').style.display = 'none';
         };
 
-       async function loadRealStudents() {
+      async function loadRealStudents() {
             try {
                 console.log('📊 Cargando estudiantes de Firebase...');
                 
                 const studentsSnapshot = await getDocs(collection(db, 'students'));
                 const students = [];
                 
-                // 🔧 FILTRO: Solo mostrar estudiantes que ya han usado la app
+                // 🔥 SIN FILTROS: Mostrar TODOS los estudiantes registrados
                 for (const docSnap of studentsSnapshot.docs) {
                     const studentData = docSnap.data();
                     const studentId = docSnap.id;
                     
-                    // Verificar que el estudiante tenga datos de progreso
+                    // Intentar cargar progreso (puede no existir)
                     const progressDoc = await getDoc(doc(db, 'progress', studentId));
-                    if (!progressDoc.exists()) {
-                        console.log(`⏭️ Saltando ${studentData.name} - Sin datos de progreso`);
-                        continue; // Saltar estudiantes sin datos
-                    }
-                    
-                    const progressData = progressDoc.data();
-                    
-                    // Solo incluir si tiene al menos una sesión
-                    const hasAnySessions = progressData.tables && 
-                        Object.values(progressData.tables).some(table => table.sessions > 0);
-                    
-                    if (!hasAnySessions) {
-                        console.log(`⏭️ Saltando ${studentData.name} - Sin sesiones practicadas`);
-                        continue;
-                    }
+                    const progressData = progressDoc.exists() ? progressDoc.data() : {
+                        tables: {},
+                        totalSessions: 0,
+                        createdAt: new Date().toISOString()
+                    };
                     
                     const stats = calculateStudentStats(progressData);
                     
@@ -407,7 +397,8 @@
                         name: studentData.name,
                         code: studentData.studentCode,
                         progress: progressData,
-                        stats: stats
+                        stats: stats,
+                        hasPlayedBefore: progressDoc.exists() && stats.totalSessions > 0
                     });
                     
                     console.log(`✅ Incluido: ${studentData.name} (${stats.totalSessions} sesiones)`);
@@ -420,7 +411,7 @@
                     showDashboard();
                     console.log(`✅ ${students.length} estudiantes cargados y mostrados`);
                 } else {
-                    console.log('ℹ️ No hay estudiantes con datos para mostrar');
+                    console.log('ℹ️ No hay estudiantes registrados');
                     showEmptyState();
                 }
                 
@@ -430,8 +421,19 @@
             }
         }
 
-        function calculateStudentStats(progressData) {
-            const tables = progressData.tables || {};
+     function calculateStudentStats(progressData) {
+            // 🔒 PROTECCIÓN: Manejar datos vacíos o undefined
+            if (!progressData || !progressData.tables) {
+                console.log('📊 Calculando estadísticas para estudiante nuevo (sin datos)');
+                return {
+                    totalSessions: 0,
+                    avgAccuracy: 0,
+                    criticalTables: 0,
+                    tablesWithData: 0
+                };
+            }
+            
+            const tables = progressData.tables;
             let totalAccuracy = 0;
             let tablesWithData = 0;
             let criticalTables = 0;
@@ -467,18 +469,57 @@
             return stats;
         }
 
-        function renderStudents(students) {
+       function renderStudents(students) {
             const container = document.getElementById('students-container');
             container.innerHTML = '';
             
             students.forEach((student, index) => {
                 const avatar = ['👧', '👦', '🧒'][index % 3];
                 const accuracy = student.stats.avgAccuracy;
-                const accuracyColor = accuracy >= 80 ? 'text-green-300' : accuracy >= 60 ? 'text-yellow-300' : 'text-red-300';
                 
-                const pendingActivities = Math.floor(Math.random() * 4);
-                const pendingColor = pendingActivities > 0 ? 'bg-red-500' : 'bg-green-500';
-                const pendingText = pendingActivities > 0 ? `${pendingActivities} pendientes` : 'Al día';
+                // 🔥 NUEVA LÓGICA: Diferentes visuales según si ha jugado
+                let statusDisplay, accuracyDisplay, actionButtons;
+                
+                if (student.hasPlayedBefore) {
+                    // ✅ Estudiante con experiencia
+                    const accuracyColor = accuracy >= 80 ? 'text-green-300' : accuracy >= 60 ? 'text-yellow-300' : 'text-red-300';
+                    const pendingActivities = Math.floor(Math.random() * 4);
+                    const pendingColor = pendingActivities > 0 ? 'bg-red-500' : 'bg-green-500';
+                    const pendingText = pendingActivities > 0 ? `${pendingActivities} pendientes` : 'Al día';
+                    
+                    accuracyDisplay = `<div class="text-2xl font-bold ${accuracyColor}">${accuracy}%</div>`;
+                    statusDisplay = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold">📋 Actividades:</span>
+                            <span class="${pendingColor} text-white px-2 py-1 rounded-full text-xs font-bold">${pendingText}</span>
+                        </div>
+                    `;
+                    actionButtons = `
+                        <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
+                            👁️ Ver Detalles
+                        </button>
+                        <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
+                            ⚡ Asignar
+                        </button>
+                    `;
+                } else {
+                    // 🆕 Estudiante nuevo sin experiencia
+                    accuracyDisplay = `<div class="text-2xl font-bold text-gray-400">🆕</div>`;
+                    statusDisplay = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-bold">🎮 Estado:</span>
+                            <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold">Nuevo</span>
+                        </div>
+                    `;
+                    actionButtons = `
+                        <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-gray-500 hover:bg-gray-600 rounded-xl font-bold text-sm transition-all">
+                            👁️ Ver Perfil
+                        </button>
+                        <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-green-500 hover:bg-green-600 rounded-xl font-bold text-sm transition-all">
+                            🎯 Primera Tarea
+                        </button>
+                    `;
+                }
                 
                 const studentCard = `
                     <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
@@ -492,23 +533,15 @@
                                     <p class="text-sm opacity-75">${student.code}</p>
                                 </div>
                             </div>
-                            <div class="text-2xl font-bold ${accuracyColor}">${accuracy}%</div>
+                            ${accuracyDisplay}
                         </div>
                         
                         <div class="mb-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-bold">📋 Actividades:</span>
-                                <span class="${pendingColor} text-white px-2 py-1 rounded-full text-xs font-bold">${pendingText}</span>
-                            </div>
+                            ${statusDisplay}
                         </div>
                         
                         <div class="flex space-x-2">
-                            <button onclick="viewStudentDetails('${student.id}')" class="flex-1 py-2 px-4 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm transition-all">
-                                👁️ Ver Detalles
-                            </button>
-                            <button onclick="assignQuickActivity('${student.id}')" class="py-2 px-4 bg-red-500 hover:bg-red-600 rounded-xl font-bold text-sm transition-all">
-                                ⚡ Asignar
-                            </button>
+                            ${actionButtons}
                         </div>
                     </div>
                 `;
