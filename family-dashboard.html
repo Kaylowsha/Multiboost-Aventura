@@ -238,6 +238,83 @@
         import { auth, db } from './firebase-config.js';
         import { collection, getDocs, doc, getDoc, setDoc, query, where, updateDoc, arrayUnion, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
+        // 🔒 PROTECCIÓN DEL DASHBOARD FAMILIAR
+console.log('🔒 Verificando acceso al dashboard familiar...');
+
+// Verificar sesión familiar válida
+function validateFamilyAccess() {
+    try {
+        const familySession = localStorage.getItem('multiboost_family_session');
+        
+        if (!familySession) {
+            console.log('❌ No hay sesión familiar - redirigiendo al login');
+            redirectToLogin();
+            return false;
+        }
+        
+        const session = JSON.parse(familySession);
+        
+        // Verificar que la sesión no haya expirado (24 horas)
+        const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+        if (Date.now() - session.loginTime > maxAge) {
+            console.log('❌ Sesión familiar expirada - redirigiendo al login');
+            localStorage.removeItem('multiboost_family_session');
+            redirectToLogin();
+            return false;
+        }
+        
+        // Verificar que sea una cuenta familiar
+        if (!session.isFamilyAccount) {
+            console.log('❌ Cuenta no es familiar - redirigiendo');
+            redirectToLogin();
+            return false;
+        }
+        
+        console.log('✅ Acceso familiar validado:', session.email);
+        
+        // Actualizar información del header
+        const parentNameEl = document.getElementById('parent-name');
+        if (parentNameEl) {
+            parentNameEl.textContent = session.familyName || session.email.split('@')[0];
+        }
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error validando sesión familiar:', error);
+        redirectToLogin();
+        return false;
+    }
+}
+
+// Función para redirigir al login
+function redirectToLogin() {
+    // Mostrar mensaje temporal antes de redirigir
+    const loadingSection = document.getElementById('loading-section');
+    if (loadingSection) {
+        loadingSection.innerHTML = `
+            <div class="text-center py-16">
+                <div class="text-6xl mb-4">🔒</div>
+                <h2 class="text-3xl font-bold mb-4">Acceso No Autorizado</h2>
+                <p class="text-lg opacity-75 mb-8">Redirigiendo al login familiar...</p>
+            </div>
+        `;
+    }
+    
+    // Redirigir después de 2 segundos
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 2000);
+}
+
+// EJECUTAR VALIDACIÓN INMEDIATAMENTE
+if (!validateFamilyAccess()) {
+    // Si la validación falla, no continuar con el resto del script
+    console.log('❌ Validación fallida - deteniendo carga del dashboard');
+} else {
+    console.log('✅ Validación exitosa - continuando con carga del dashboard');
+}
+        
         console.log('🚀 Dashboard Familiar - VERSIÓN LIMPIA');
 
         let realStudentsData = [];
@@ -945,13 +1022,32 @@ function showEmptyState() {
             }, 1000);
         };
 
-        window.logout = function() {
-            console.log('🚪 Cerrando sesión del dashboard familiar');
-            showNotification('👋', 'Cerrando Sesión', 'Hasta luego');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-        };
+       window.logout = async function() {
+    console.log('🚪 Cerrando sesión del dashboard familiar');
+    
+    try {
+        // Cerrar sesión de Firebase si está disponible
+        if (window.firebase && firebase.auth().currentUser) {
+            await firebase.auth().signOut();
+            console.log('✅ Sesión de Firebase cerrada');
+        }
+        
+        // Limpiar localStorage
+        localStorage.removeItem('multiboost_family_session');
+        
+        showNotification('👋', 'Sesión Cerrada', 'Hasta luego');
+        
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1500);
+        
+    } catch (error) {
+        console.error('Error cerrando sesión:', error);
+        // Continuar con logout aunque falle Firebase
+        localStorage.removeItem('multiboost_family_session');
+        window.location.href = 'index.html';
+    }
+};
 
         // Cerrar modales al hacer click fuera
         document.addEventListener('click', function(e) {
