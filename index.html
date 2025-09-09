@@ -497,41 +497,227 @@ async function handleFamilyLogin() {
         loadingDiv.classList.add('hidden');
     }
 }
+// === FUNCIONES DE REGISTRO FAMILIAR ===
 
-// Función para cargar Firebase si no está disponible
-async function loadFirebaseIfNeeded() {
+// Cambiar entre pestañas de login y registro
+function showFamilyLogin() {
+    document.getElementById('family-login-form').style.display = 'block';
+    document.getElementById('family-register-form').style.display = 'none';
+    
+    document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold';
+    document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold';
+    
+    document.getElementById('modal-subtitle').textContent = 'Inicia sesión para acceder al dashboard';
+    
+    // Limpiar errores
+    document.getElementById('login-error').classList.add('hidden');
+    document.getElementById('register-error').classList.add('hidden');
+}
+
+function showFamilyRegister() {
+    document.getElementById('family-login-form').style.display = 'none';
+    document.getElementById('family-register-form').style.display = 'block';
+    
+    document.getElementById('family-login-tab').className = 'flex-1 py-2 px-4 rounded-l-xl bg-gray-300 text-gray-700 font-bold';
+    document.getElementById('family-register-tab').className = 'flex-1 py-2 px-4 rounded-r-xl bg-purple-500 text-white font-bold';
+    
+    document.getElementById('modal-subtitle').textContent = 'Crea una nueva cuenta familiar';
+    
+    // Limpiar errores
+    document.getElementById('login-error').classList.add('hidden');
+    document.getElementById('register-error').classList.add('hidden');
+}
+
+// Función de registro familiar
+async function handleFamilyRegister() {
+    console.log('✨ Iniciando proceso de registro familiar');
+    
+    const familyName = document.getElementById('family-name').value.trim();
+    const email = document.getElementById('register-family-email').value.trim().toLowerCase();
+    const password = document.getElementById('register-family-password').value;
+    const confirmPassword = document.getElementById('confirm-family-password').value;
+    
+    const registerBtn = document.getElementById('register-btn');
+    const loadingDiv = document.getElementById('login-loading');
+    const errorDiv = document.getElementById('register-error');
+    
+    // Validaciones básicas
+    if (!familyName || !email || !password || !confirmPassword) {
+        showRegisterError('Por favor completa todos los campos');
+        return;
+    }
+    
+    if (!email.includes('@') || !email.includes('.')) {
+        showRegisterError('Por favor ingresa un email válido');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showRegisterError('La contraseña debe tener al menos 6 caracteres');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showRegisterError('Las contraseñas no coinciden');
+        return;
+    }
+    
+    // Mostrar loading
+    registerBtn.style.display = 'none';
+    loadingDiv.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+    
     try {
-        if (window.firebase) {
-            console.log('🔥 Firebase ya está cargado');
-            return;
+        // Cargar Firebase si no está disponible
+        if (!window.firebase) {
+            console.log('📦 Cargando Firebase para registro...');
+            await loadFirebaseIfNeeded();
         }
         
-        console.log('📦 Cargando Firebase desde CDN...');
+        console.log('👨‍👩‍👧‍👦 Creando cuenta familiar en Firebase Auth...');
         
-        // Cargar Firebase SDK
-        await loadScript('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
-        await loadScript('https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js');
-        await loadScript('https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js');
+        // Crear usuario en Firebase Auth
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
         
-        // Configurar Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAcEfiepMniuaDnI9Ze-h7S-KAwGltJnEA",
-            authDomain: "multiboost-aventura.firebaseapp.com",
-            projectId: "multiboost-aventura",
-            storageBucket: "multiboost-aventura.firebasestorage.app",
-            messagingSenderId: "277366007404",
-            appId: "1:277366007404:web:68d582b212e76d066d9a49"
+        console.log('✅ Usuario creado en Firebase Auth:', user.uid);
+        
+        // Crear documento de familia en Firestore
+        await firebase.firestore()
+            .collection('families')
+            .doc(user.uid)
+            .set({
+                uid: user.uid,
+                email: email,
+                familyName: familyName,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
+                studentsCount: 0
+            });
+        
+        console.log('✅ Documento de familia creado en Firestore');
+        
+        // Crear sesión familiar
+        const familySession = {
+            uid: user.uid,
+            email: email,
+            familyName: familyName,
+            loginTime: Date.now(),
+            isAuthenticated: true,
+            isFamilyAccount: true
         };
         
-        firebase.initializeApp(firebaseConfig);
-        console.log('✅ Firebase inicializado correctamente');
+        localStorage.setItem('multiboost_family_session', JSON.stringify(familySession));
+        
+        // Mostrar mensaje de éxito
+        loadingDiv.innerHTML = `
+            <div class="text-center py-4">
+                <div class="text-green-500 text-4xl mb-2">✅</div>
+                <p class="text-green-600 font-bold">¡Cuenta familiar creada!</p>
+                <p class="text-gray-600">Redirigiendo al dashboard...</p>
+            </div>
+        `;
+        
+        // Redireccionar después de 2 segundos
+        setTimeout(() => {
+            window.location.href = 'family-dashboard.html';
+        }, 2000);
         
     } catch (error) {
-        console.error('❌ Error cargando Firebase:', error);
-        throw new Error('No se pudo cargar Firebase');
+        console.error('❌ Error en registro familiar:', error);
+        
+        let errorMessage = 'Error creando la cuenta familiar';
+        
+        // Manejar errores específicos de Firebase
+        switch (error.code) {
+            case 'auth/email-already-in-use':
+                errorMessage = 'Este email ya está registrado. Usa el Login.';
+                break;
+            case 'auth/invalid-email':
+                errorMessage = 'Email inválido. Verifica el formato.';
+                break;
+            case 'auth/weak-password':
+                errorMessage = 'Contraseña muy débil. Usa al menos 6 caracteres.';
+                break;
+            case 'auth/network-request-failed':
+                errorMessage = 'Error de conexión. Verifica tu internet.';
+                break;
+            default:
+                errorMessage = 'Error creando la cuenta: ' + error.message;
+        }
+        
+        showRegisterError(errorMessage);
+        
+        // Restaurar UI
+        registerBtn.style.display = 'block';
+        loadingDiv.classList.add('hidden');
     }
 }
 
+// Mostrar error de registro
+function showRegisterError(message) {
+    const errorDiv = document.getElementById('register-error');
+    const errorMessage = document.getElementById('register-error-message');
+    
+    errorMessage.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+// Configurar formulario de registro al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('family-register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleFamilyRegister();
+        });
+    }
+});
+// Función para cargar Firebase si no está disponible - VERSIÓN CORREGIDA
+async function loadFirebaseIfNeeded() {
+    try {
+        // 🔥 VERIFICAR SI FIREBASE YA ESTÁ CARGADO
+        if (window.firebase && window.firebase.auth && window.firebase.firestore) {
+            console.log('🔥 Firebase ya está completamente cargado');
+            return;
+        }
+        
+        console.log('📦 Firebase no encontrado, cargando desde CDN...');
+        
+        // Cargar Firebase SDK v8 (compat)
+        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js');
+        await loadScript('https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js');
+        
+        console.log('📦 Firebase scripts cargados, inicializando...');
+        
+        // Verificar que Firebase esté disponible
+        if (!window.firebase) {
+            throw new Error('Firebase no se cargó correctamente');
+        }
+        
+        // Configurar Firebase solo si no está inicializado
+        if (firebase.apps.length === 0) {
+            const firebaseConfig = {
+                apiKey: "AIzaSyAcEfiepMniuaDnI9Ze-h7S-KAwGltJnEA",
+                authDomain: "multiboost-aventura.firebaseapp.com",
+                projectId: "multiboost-aventura",
+                storageBucket: "multiboost-aventura.firebasestorage.app",
+                messagingSenderId: "277366007404",
+                appId: "1:277366007404:web:68d582b212e76d066d9a49"
+            };
+            
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase inicializado por primera vez');
+        } else {
+            console.log('✅ Firebase ya estaba inicializado');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error cargando Firebase:', error);
+        throw new Error('No se pudo cargar Firebase: ' + error.message);
+    }
+}
 // Función auxiliar para cargar scripts
 function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -621,34 +807,42 @@ console.log('✅ Sistema de login familiar con Firebase Auth cargado');
 
         
     </script>
-    <!-- MODAL DE LOGIN FAMILIAR -->
+    <!-- MODAL DE LOGIN/REGISTRO FAMILIAR -->
 <div id="family-login-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-auto">
         <!-- Header del Modal -->
         <div class="text-center mb-6">
             <h2 class="text-3xl font-bold text-gray-800 mb-2">👨‍👩‍👧‍👦 Acceso Familiar</h2>
-            <p class="text-gray-600">Ingresa tus credenciales para acceder al dashboard</p>
+            <p class="text-gray-600" id="modal-subtitle">Inicia sesión para acceder al dashboard</p>
         </div>
 
-        <!-- Formulario de Login -->
-        <form id="family-login-form" class="space-y-4">
-          <!-- Email -->
-<div>
-    <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
-    <input type="email" id="family-email" required 
-           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-           placeholder="familia@ejemplo.com"
-           style="color: #1f2937 !important; background-color: white !important;">
-</div>
+        <!-- PESTAÑAS -->
+        <div class="flex mb-6">
+            <button onclick="showFamilyLogin()" id="family-login-tab" class="flex-1 py-2 px-4 rounded-l-xl bg-blue-500 text-white font-bold">
+                Iniciar Sesión
+            </button>
+            <button onclick="showFamilyRegister()" id="family-register-tab" class="flex-1 py-2 px-4 rounded-r-xl bg-gray-300 text-gray-700 font-bold">
+                Registrarse
+            </button>
+        </div>
 
-<!-- Contraseña -->
-<div>
-    <label class="block text-gray-700 font-bold mb-2">🔒 Contraseña:</label>
-    <input type="password" id="family-password" required 
-           class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
-           placeholder="Tu contraseña familiar"
-           style="color: #1f2937 !important; background-color: white !important;">
-</div>
+        <!-- FORMULARIO DE LOGIN -->
+        <form id="family-login-form" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
+                <input type="email" id="family-email" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="familia@ejemplo.com"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">🔒 Contraseña:</label>
+                <input type="password" id="family-password" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="Tu contraseña familiar"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
 
             <!-- Mensaje de Error -->
             <div id="login-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
@@ -669,10 +863,63 @@ console.log('✅ Sistema de login familiar con Firebase Auth cargado');
             </div>
         </form>
 
+        <!-- FORMULARIO DE REGISTRO -->
+        <form id="family-register-form" class="space-y-4" style="display: none;">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">👨‍👩‍👧‍👦 Nombre de la Familia:</label>
+                <input type="text" id="family-name" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="Familia García"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
+                <input type="email" id="register-family-email" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="familia@ejemplo.com"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">🔒 Crear Contraseña:</label>
+                <input type="password" id="register-family-password" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="Mínimo 6 caracteres"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">🔒 Confirmar Contraseña:</label>
+                <input type="password" id="confirm-family-password" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-800 bg-white"
+                       placeholder="Repite la contraseña"
+                       style="color: #1f2937 !important; background-color: white !important;">
+            </div>
+
+            <!-- Mensaje de Error -->
+            <div id="register-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+                <span id="register-error-message">Error en el registro</span>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex flex-col space-y-3 pt-4">
+                <button type="submit" id="register-btn" 
+                        class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all">
+                    ✨ Crear Cuenta Familiar
+                </button>
+                
+                <button type="button" onclick="closeFamilyLogin()" 
+                        class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </form>
+
         <!-- Loading Spinner -->
         <div id="login-loading" class="hidden text-center py-4">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p class="text-gray-600 mt-2">Verificando credenciales...</p>
+            <p class="text-gray-600 mt-2">Procesando...</p>
         </div>
     </div>
 </div>
