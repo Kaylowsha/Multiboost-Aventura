@@ -203,18 +203,20 @@ const firebaseConfig = {
         };
 
         // Función para crear sesión familiar
-        window.createFamilySession = function(familyId, familyName, email) {
-            const sessionData = {
-                familyId: familyId,
-                familyName: familyName,
-                email: email,
-                loginTime: new Date().toISOString(),
-                userType: 'family'
-            };
-            
-            localStorage.setItem('familySession', JSON.stringify(sessionData));
-            console.log('✅ Sesión familiar creada:', sessionData);
-        };
+      window.createFamilySession = function(familyId, familyName, email) {
+    const sessionData = {
+        uid: familyId,
+        familyId: familyId,
+        familyName: familyName,
+        email: email,
+        loginTime: Date.now(),
+        userType: 'family',
+        isFamilyAccount: true
+    };
+    
+    localStorage.setItem('multiboost_family_session', JSON.stringify(sessionData));
+    console.log('✅ Sesión familiar creada:', sessionData);
+};
 
         // Función para toggle entre login y registro
         window.toggleRegisterForm = function() {
