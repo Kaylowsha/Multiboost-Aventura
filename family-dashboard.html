@@ -362,27 +362,74 @@
             document.getElementById('error-section').style.display = 'block';
         }
 
-        // Funciones globales LIMPIAS
-        window.viewStudentDetails = function(studentId) {
-            console.log('🔍 Ver detalles del estudiante:', studentId);
-            
-            const student = realStudentsData.find(s => s.id === studentId);
-            if (!student) {
-                console.error('❌ Estudiante no encontrado');
-                return;
+        window.viewStudentDetails = async function(studentId) {
+    console.log('🔍 Cargando detalles REALES del estudiante:', studentId);
+    
+    const student = realStudentsData.find(s => s.id === studentId);
+    if (!student) {
+        console.error('❌ Estudiante no encontrado');
+        return;
+    }
+    
+    currentStudentForModal = student;
+    
+    try {
+        // CARGAR PROGRESO REAL DESDE FIREBASE
+        console.log('📊 Cargando progreso desde Firebase...');
+        const progressDoc = await getDoc(doc(db, 'progress', studentId));
+        const progressData = progressDoc.exists() ? progressDoc.data() : null;
+        
+        // CARGAR SESIONES REALES
+        console.log('📝 Cargando sesiones desde Firebase...');
+        const sessionsSnapshot = await getDocs(collection(db, 'sessions'));
+        
+        let totalCorrect = 0;
+        let totalIncorrect = 0;
+        let totalTimeSeconds = 0;
+        let sessionCount = 0;
+        
+        // Filtrar y procesar sesiones del estudiante
+        sessionsSnapshot.forEach(doc => {
+            const sessionData = doc.data();
+            // Verificar si la sesión pertenece al estudiante actual
+            if (doc.id.includes(studentId) || sessionData.studentId === studentId) {
+                sessionCount++;
+                totalCorrect += sessionData.correct || 0;
+                totalIncorrect += sessionData.incorrect || 0;
+                totalTimeSeconds += sessionData.totalTime || 0;
             }
-            
-            currentStudentForModal = student;
-            
-            document.getElementById('modal-student-name').textContent = student.name;
-            document.getElementById('modal-student-info').textContent = `Código: ${student.code}`;
-            document.getElementById('modal-sessions').textContent = student.stats.totalSessions;
-            document.getElementById('modal-accuracy').textContent = student.stats.avgAccuracy + '%';
-            
-            document.getElementById('student-detail-modal').style.display = 'flex';
-            
-            showNotification('👁️', 'Vista Detallada', `Mostrando detalles de ${student.name}`);
-        };
+        });
+        
+        // Convertir tiempo a formato legible
+        const hours = Math.floor(totalTimeSeconds / 3600);
+        const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+        const timeDisplay = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+        
+        // Calcular precisión global real
+        const totalExercises = totalCorrect + totalIncorrect;
+        const globalAccuracy = totalExercises > 0 ? Math.round((totalCorrect / totalExercises) * 100) : 0;
+        
+        // ACTUALIZAR INFORMACIÓN BÁSICA DEL MODAL
+        document.getElementById('modal-student-name').textContent = student.name;
+        document.getElementById('modal-student-info').textContent = `Código: ${student.code}`;
+        document.getElementById('modal-last-activity').textContent = `Total de ${sessionCount} sesiones practicadas`;
+        
+        // ACTUALIZAR ESTADÍSTICAS REALES
+        document.getElementById('modal-correct').textContent = totalCorrect;
+        document.getElementById('modal-sessions').textContent = sessionCount;
+        document.getElementById('modal-time').textContent = timeDisplay;
+        document.getElementById('modal-accuracy').textContent = globalAccuracy + '%';
+        
+        // MOSTRAR MODAL
+        document.getElementById('student-detail-modal').style.display = 'flex';
+        
+        showNotification('👁️', 'Vista Detallada', `Mostrando datos reales de ${student.name}`);
+        
+    } catch (error) {
+        console.error('❌ Error cargando datos del estudiante:', error);
+        showNotification('❌', 'Error', 'Error cargando datos del estudiante');
+    }
+};
 
         window.assignQuickActivity = function(studentId) {
             console.log('⚡ Asignar actividad a:', studentId);
