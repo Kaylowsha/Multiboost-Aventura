@@ -419,7 +419,9 @@
         document.getElementById('modal-sessions').textContent = sessionCount;
         document.getElementById('modal-time').textContent = timeDisplay;
         document.getElementById('modal-accuracy').textContent = globalAccuracy + '%';
-        
+
+        // RENDERIZAR ANÁLISIS DETALLADO POR TABLA
+renderDetailedTables(progressData);
         // MOSTRAR MODAL
         document.getElementById('student-detail-modal').style.display = 'flex';
         
@@ -430,6 +432,88 @@
         showNotification('❌', 'Error', 'Error cargando datos del estudiante');
     }
 };
+        // NUEVA FUNCIÓN: Renderizar análisis detallado por tabla
+function renderDetailedTables(progressData) {
+    console.log('📊 Renderizando análisis detallado por tabla...');
+    
+    // Buscar el contenedor del análisis detallado  
+    const analysisContainer = document.querySelector('#student-detail-modal .mb-8:last-child');
+    if (!analysisContainer) {
+        console.log('❌ No se encontró contenedor para análisis detallado');
+        return;
+    }
+    
+    if (!progressData || !progressData.tables) {
+        analysisContainer.innerHTML = `
+            <h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>
+            <div class="text-center opacity-60">No hay datos de progreso disponibles</div>
+        `;
+        return;
+    }
+    
+    let html = '<h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>';
+    html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+    
+    // Renderizar cada tabla con datos reales
+    for (let tableNum = 2; tableNum <= 13; tableNum++) {
+        const tableData = progressData.tables[tableNum];
+        
+        if (tableData && tableData.sessions > 0) {
+            const accuracy = Math.round(tableData.accuracy);
+            const sessions = tableData.sessions;
+            
+            // Determinar color según precisión
+            let colorClass = 'bg-gray-500';
+            let emoji = '😟';
+            if (accuracy >= 90) {
+                colorClass = 'bg-green-500';
+                emoji = '🌟';
+            } else if (accuracy >= 80) {
+                colorClass = 'bg-blue-500';
+                emoji = '👍';
+            } else if (accuracy >= 70) {
+                colorClass = 'bg-yellow-500';
+                emoji = '⚡';
+            } else if (accuracy >= 50) {
+                colorClass = 'bg-orange-500';
+                emoji = '💪';
+            } else {
+                colorClass = 'bg-red-500';
+                emoji = '🎯';
+            }
+            
+            html += `
+                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                    <div class="text-2xl mb-2">${emoji}</div>
+                    <div class="font-bold text-lg">Tabla ${tableNum}</div>
+                    <div class="text-sm opacity-75 mb-2">${sessions} sesiones</div>
+                    <div class="w-full bg-white bg-opacity-30 rounded-full h-2 mb-2">
+                        <div class="${colorClass} h-2 rounded-full" style="width: ${accuracy}%"></div>
+                    </div>
+                    <div class="font-bold">${accuracy}%</div>
+                </div>
+            `;
+        } else {
+            // Tabla no practicada
+            html += `
+                <div class="bg-white bg-opacity-5 rounded-xl p-4 text-center opacity-50">
+                    <div class="text-2xl mb-2">⭕</div>
+                    <div class="font-bold text-lg">Tabla ${tableNum}</div>
+                    <div class="text-sm opacity-75 mb-2">Sin práctica</div>
+                    <div class="w-full bg-white bg-opacity-10 rounded-full h-2 mb-2">
+                        <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="font-bold">0%</div>
+                </div>
+            `;
+        }
+    }
+    
+    html += '</div>';
+    analysisContainer.innerHTML = html;
+    
+    console.log('✅ Análisis detallado renderizado correctamente');
+}
 
         window.assignQuickActivity = function(studentId) {
             console.log('⚡ Asignar actividad a:', studentId);
