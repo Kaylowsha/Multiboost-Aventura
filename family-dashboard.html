@@ -83,7 +83,39 @@
                     </div>
                 </div>
             </div>
-
+<!-- NUEVA SECCIÓN: AGREGAR ESTUDIANTE -->
+<div class="mb-8">
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 text-center">
+        <h2 class="text-2xl font-bold mb-4">👥 Gestión de Estudiantes</h2>
+        <p class="text-lg opacity-80 mb-6">
+            ¿Tu hijo/a ya tiene una cuenta? Agrega su código para hacer seguimiento
+        </p>
+        
+        <div class="max-w-md mx-auto">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input 
+                    type="text" 
+                    id="student-code-input" 
+                    placeholder="Código del estudiante (EST_ABC123)" 
+                    class="flex-1 px-6 py-4 rounded-2xl text-black font-bold text-center border-4 border-white border-opacity-30 focus:border-yellow-400 focus:outline-none"
+                    maxlength="10"
+                    style="text-transform: uppercase;"
+                >
+                <button 
+                    onclick="addStudentByCode()" 
+                    id="add-student-btn"
+                    class="px-8 py-4 rounded-2xl text-lg font-bold bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white shadow-lg"
+                >
+                    ➕ Agregar Estudiante
+                </button>
+            </div>
+            
+            <div class="text-center mt-4 text-sm opacity-75">
+                El estudiante debe haberse registrado previamente en Modo Aventura
+            </div>
+        </div>
+    </div>
+</div>
             <!-- CARDS DE ESTUDIANTES -->
             <div id="students-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <!-- Se llenan dinámicamente con datos reales -->
