@@ -12,6 +12,38 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
+
+        .priority-urgent {
+            border: 2px solid #ef4444;
+            animation: pulse-red 2s infinite;
+        }
+
+        .priority-high {
+            border: 2px solid #f59e0b;
+            animation: pulse-yellow 2s infinite;
+        }
+
+        .priority-normal {
+            border: 2px solid #10b981;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
+        }
+
+        @keyframes pulse-yellow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); }
+        }
+
+        .assignment-card {
+            transition: all 0.3s ease;
+        }
+
+        .assignment-card:hover {
+            transform: translateY(-5px);
+        }
     </style>
 </head>
 <body class="text-white">
@@ -41,6 +73,26 @@
                             🚪 Cerrar Sesión
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- NUEVA SECCIÓN: ACTIVIDADES ASIGNADAS -->
+            <div id="assignments-section" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6" style="display: none;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">📋 MIS ACTIVIDADES ASIGNADAS</h2>
+                    <button onclick="refreshAssignments()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm">
+                        🔄 Actualizar
+                    </button>
+                </div>
+                
+                <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Se llenan dinámicamente -->
+                </div>
+
+                <div id="no-assignments" class="text-center py-8 opacity-60" style="display: none;">
+                    <div class="text-4xl mb-4">📚</div>
+                    <p class="text-lg">No tienes actividades asignadas por ahora</p>
+                    <p class="text-sm opacity-75">¡Puedes practicar cualquier tabla que quieras!</p>
                 </div>
             </div>
 
@@ -96,7 +148,7 @@
                 </div>
             </div>
 
-            <!-- NUEVA SECCIÓN: UNIRSE A DESAFÍO -->
+            <!-- UNIRSE A DESAFÍO -->
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">🏆 UNIRSE A DESAFÍO</h2>
                 
@@ -151,21 +203,24 @@
         </div>
     </div>
 
-   <!-- FIREBASE Y SCRIPTS -->
+    <!-- FIREBASE Y SCRIPTS -->
     <script type="module">
         import { auth, db } from './firebase-config.js';
         import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { doc, getDoc, updateDoc, collection, query, where, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         let currentUser = null;
         let userProgress = null;
         let selectedTable = null;
+        let userAssignments = [];
 
         // Verificar autenticación
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 await loadUserData();
+                await loadAssignments();
+                setupAssignmentsListener();
                 showDashboard();
             } else {
                 window.location.href = 'login.html';
@@ -196,6 +251,158 @@
                 console.error('Error cargando datos del usuario:', error);
             }
         }
+
+        // NUEVA FUNCIÓN: Cargar actividades asignadas
+        async function loadAssignments() {
+            try {
+                console.log('📋 Cargando actividades asignadas...');
+                
+                const assignmentsQuery = query(
+                    collection(db, 'assigned_activities'),
+                    where('studentId', '==', currentUser.uid),
+                    where('status', '==', 'pending')
+                );
+                
+                const querySnapshot = await getDocs(assignmentsQuery);
+                userAssignments = [];
+                
+                querySnapshot.forEach((doc) => {
+                    userAssignments.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                console.log('📋 Actividades cargadas:', userAssignments);
+                renderAssignments();
+                
+            } catch (error) {
+                console.error('Error cargando asignaciones:', error);
+            }
+        }
+
+        // NUEVA FUNCIÓN: Renderizar actividades asignadas
+        function renderAssignments() {
+            const container = document.getElementById('assignments-container');
+            const noAssignments = document.getElementById('no-assignments');
+            const assignmentsSection = document.getElementById('assignments-section');
+            
+            if (userAssignments.length === 0) {
+                assignmentsSection.style.display = 'none';
+                return;
+            }
+
+            assignmentsSection.style.display = 'block';
+            noAssignments.style.display = 'none';
+            container.innerHTML = '';
+
+            userAssignments.forEach((assignment) => {
+                const priorityClass = assignment.priority === 'urgent' ? 'priority-urgent' : 
+                                   assignment.priority === 'high' ? 'priority-high' : 'priority-normal';
+                
+                const priorityEmoji = assignment.priority === 'urgent' ? '🚨' : 
+                                    assignment.priority === 'high' ? '⚡' : '✅';
+                
+                const priorityText = assignment.priority === 'urgent' ? 'URGENTE' : 
+                                   assignment.priority === 'high' ? 'ALTA PRIORIDAD' : 'NORMAL';
+
+                const priorityColor = assignment.priority === 'urgent' ? 'text-red-300' : 
+                                    assignment.priority === 'high' ? 'text-yellow-300' : 'text-green-300';
+
+                // Calcular tiempo desde asignación
+                const assignedDate = new Date(assignment.createdAt);
+                const now = new Date();
+                const diffHours = Math.floor((now - assignedDate) / (1000 * 60 * 60));
+                const timeText = diffHours < 1 ? 'Hace unos minutos' : 
+                               diffHours < 24 ? `Hace ${diffHours} horas` : 
+                               `Hace ${Math.floor(diffHours / 24)} días`;
+
+                const assignmentCard = `
+                    <div class="assignment-card bg-white bg-opacity-20 rounded-xl p-4 ${priorityClass}">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="text-2xl">${priorityEmoji}</div>
+                            <div class="text-xs opacity-60">${timeText}</div>
+                        </div>
+                        
+                        <div class="text-center mb-4">
+                            <h3 class="text-xl font-bold mb-2">Tabla del ${assignment.table}</h3>
+                            <p class="text-sm ${priorityColor} font-bold">${priorityText}</p>
+                            <p class="text-sm opacity-75 mt-1">${assignment.exercises} ejercicios</p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <button onclick="practiceAssignment('${assignment.id}', ${assignment.table}, ${assignment.exercises})" 
+                                    class="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 font-bold text-white">
+                                🚀 Practicar Ahora
+                            </button>
+                            <button onclick="postponeAssignment('${assignment.id}')" 
+                                    class="w-full py-2 px-4 rounded-lg bg-gray-500 hover:bg-gray-600 font-bold text-white text-sm">
+                                ⏰ Practicar Más Tarde
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML += assignmentCard;
+            });
+        }
+
+        // NUEVA FUNCIÓN: Configurar listener en tiempo real para asignaciones
+        function setupAssignmentsListener() {
+            const assignmentsQuery = query(
+                collection(db, 'assigned_activities'),
+                where('studentId', '==', currentUser.uid),
+                where('status', '==', 'pending')
+            );
+            
+            onSnapshot(assignmentsQuery, (snapshot) => {
+                console.log('🔄 Detectados cambios en asignaciones');
+                loadAssignments();
+            });
+        }
+
+        // NUEVA FUNCIÓN: Practicar actividad asignada
+        window.practiceAssignment = function(assignmentId, tableNumber, exerciseCount) {
+            console.log(`🎯 Iniciando práctica asignada: Tabla ${tableNumber}, ${exerciseCount} ejercicios`);
+            
+            // Configurar localStorage para la práctica
+            localStorage.setItem('adventureMode', 'true');
+            localStorage.setItem('practiceTable', tableNumber.toString());
+            localStorage.setItem('practiceExercises', exerciseCount.toString());
+            localStorage.setItem('userId', currentUser.uid);
+            localStorage.setItem('assignmentId', assignmentId); // Para marcar como completada después
+            
+            // Ir a la práctica
+            window.location.href = 'tablas.html';
+        };
+
+        // NUEVA FUNCIÓN: Posponer actividad
+        window.postponeAssignment = async function(assignmentId) {
+            try {
+                console.log('⏰ Posponiendo actividad:', assignmentId);
+                
+                // Por ahora, simplemente la ocultamos temporalmente
+                // En el futuro se podría agregar un campo "postponedUntil"
+                const assignmentCard = document.querySelector(`[onclick*="${assignmentId}"]`).closest('.assignment-card');
+                assignmentCard.style.opacity = '0.5';
+                assignmentCard.style.pointerEvents = 'none';
+                
+                // Mensaje temporal
+                setTimeout(() => {
+                    assignmentCard.style.opacity = '1';
+                    assignmentCard.style.pointerEvents = 'auto';
+                }, 30000); // Vuelve a aparecer en 30 segundos
+                
+            } catch (error) {
+                console.error('Error posponiendo actividad:', error);
+            }
+        };
+
+        // NUEVA FUNCIÓN: Refrescar asignaciones
+        window.refreshAssignments = function() {
+            console.log('🔄 Refrescando asignaciones...');
+            loadAssignments();
+        };
 
         // Mostrar dashboard
         function showDashboard() {
@@ -260,7 +467,7 @@
             }
         }
 
-        // Funciones globales
+        // Funciones globales existentes
         window.openPracticeModal = function(table) {
             selectedTable = table;
             document.getElementById('practice-table').textContent = table;
@@ -302,7 +509,6 @@
             window.location.href = 'create-challenge.html';
         };
 
-        // NUEVA FUNCIÓN: UNIRSE A DESAFÍO COMO USUARIO LOGUEADO
         window.joinChallengeAsUser = function() {
             const code = document.getElementById('dashboard-challenge-code').value.trim().toUpperCase();
             
@@ -323,14 +529,12 @@
             
             console.log('🏆 Usuario logueado uniéndose al desafío:', code);
             
-            // Configurar para modo desafío con usuario logueado
             localStorage.setItem('challengeMode', 'true');
             localStorage.setItem('challengeCode', code);
             localStorage.setItem('participantName', document.getElementById('student-name').textContent);
             localStorage.setItem('participantType', 'logged');
             localStorage.setItem('userId', currentUser.uid);
             
-            // Ir al desafío
             window.location.href = `challenge.html?code=${code}`;
         };
 
@@ -365,7 +569,7 @@
             }, 1000);
         });
 
-        console.log('🎮 Dashboard cargado correctamente');
+        console.log('🎮 Dashboard con actividades asignadas cargado correctamente');
     </script>
 
 </body>
