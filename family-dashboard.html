@@ -372,7 +372,10 @@ if (!validateFamilyAccess()) {
                 // Por ahora solo lo agregamos a la lista local y recargamos
 
                // 🔥 GUARDAR VÍNCULO FAMILIAR EN FIREBASE
-                const familyId = 'family_demo'; // Por ahora ID fijo, después será dinámico
+// 🔥 OBTENER ID REAL DE LA FAMILIA
+const familySession = localStorage.getItem('multiboost_family_session');
+const session = JSON.parse(familySession);
+const familyId = session.uid; // ← USAR UID REAL
                 const linkData = {
                     familyId: familyId,
                     studentId: studentId,
@@ -465,86 +468,97 @@ if (!validateFamilyAccess()) {
             document.getElementById('quick-assign-modal').style.display = 'none';
         };
 
-     async function loadRealStudents() {
+    async function loadRealStudents() {
+    try {
+        console.log('📊 Cargando estudiantes vinculados a esta familia...');
+        
+        // 🔥 OBTENER ID REAL DE LA FAMILIA AUTENTICADA
+        const familySession = localStorage.getItem('multiboost_family_session');
+        if (!familySession) {
+            console.error('❌ No hay sesión familiar válida');
+            showEmptyState();
+            return;
+        }
+        
+        const session = JSON.parse(familySession);
+        const familyId = session.uid; // ← USAR UID REAL DE FIREBASE AUTH
+        
+        console.log('👨‍👩‍👧‍👦 Familia actual:', session.familyName, '(ID:', familyId + ')');
+        
+        // 🔥 PASO 1: Obtener vínculos familiares SOLO de esta familia
+        const linksSnapshot = await getDocs(collection(db, 'family_links'));
+        const familyStudentIds = [];
+        
+        linksSnapshot.forEach(doc => {
+            const linkData = doc.data();
+            if (linkData.familyId === familyId) { // ← USAR familyId DINÁMICO
+                familyStudentIds.push(linkData.studentId);
+                console.log(`🔗 Estudiante vinculado encontrado: ${linkData.studentName} (${linkData.studentId})`);
+            }
+        });
+        
+        if (familyStudentIds.length === 0) {
+            console.log('ℹ️ No hay estudiantes vinculados a esta familia específica');
+            showEmptyState();
+            return;
+        }
+        
+        // 🔥 PASO 2: Cargar solo estudiantes vinculados a ESTA familia
+        const students = [];
+        
+        for (const studentId of familyStudentIds) {
             try {
-                console.log('📊 Cargando estudiantes vinculados a esta familia...');
+                // Obtener datos del estudiante
+                const studentDoc = await getDoc(doc(db, 'students', studentId));
+                if (!studentDoc.exists()) {
+                    console.log(`⚠️ Estudiante ${studentId} no existe en la base de datos`);
+                    continue;
+                }
                 
-                const familyId = 'family_demo'; // Por ahora ID fijo
+                const studentData = studentDoc.data();
                 
-                // 🔥 PASO 1: Obtener vínculos familiares
-                const linksSnapshot = await getDocs(collection(db, 'family_links'));
-                const familyStudentIds = [];
+                // Obtener progreso del estudiante
+                const progressDoc = await getDoc(doc(db, 'progress', studentId));
+                const progressData = progressDoc.exists() ? progressDoc.data() : {
+                    tables: {},
+                    totalSessions: 0,
+                    createdAt: new Date().toISOString()
+                };
                 
-                linksSnapshot.forEach(doc => {
-                    const linkData = doc.data();
-                    if (linkData.familyId === familyId) {
-                        familyStudentIds.push(linkData.studentId);
-                        console.log(`🔗 Estudiante vinculado encontrado: ${linkData.studentName} (${linkData.studentId})`);
-                    }
+                const stats = calculateStudentStats(progressData);
+                
+                students.push({
+                    id: studentId,
+                    name: studentData.name,
+                    code: studentData.studentCode,
+                    progress: progressData,
+                    stats: stats,
+                    hasPlayedBefore: progressDoc.exists() && stats.totalSessions > 0
                 });
                 
-                if (familyStudentIds.length === 0) {
-                    console.log('ℹ️ No hay estudiantes vinculados a esta familia');
-                    showEmptyState();
-                    return;
-                }
-                
-                // 🔥 PASO 2: Cargar solo estudiantes vinculados
-                const students = [];
-                
-                for (const studentId of familyStudentIds) {
-                    try {
-                        // Obtener datos del estudiante
-                        const studentDoc = await getDoc(doc(db, 'students', studentId));
-                        if (!studentDoc.exists()) {
-                            console.log(`⚠️ Estudiante ${studentId} no existe en la base de datos`);
-                            continue;
-                        }
-                        
-                        const studentData = studentDoc.data();
-                        
-                        // Obtener progreso del estudiante
-                        const progressDoc = await getDoc(doc(db, 'progress', studentId));
-                        const progressData = progressDoc.exists() ? progressDoc.data() : {
-                            tables: {},
-                            totalSessions: 0,
-                            createdAt: new Date().toISOString()
-                        };
-                        
-                        const stats = calculateStudentStats(progressData);
-                        
-                        students.push({
-                            id: studentId,
-                            name: studentData.name,
-                            code: studentData.studentCode,
-                            progress: progressData,
-                            stats: stats,
-                            hasPlayedBefore: progressDoc.exists() && stats.totalSessions > 0
-                        });
-                        
-                        console.log(`✅ Cargado: ${studentData.name} (${stats.totalSessions} sesiones)`);
-                        
-                    } catch (error) {
-                        console.error(`❌ Error cargando estudiante ${studentId}:`, error);
-                    }
-                }
-                
-                if (students.length > 0) {
-                    realStudentsData = students;
-                    renderStudents(students);
-                    updateStats(students);
-                    showDashboard();
-                    console.log(`✅ ${students.length} estudiantes de la familia cargados`);
-                } else {
-                    console.log('ℹ️ No se pudieron cargar estudiantes vinculados');
-                    showEmptyState();
-                }
+                console.log(`✅ Cargado: ${studentData.name} (${stats.totalSessions} sesiones)`);
                 
             } catch (error) {
-                console.error('❌ Error:', error);
-                showError();
+                console.error(`❌ Error cargando estudiante ${studentId}:`, error);
             }
         }
+        
+        if (students.length > 0) {
+            realStudentsData = students;
+            renderStudents(students);
+            updateStats(students);
+            showDashboard();
+            console.log(`✅ ${students.length} estudiantes de esta familia específica cargados`);
+        } else {
+            console.log('ℹ️ No se pudieron cargar estudiantes vinculados a esta familia');
+            showEmptyState();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showError();
+    }
+}
      function calculateStudentStats(progressData) {
             // 🔒 PROTECCIÓN: Manejar datos vacíos o undefined
             if (!progressData || !progressData.tables) {
@@ -954,7 +968,10 @@ function showEmptyState() {
             console.log('🗑️ Ejecutando eliminación de:', studentName);
             
             try {
-                const familyId = 'family_demo';
+              // 🔥 OBTENER ID REAL DE LA FAMILIA
+const familySession = localStorage.getItem('multiboost_family_session');
+const session = JSON.parse(familySession);
+const familyId = session.uid; // ← USAR UID REAL
                 const linkId = `${familyId}_${studentId}`;
                 
                 // Mostrar loading en el botón
