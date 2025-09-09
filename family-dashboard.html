@@ -201,7 +201,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE Y JAVASCRIPT LIMPIO -->
+    <!-- FIREBASE Y JAVASCRIPT - SOLO ARREGLO DEL ERROR -->
     <script type="module">
         import { auth, db } from './firebase-config.js';
         import { collection, getDocs, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -210,6 +210,26 @@
 
         let realStudentsData = [];
         let currentStudentForModal = null;
+
+        // ✅ FIX CRÍTICO: Definir assignTableDirect en scope global AL INICIO
+        window.assignTableDirect = function(tableNumber) {
+            console.log('🎯 Asignación directa desde tabla:', tableNumber);
+            if (currentStudentForModal) {
+                window.assignTable(tableNumber);
+            } else {
+                console.error('❌ No hay estudiante seleccionado para asignación directa');
+            }
+        };
+
+        // Definir funciones de cierre de modales en scope global
+        window.closeStudentModal = function() {
+            document.getElementById('student-detail-modal').style.display = 'none';
+            currentStudentForModal = null;
+        };
+
+        window.closeQuickAssignModal = function() {
+            document.getElementById('quick-assign-modal').style.display = 'none';
+        };
 
         // Cargar estudiantes reales
         async function loadRealStudents() {
@@ -363,160 +383,164 @@
         }
 
         window.viewStudentDetails = async function(studentId) {
-    console.log('🔍 Cargando detalles REALES del estudiante:', studentId);
-    
-    const student = realStudentsData.find(s => s.id === studentId);
-    if (!student) {
-        console.error('❌ Estudiante no encontrado');
-        return;
-    }
-    
-    currentStudentForModal = student;
-    
-    try {
-        // CARGAR PROGRESO REAL DESDE FIREBASE
-        console.log('📊 Cargando progreso desde Firebase...');
-        const progressDoc = await getDoc(doc(db, 'progress', studentId));
-        const progressData = progressDoc.exists() ? progressDoc.data() : null;
-        
-        // CARGAR SESIONES REALES
-        console.log('📝 Cargando sesiones desde Firebase...');
-        const sessionsSnapshot = await getDocs(collection(db, 'sessions'));
-        
-        let totalCorrect = 0;
-        let totalIncorrect = 0;
-        let totalTimeSeconds = 0;
-        let sessionCount = 0;
-        
-        // Filtrar y procesar sesiones del estudiante
-        sessionsSnapshot.forEach(doc => {
-            const sessionData = doc.data();
-            // Verificar si la sesión pertenece al estudiante actual
-            if (doc.id.includes(studentId) || sessionData.studentId === studentId) {
-                sessionCount++;
-                totalCorrect += sessionData.correct || 0;
-                totalIncorrect += sessionData.incorrect || 0;
-                totalTimeSeconds += sessionData.totalTime || 0;
+            console.log('🔍 Cargando detalles REALES del estudiante:', studentId);
+            
+            const student = realStudentsData.find(s => s.id === studentId);
+            if (!student) {
+                console.error('❌ Estudiante no encontrado');
+                return;
             }
-        });
-        
-        // Convertir tiempo a formato legible
-        const hours = Math.floor(totalTimeSeconds / 3600);
-        const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-        const timeDisplay = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-        
-        // Calcular precisión global real
-        const totalExercises = totalCorrect + totalIncorrect;
-        const globalAccuracy = totalExercises > 0 ? Math.round((totalCorrect / totalExercises) * 100) : 0;
-        
-        // ACTUALIZAR INFORMACIÓN BÁSICA DEL MODAL
-        document.getElementById('modal-student-name').textContent = student.name;
-        document.getElementById('modal-student-info').textContent = `Código: ${student.code}`;
-        document.getElementById('modal-last-activity').textContent = `Total de ${sessionCount} sesiones practicadas`;
-        
-        // ACTUALIZAR ESTADÍSTICAS REALES
-        document.getElementById('modal-correct').textContent = totalCorrect;
-        document.getElementById('modal-sessions').textContent = sessionCount;
-        document.getElementById('modal-time').textContent = timeDisplay;
-        document.getElementById('modal-accuracy').textContent = globalAccuracy + '%';
+            
+            currentStudentForModal = student;
+            
+            try {
+                // CARGAR PROGRESO REAL DESDE FIREBASE
+                console.log('📊 Cargando progreso desde Firebase...');
+                const progressDoc = await getDoc(doc(db, 'progress', studentId));
+                const progressData = progressDoc.exists() ? progressDoc.data() : null;
+                
+                // CARGAR SESIONES REALES
+                console.log('📝 Cargando sesiones desde Firebase...');
+                const sessionsSnapshot = await getDocs(collection(db, 'sessions'));
+                
+                let totalCorrect = 0;
+                let totalIncorrect = 0;
+                let totalTimeSeconds = 0;
+                let sessionCount = 0;
+                
+                // Filtrar y procesar sesiones del estudiante
+                sessionsSnapshot.forEach(doc => {
+                    const sessionData = doc.data();
+                    // Verificar si la sesión pertenece al estudiante actual
+                    if (doc.id.includes(studentId) || sessionData.studentId === studentId) {
+                        sessionCount++;
+                        totalCorrect += sessionData.correct || 0;
+                        totalIncorrect += sessionData.incorrect || 0;
+                        totalTimeSeconds += sessionData.totalTime || 0;
+                    }
+                });
+                
+                // Convertir tiempo a formato legible
+                const hours = Math.floor(totalTimeSeconds / 3600);
+                const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+                const timeDisplay = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                
+                // Calcular precisión global real
+                const totalExercises = totalCorrect + totalIncorrect;
+                const globalAccuracy = totalExercises > 0 ? Math.round((totalCorrect / totalExercises) * 100) : 0;
+                
+                // ACTUALIZAR INFORMACIÓN BÁSICA DEL MODAL
+                document.getElementById('modal-student-name').textContent = student.name;
+                document.getElementById('modal-student-info').textContent = `Código: ${student.code}`;
+                document.getElementById('modal-last-activity').textContent = `Total de ${sessionCount} sesiones practicadas`;
+                
+                // ACTUALIZAR ESTADÍSTICAS REALES
+                document.getElementById('modal-correct').textContent = totalCorrect;
+                document.getElementById('modal-sessions').textContent = sessionCount;
+                document.getElementById('modal-time').textContent = timeDisplay;
+                document.getElementById('modal-accuracy').textContent = globalAccuracy + '%';
 
-        // RENDERIZAR ANÁLISIS DETALLADO POR TABLA
-renderDetailedTables(progressData);
-        // MOSTRAR MODAL
-        document.getElementById('student-detail-modal').style.display = 'flex';
-        
-        showNotification('👁️', 'Vista Detallada', `Mostrando datos reales de ${student.name}`);
-        
-    } catch (error) {
-        console.error('❌ Error cargando datos del estudiante:', error);
-        showNotification('❌', 'Error', 'Error cargando datos del estudiante');
-    }
-};
-        // NUEVA FUNCIÓN: Renderizar análisis detallado por tabla
-function renderDetailedTables(progressData) {
-    console.log('📊 Renderizando análisis detallado por tabla...');
-    
-    // Buscar el contenedor del análisis detallado  
-    const analysisContainer = document.querySelector('#student-detail-modal .mb-8:last-child');
-    if (!analysisContainer) {
-        console.log('❌ No se encontró contenedor para análisis detallado');
-        return;
-    }
-    
-    if (!progressData || !progressData.tables) {
-        analysisContainer.innerHTML = `
-            <h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>
-            <div class="text-center opacity-60">No hay datos de progreso disponibles</div>
-        `;
-        return;
-    }
-    
-    let html = '<h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>';
-    html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
-    
-    // Renderizar cada tabla con datos reales
-    for (let tableNum = 2; tableNum <= 13; tableNum++) {
-        const tableData = progressData.tables[tableNum];
-        
-        if (tableData && tableData.sessions > 0) {
-            const accuracy = Math.round(tableData.accuracy);
-            const sessions = tableData.sessions;
+                // RENDERIZAR ANÁLISIS DETALLADO POR TABLA
+                renderDetailedTables(progressData);
+                // MOSTRAR MODAL
+                document.getElementById('student-detail-modal').style.display = 'flex';
+                
+                showNotification('👁️', 'Vista Detallada', `Mostrando datos reales de ${student.name}`);
+                
+            } catch (error) {
+                console.error('❌ Error cargando datos del estudiante:', error);
+                showNotification('❌', 'Error', 'Error cargando datos del estudiante');
+            }
+        };
+
+        // FUNCIÓN RENDERIZAR ANÁLISIS DETALLADO - AQUÍ ESTÁ EL BOTÓN QUE CAUSABA ERROR
+        function renderDetailedTables(progressData) {
+            console.log('📊 Renderizando análisis detallado por tabla...');
             
-            // Determinar color según precisión
-            let colorClass = 'bg-gray-500';
-            let emoji = '😟';
-            if (accuracy >= 90) {
-                colorClass = 'bg-green-500';
-                emoji = '🌟';
-            } else if (accuracy >= 80) {
-                colorClass = 'bg-blue-500';
-                emoji = '👍';
-            } else if (accuracy >= 70) {
-                colorClass = 'bg-yellow-500';
-                emoji = '⚡';
-            } else if (accuracy >= 50) {
-                colorClass = 'bg-orange-500';
-                emoji = '💪';
-            } else {
-                colorClass = 'bg-red-500';
-                emoji = '🎯';
+            // Buscar el contenedor del análisis detallado  
+            const analysisContainer = document.querySelector('#student-detail-modal .mb-8:last-child');
+            if (!analysisContainer) {
+                console.log('❌ No se encontró contenedor para análisis detallado');
+                return;
             }
             
-            html += `
-                <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
-                    <div class="text-2xl mb-2">${emoji}</div>
-                    <div class="font-bold text-lg">Tabla ${tableNum}</div>
-                    <div class="text-sm opacity-75 mb-2">${sessions} sesiones</div>
-                    <div class="w-full bg-white bg-opacity-30 rounded-full h-2 mb-2">
-                        <div class="${colorClass} h-2 rounded-full" style="width: ${accuracy}%"></div>
-                    </div>
-                    <div class="font-bold">${accuracy}%</div>
-                    <button onclick="assignTableDirect(${tableNum})" class="mt-2 px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-white text-sm font-bold">
-    ⚡ Asignar
-</button>
-                </div>
-            `;
-        } else {
-            // Tabla no practicada
-            html += `
-                <div class="bg-white bg-opacity-5 rounded-xl p-4 text-center opacity-50">
-                    <div class="text-2xl mb-2">⭕</div>
-                    <div class="font-bold text-lg">Tabla ${tableNum}</div>
-                    <div class="text-sm opacity-75 mb-2">Sin práctica</div>
-                    <div class="w-full bg-white bg-opacity-10 rounded-full h-2 mb-2">
-                        <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
-                    </div>
-                    <div class="font-bold">0%</div>
-                </div>
-            `;
+            if (!progressData || !progressData.tables) {
+                analysisContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>
+                    <div class="text-center opacity-60">No hay datos de progreso disponibles</div>
+                `;
+                return;
+            }
+            
+            let html = '<h3 class="text-2xl font-bold mb-4">📊 Análisis Detallado por Tabla</h3>';
+            html += '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+            
+            // Renderizar cada tabla con datos reales
+            for (let tableNum = 2; tableNum <= 13; tableNum++) {
+                const tableData = progressData.tables[tableNum];
+                
+                if (tableData && tableData.sessions > 0) {
+                    const accuracy = Math.round(tableData.accuracy);
+                    const sessions = tableData.sessions;
+                    
+                    // Determinar color según precisión
+                    let colorClass = 'bg-gray-500';
+                    let emoji = '😟';
+                    if (accuracy >= 90) {
+                        colorClass = 'bg-green-500';
+                        emoji = '🌟';
+                    } else if (accuracy >= 80) {
+                        colorClass = 'bg-blue-500';
+                        emoji = '👍';
+                    } else if (accuracy >= 70) {
+                        colorClass = 'bg-yellow-500';
+                        emoji = '⚡';
+                    } else if (accuracy >= 50) {
+                        colorClass = 'bg-orange-500';
+                        emoji = '💪';
+                    } else {
+                        colorClass = 'bg-red-500';
+                        emoji = '🎯';
+                    }
+                    
+                    html += `
+                        <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">${emoji}</div>
+                            <div class="font-bold text-lg">Tabla ${tableNum}</div>
+                            <div class="text-sm opacity-75 mb-2">${sessions} sesiones</div>
+                            <div class="w-full bg-white bg-opacity-30 rounded-full h-2 mb-2">
+                                <div class="${colorClass} h-2 rounded-full" style="width: ${accuracy}%"></div>
+                            </div>
+                            <div class="font-bold">${accuracy}%</div>
+                            <button onclick="assignTableDirect(${tableNum})" class="mt-2 px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-white text-sm font-bold">
+        ⚡ Asignar
+    </button>
+                        </div>
+                    `;
+                } else {
+                    // Tabla no practicada
+                    html += `
+                        <div class="bg-white bg-opacity-5 rounded-xl p-4 text-center opacity-50">
+                            <div class="text-2xl mb-2">⭕</div>
+                            <div class="font-bold text-lg">Tabla ${tableNum}</div>
+                            <div class="text-sm opacity-75 mb-2">Sin práctica</div>
+                            <div class="w-full bg-white bg-opacity-10 rounded-full h-2 mb-2">
+                                <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <div class="font-bold">0%</div>
+                            <button onclick="assignTableDirect(${tableNum})" class="mt-2 px-3 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-white text-sm font-bold">
+        ⚡ Asignar
+    </button>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += '</div>';
+            analysisContainer.innerHTML = html;
+            
+            console.log('✅ Análisis detallado renderizado correctamente');
         }
-    }
-    
-    html += '</div>';
-    analysisContainer.innerHTML = html;
-    
-    console.log('✅ Análisis detallado renderizado correctamente');
-}
 
         window.assignQuickActivity = function(studentId) {
             console.log('⚡ Asignar actividad a:', studentId);
@@ -535,79 +559,75 @@ function renderDetailedTables(progressData) {
             showNotification('⚡', 'Asignación', `Abriendo asignador para ${student.name}`);
         };
 
-       window.assignTable = async function(tableNumber) {
-    if (!currentStudentForModal) {
-        console.error('❌ No hay estudiante seleccionado');
-        return;
-    }
-    
-    console.log(`🎯 Asignando tabla ${tableNumber} a ${currentStudentForModal.name}`);
-    
-    try {
-        // Determinar prioridad basada en el progreso actual
-        const tableData = currentStudentForModal.progress?.tables?.[tableNumber];
-        let priority = 'normal';
-        if (!tableData || tableData.sessions === 0) {
-            priority = 'high'; // Nueva tabla
-        } else if (tableData.accuracy < 50) {
-            priority = 'urgent'; // Tabla crítica
-        } else if (tableData.accuracy < 80) {
-            priority = 'high'; // Necesita mejora
-        }
-        
-        // Crear datos de la asignación
-        const assignmentData = {
-            studentId: currentStudentForModal.id,
-            studentName: currentStudentForModal.name,
-            assignedBy: 'family_dashboard',
-            table: tableNumber,
-            exercises: 20, // Por defecto 20 ejercicios
-            priority: priority,
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            description: `Practicar tabla del ${tableNumber}`,
-            completedAt: null
+        window.assignTable = async function(tableNumber) {
+            if (!currentStudentForModal) {
+                console.error('❌ No hay estudiante seleccionado');
+                return;
+            }
+            
+            console.log(`🎯 Asignando tabla ${tableNumber} a ${currentStudentForModal.name}`);
+            
+            try {
+                // Determinar prioridad basada en el progreso actual
+                const tableData = currentStudentForModal.progress?.tables?.[tableNumber];
+                let priority = 'normal';
+                if (!tableData || tableData.sessions === 0) {
+                    priority = 'high'; // Nueva tabla
+                } else if (tableData.accuracy < 50) {
+                    priority = 'urgent'; // Tabla crítica
+                } else if (tableData.accuracy < 80) {
+                    priority = 'high'; // Necesita mejora
+                }
+                
+                // Crear datos de la asignación
+                const assignmentData = {
+                    studentId: currentStudentForModal.id,
+                    studentName: currentStudentForModal.name,
+                    assignedBy: 'family_dashboard',
+                    table: tableNumber,
+                    exercises: 20, // Por defecto 20 ejercicios
+                    priority: priority,
+                    status: 'pending',
+                    createdAt: new Date().toISOString(),
+                    description: `Practicar tabla del ${tableNumber}`,
+                    completedAt: null
+                };
+                
+                // Generar ID único para la asignación
+                const assignmentId = 'assignment_' + Date.now() + '_' + tableNumber;
+                
+                // Guardar en Firebase
+                await setDoc(doc(db, 'assigned_activities', assignmentId), assignmentData);
+                
+                console.log('✅ Asignación guardada en Firebase:', assignmentId);
+                
+                // Determinar emoji y mensaje según prioridad
+                let emoji = '✅';
+                let priorityText = 'Normal';
+                if (priority === 'urgent') {
+                    emoji = '🚨';
+                    priorityText = 'URGENTE';
+                } else if (priority === 'high') {
+                    emoji = '⚡';
+                    priorityText = 'Alta';
+                }
+                
+                // Mostrar notificación de éxito
+                showNotification(
+                    emoji,
+                    'Actividad Asignada',
+                    `Tabla ${tableNumber} asignada a ${currentStudentForModal.name} (Prioridad: ${priorityText})`
+                );
+                
+                // Cerrar modal de asignación
+                window.closeStudentModal();
+                window.closeQuickAssignModal();
+                
+            } catch (error) {
+                console.error('❌ Error guardando asignación:', error);
+                showNotification('❌', 'Error', 'Error asignando actividad. Intenta de nuevo.');
+            }
         };
-// FUNCIÓN AUXILIAR PARA ASIGNACIÓN DIRECTA DESDE TABLAS
-window.assignTableDirect = function(tableNumber) {
-    assignTable(tableNumber);
-};
-
-        
-        // Generar ID único para la asignación
-        const assignmentId = 'assignment_' + Date.now() + '_' + tableNumber;
-        
-        // Guardar en Firebase
-        await setDoc(doc(db, 'assigned_activities', assignmentId), assignmentData);
-        
-        console.log('✅ Asignación guardada en Firebase:', assignmentId);
-        
-        // Determinar emoji y mensaje según prioridad
-        let emoji = '✅';
-        let priorityText = 'Normal';
-        if (priority === 'urgent') {
-            emoji = '🚨';
-            priorityText = 'URGENTE';
-        } else if (priority === 'high') {
-            emoji = '⚡';
-            priorityText = 'Alta';
-        }
-        
-        // Mostrar notificación de éxito
-        showNotification(
-            emoji,
-            'Actividad Asignada',
-            `Tabla ${tableNumber} asignada a ${currentStudentForModal.name} (Prioridad: ${priorityText})`
-        );
-        
-        // Cerrar modal de asignación
-        closeStudentModal();
-        
-    } catch (error) {
-        console.error('❌ Error guardando asignación:', error);
-        showNotification('❌', 'Error', 'Error asignando actividad. Intenta de nuevo.');
-    }
-};
 
         function showNotification(icon, title, message) {
             const notification = document.getElementById('notification');
@@ -622,13 +642,30 @@ window.assignTableDirect = function(tableNumber) {
             }, 3000);
         }
 
+        // Funciones adicionales para botones del header
+        window.refreshDashboard = function() {
+            console.log('🔄 Refrescando dashboard...');
+            showNotification('🔄', 'Actualizando', 'Recargando datos...');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        };
+
+        window.logout = function() {
+            console.log('🚪 Cerrando sesión del dashboard familiar');
+            showNotification('👋', 'Cerrando Sesión', 'Hasta luego');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        };
+
         // Cerrar modales al hacer click fuera
         document.addEventListener('click', function(e) {
             if (e.target.id === 'student-detail-modal') {
-                closeStudentModal();
+                window.closeStudentModal();
             }
             if (e.target.id === 'quick-assign-modal') {
-                closeStudentModal();
+                window.closeQuickAssignModal();
             }
         });
 
@@ -637,7 +674,7 @@ window.assignTableDirect = function(tableNumber) {
             loadRealStudents();
         }, 1000);
 
-        console.log('✅ Dashboard limpio cargado');
+        console.log('✅ Dashboard familiar corregido - Error assignTableDirect resuelto');
     </script>
 
 </body>
