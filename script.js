@@ -1,5 +1,5 @@
 // MULTIBOOST - ENTRENAMIENTO DE MULTIPLICACIONES
-// Versión Compatible con limpieza automática - CORREGIDA
+// Versión con completado de actividades asignadas
 
 function MultiBoost() {
     // Estado de la aplicación
@@ -15,19 +15,24 @@ function MultiBoost() {
     this.sessionStartTime = null;
     this.sessionTimer = null;
     this.lastCorrectPosition = -1;
+    
     // Modo Aventura
-this.adventureMode = localStorage.getItem('adventureMode') === 'true';
-this.userId = localStorage.getItem('userId');
-this.practiceTable = localStorage.getItem('practiceTable');
-this.practiceExercises = localStorage.getItem('practiceExercises');
+    this.adventureMode = localStorage.getItem('adventureMode') === 'true';
+    this.userId = localStorage.getItem('userId');
+    this.practiceTable = localStorage.getItem('practiceTable');
+    this.practiceExercises = localStorage.getItem('practiceExercises');
 
     // Modo Desafío
-this.challengeMode = localStorage.getItem('challengeMode') === 'true';
-this.challengeCode = localStorage.getItem('challengeCode');
-this.challengeTable = localStorage.getItem('challengeTable');
-this.challengeExercises = localStorage.getItem('challengeExercises');
-this.participantName = localStorage.getItem('participantName');
-this.participantType = localStorage.getItem('participantType');
+    this.challengeMode = localStorage.getItem('challengeMode') === 'true';
+    this.challengeCode = localStorage.getItem('challengeCode');
+    this.challengeTable = localStorage.getItem('challengeTable');
+    this.challengeExercises = localStorage.getItem('challengeExercises');
+    this.participantName = localStorage.getItem('participantName');
+    this.participantType = localStorage.getItem('participantType');
+
+    // 🆕 ACTIVIDAD ASIGNADA
+    this.assignmentId = localStorage.getItem('assignmentId');
+    this.isAssignedPractice = this.assignmentId !== null && this.assignmentId !== undefined;
     
     // Estadísticas
     this.stats = {
@@ -44,12 +49,11 @@ this.participantType = localStorage.getItem('participantType');
 MultiBoost.prototype.init = function() {
     var self = this;
     
-    // Esperar a que el DOM esté listo
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             self.bindEvents();
             
-            // Saltar directo a ejercicios si es práctica específica o desafío
+            // Detectar tipo de práctica e inicializar automáticamente
             if (self.adventureMode && self.practiceTable && self.practiceExercises) {
                 self.autoStartSpecificPractice();
             } else if (self.challengeMode && self.challengeTable && self.challengeExercises) {
@@ -62,7 +66,6 @@ MultiBoost.prototype.init = function() {
     } else {
         this.bindEvents();
         
-        // Saltar directo a ejercicios si es práctica específica o desafío
         if (this.adventureMode && this.practiceTable && this.practiceExercises) {
             this.autoStartSpecificPractice();
         } else if (this.challengeMode && this.challengeTable && this.challengeExercises) {
@@ -73,13 +76,12 @@ MultiBoost.prototype.init = function() {
         console.log('🚀 MultiBoost iniciado correctamente');
     }
 };
+
 // Vincular eventos de los botones
 MultiBoost.prototype.bindEvents = function() {
     var self = this;
 
-    // Validar que los elementos existen
     try {
-        // Botón de inicio
         var startBtn = document.getElementById('start-btn');
         if (startBtn) {
             startBtn.addEventListener('click', function() {
@@ -87,7 +89,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botones de selección de tablas
         var tableBtns = document.querySelectorAll('.table-btn');
         for (var i = 0; i < tableBtns.length; i++) {
             tableBtns[i].addEventListener('click', function(e) {
@@ -95,7 +96,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botones rápidos
         var selectAllBtn = document.getElementById('select-all-btn');
         if (selectAllBtn) {
             selectAllBtn.addEventListener('click', function() {
@@ -117,7 +117,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botones de cantidad de ejercicios
         var exerciseBtns = document.querySelectorAll('.exercise-btn');
         for (var i = 0; i < exerciseBtns.length; i++) {
             exerciseBtns[i].addEventListener('click', function(e) {
@@ -125,7 +124,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botón iniciar entrenamiento
         var startTrainingBtn = document.getElementById('start-training-btn');
         if (startTrainingBtn) {
             startTrainingBtn.addEventListener('click', function() {
@@ -133,7 +131,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botones de opciones en ejercicios
         var optionBtns = document.querySelectorAll('.option-btn');
         for (var i = 0; i < optionBtns.length; i++) {
             optionBtns[i].addEventListener('click', function(e) {
@@ -141,7 +138,6 @@ MultiBoost.prototype.bindEvents = function() {
             });
         }
 
-        // Botones de resultados
         var repeatBtn = document.getElementById('repeat-btn');
         if (repeatBtn) {
             repeatBtn.addEventListener('click', function() {
@@ -155,22 +151,20 @@ MultiBoost.prototype.bindEvents = function() {
                 self.newTraining();
             });
         }
-        // Vincular botón de entrenamiento específico
-           this.bindSpecificTrainingButton();
-        // Botones de cantidad en interfaz específica
-var specificExerciseBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
-for (var i = 0; i < specificExerciseBtns.length; i++) {
-    specificExerciseBtns[i].addEventListener('click', function(e) {
-        // Remover active de todos
-        var allSpecificBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
-        for (var j = 0; j < allSpecificBtns.length; j++) {
-            allSpecificBtns[j].classList.remove('active');
+
+        this.bindSpecificTrainingButton();
+
+        var specificExerciseBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
+        for (var i = 0; i < specificExerciseBtns.length; i++) {
+            specificExerciseBtns[i].addEventListener('click', function(e) {
+                var allSpecificBtns = document.querySelectorAll('#specific-practice-config .exercise-btn');
+                for (var j = 0; j < allSpecificBtns.length; j++) {
+                    allSpecificBtns[j].classList.remove('active');
+                }
+                (e.target || e.srcElement).classList.add('active');
+                self.exerciseCount = parseInt((e.target || e.srcElement).getAttribute('data-count'));
+            });
         }
-        // Añadir active al clickeado
-        (e.target || e.srcElement).classList.add('active');
-        self.exerciseCount = parseInt((e.target || e.srcElement).getAttribute('data-count'));
-    });
-}
     } catch (error) {
         console.log('Error vinculando eventos:', error);
     }
@@ -179,23 +173,21 @@ for (var i = 0; i < specificExerciseBtns.length; i++) {
 // Mostrar pantalla específica
 MultiBoost.prototype.showScreen = function(screenName) {
     try {
-        // Ocultar todas las pantallas
         var screens = document.querySelectorAll('.screen');
         for (var i = 0; i < screens.length; i++) {
             screens[i].classList.remove('active');
         }
 
-        // Mostrar la pantalla solicitada
         var targetScreen = document.getElementById(screenName + '-screen');
         if (targetScreen) {
             targetScreen.classList.add('active');
             this.currentScreen = screenName;
             console.log('📺 Mostrando pantalla: ' + screenName);
         }
-        // Configurar interfaz específica si viene del dashboard
-if (screenName === 'config' && this.adventureMode && this.practiceTable) {
-    this.setupSpecificPracticeInterface();
-}
+
+        if (screenName === 'config' && this.adventureMode && this.practiceTable) {
+            this.setupSpecificPracticeInterface();
+        }
     } catch (error) {
         console.log('Error mostrando pantalla:', error);
     }
@@ -207,13 +199,11 @@ MultiBoost.prototype.toggleTable = function(btn) {
         var table = parseInt(btn.getAttribute('data-table'));
         
         if (btn.classList.contains('selected')) {
-            // Deseleccionar
             btn.classList.remove('selected');
             this.selectedTables = this.selectedTables.filter(function(t) {
                 return t !== table;
             });
         } else {
-            // Seleccionar
             btn.classList.add('selected');
             this.selectedTables.push(table);
         }
@@ -322,15 +312,19 @@ MultiBoost.prototype.startTraining = function() {
         console.log('🚀 Iniciando entrenamiento...');
         console.log('📊 Tablas:', this.selectedTables);
         console.log('🎯 Ejercicios:', this.exerciseCount);
-// Configurar para práctica específica si viene del dashboard
-if (this.adventureMode && this.practiceTable && this.practiceExercises) {
-    this.selectedTables = [parseInt(this.practiceTable)];
-    this.exerciseCount = parseInt(this.practiceExercises);
-    console.log('🎯 Modo práctica específica: Tabla del ' + this.practiceTable + ' con ' + this.practiceExercises + ' ejercicios');
-}
-        // LIMPIEZA AUTOMÁTICA ANTES DE EMPEZAR
+
+        // 🆕 LOG ESPECIAL PARA ACTIVIDADES ASIGNADAS
+        if (this.isAssignedPractice) {
+            console.log('📋 PRÁCTICA DE ACTIVIDAD ASIGNADA:', this.assignmentId);
+        }
+
+        if (this.adventureMode && this.practiceTable && this.practiceExercises) {
+            this.selectedTables = [parseInt(this.practiceTable)];
+            this.exerciseCount = parseInt(this.practiceExercises);
+            console.log('🎯 Modo práctica específica: Tabla del ' + this.practiceTable + ' con ' + this.practiceExercises + ' ejercicios');
+        }
+
         this.cleanupSession();
-        
         this.resetStats();
         this.generateExercises();
         
@@ -345,7 +339,7 @@ if (this.adventureMode && this.practiceTable && this.practiceExercises) {
     }
 };
 
-// Generar ejercicios (CON PROTECCIÓN ANTI-BUCLES)
+// Generar ejercicios
 MultiBoost.prototype.generateExercises = function() {
     try {
         console.log('📝 Generando ejercicios...');
@@ -357,15 +351,9 @@ MultiBoost.prototype.generateExercises = function() {
         }
         
         for (var i = 0; i < this.exerciseCount; i++) {
-            console.log('📝 Generando ejercicio ' + (i + 1) + '/' + this.exerciseCount);
-            
-            // Elegir tabla aleatoria de las seleccionadas
             var table = this.selectedTables[Math.floor(Math.random() * this.selectedTables.length)];
-            
-            // Generar multiplicando aleatorio (1-10)
             var multiplicand = Math.floor(Math.random() * 10) + 1;
             
-            // Crear ejercicio
             var exercise = {
                 table: table,
                 multiplicand: multiplicand,
@@ -373,23 +361,13 @@ MultiBoost.prototype.generateExercises = function() {
                 correctAnswer: table * multiplicand
             };
             
-            console.log('➡️ Ejercicio creado:', exercise.question, '=', exercise.correctAnswer);
-            
-            // Generar opciones de respuesta
             exercise.options = this.generateOptions(exercise.correctAnswer);
-            
             this.exercises.push(exercise);
-            
-            // Log cada 10 ejercicios para ver progreso
-            if ((i + 1) % 10 === 0) {
-                console.log('✅ Progreso: ' + (i + 1) + '/' + this.exerciseCount + ' ejercicios generados');
-            }
         }
         
         console.log('✅ TODOS los ejercicios generados:', this.exercises.length);
     } catch (error) {
         console.log('❌ Error crítico generando ejercicios:', error);
-        // Crear ejercicios de emergencia
         this.exercises = [{
             table: 2,
             multiplicand: 3,
@@ -400,23 +378,21 @@ MultiBoost.prototype.generateExercises = function() {
     }
 };
 
-// Generar opciones de respuesta (SIN BUCLES INFINITOS)
+// Generar opciones de respuesta
 MultiBoost.prototype.generateOptions = function(correctAnswer) {
     try {
         var options = [correctAnswer];
         var attempts = 0;
-        var maxAttempts = 20; // LÍMITE DE INTENTOS
+        var maxAttempts = 20;
         
-        // Opción 1: Suma de dígitos
         var sumOption = this.getSumOfDigits(correctAnswer);
         if (sumOption !== correctAnswer && sumOption > 0) {
             options.push(sumOption);
         }
         
-        // Generar opciones restantes con límite de intentos
         while (options.length < 4 && attempts < maxAttempts) {
             var wrongAnswer;
-            var variance = Math.floor(Math.random() * 15) + 1; // Mayor rango
+            var variance = Math.floor(Math.random() * 15) + 1;
             
             if (Math.random() > 0.5) {
                 wrongAnswer = correctAnswer + variance;
@@ -424,7 +400,6 @@ MultiBoost.prototype.generateOptions = function(correctAnswer) {
                 wrongAnswer = Math.max(1, correctAnswer - variance);
             }
             
-            // Agregar si es único y válido
             if (options.indexOf(wrongAnswer) === -1 && wrongAnswer > 0 && wrongAnswer < 200) {
                 options.push(wrongAnswer);
             }
@@ -432,7 +407,6 @@ MultiBoost.prototype.generateOptions = function(correctAnswer) {
             attempts++;
         }
         
-        // Si aún faltan opciones, usar fórmula fija
         while (options.length < 4) {
             var fallbackOption = correctAnswer + options.length;
             if (options.indexOf(fallbackOption) === -1) {
@@ -442,12 +416,10 @@ MultiBoost.prototype.generateOptions = function(correctAnswer) {
             }
         }
         
-        console.log('✅ Opciones generadas:', options);
         return this.shuffleOptionsSmartly(options, correctAnswer);
         
     } catch (error) {
         console.log('Error generando opciones:', error);
-        // Fallback seguro
         return [correctAnswer, correctAnswer + 1, correctAnswer + 2, correctAnswer + 3];
     }
 };
@@ -478,27 +450,19 @@ MultiBoost.prototype.shuffleArray = function(array) {
         return array;
     }
 };
-// NUEVA FUNCIÓN: SHUFFLE INTELIGENTE
+
+// SHUFFLE INTELIGENTE
 MultiBoost.prototype.shuffleOptionsSmartly = function(options, correctAnswer) {
     try {
-        // Mezclar normalmente primero
         var shuffled = this.shuffleArray(options);
-        
-        // Encontrar posición de la respuesta correcta después del shuffle
         var newCorrectIndex = shuffled.indexOf(correctAnswer);
         
-        // Si es el primer ejercicio, cualquier posición está bien
         if (this.lastCorrectPosition === -1) {
             this.lastCorrectPosition = newCorrectIndex;
-            console.log('🎯 Primera respuesta correcta en posición:', newCorrectIndex);
             return shuffled;
         }
         
-        // Si la nueva posición es igual a la anterior, reorganizar
         if (newCorrectIndex === this.lastCorrectPosition) {
-            console.log('⚠️ Misma posición detectada. Reorganizando...');
-            
-            // Buscar una posición diferente disponible
             var availablePositions = [];
             for (var i = 0; i < 4; i++) {
                 if (i !== this.lastCorrectPosition) {
@@ -506,31 +470,26 @@ MultiBoost.prototype.shuffleOptionsSmartly = function(options, correctAnswer) {
                 }
             }
             
-            // Elegir una posición aleatoria de las disponibles
             var newPosition = availablePositions[Math.floor(Math.random() * availablePositions.length)];
             
-            // Intercambiar elementos
             var temp = shuffled[newPosition];
             shuffled[newPosition] = shuffled[newCorrectIndex];
             shuffled[newCorrectIndex] = temp;
             
-            console.log('🔄 Respuesta correcta movida de posición', newCorrectIndex, 'a posición', newPosition);
             this.lastCorrectPosition = newPosition;
         } else {
-            // La posición ya es diferente, guardarla
             this.lastCorrectPosition = newCorrectIndex;
-            console.log('✅ Respuesta correcta en nueva posición:', newCorrectIndex);
         }
         
         return shuffled;
         
     } catch (error) {
         console.log('Error en shuffle inteligente:', error);
-        // Si hay error, usar el método anterior
         this.lastCorrectPosition = -1;
         return this.shuffleArray(options);
     }
 };
+
 // Mostrar siguiente ejercicio
 MultiBoost.prototype.showNextExercise = function() {
     try {
@@ -756,7 +715,7 @@ MultiBoost.prototype.updateStatsDisplay = function() {
     }
 };
 
-// Mostrar resultados
+// 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
 MultiBoost.prototype.showResults = function() {
     try {
         console.log('🏁 Entrenamiento completado');
@@ -793,36 +752,114 @@ MultiBoost.prototype.showResults = function() {
         
         var resultsTitle = document.getElementById('results-title');
         if (resultsTitle) {
-            if (percentage >= 80) {
-                resultsTitle.textContent = '🎉 ¡EXCELENTE ENTRENAMIENTO!';
-                resultsTitle.style.color = '#10b981';
-                this.playCelebrationSound();
-            } else if (percentage >= 60) {
-                resultsTitle.textContent = '👍 ¡BUEN TRABAJO!';
-                resultsTitle.style.color = '#f59e0b';
+            // 🆕 MENSAJE ESPECIAL PARA ACTIVIDADES ASIGNADAS
+            if (this.isAssignedPractice) {
+                if (percentage >= 80) {
+                    resultsTitle.textContent = '🎉 ¡ACTIVIDAD COMPLETADA CON ÉXITO!';
+                    resultsTitle.style.color = '#10b981';
+                } else {
+                    resultsTitle.textContent = '💪 ¡ACTIVIDAD COMPLETADA - SIGUE MEJORANDO!';
+                    resultsTitle.style.color = '#f59e0b';
+                }
             } else {
-                resultsTitle.textContent = '💪 ¡SIGUE PRACTICANDO!';
-                resultsTitle.style.color = '#f97316';
+                if (percentage >= 80) {
+                    resultsTitle.textContent = '🎉 ¡EXCELENTE ENTRENAMIENTO!';
+                    resultsTitle.style.color = '#10b981';
+                    this.playCelebrationSound();
+                } else if (percentage >= 60) {
+                    resultsTitle.textContent = '👍 ¡BUEN TRABAJO!';
+                    resultsTitle.style.color = '#f59e0b';
+                } else {
+                    resultsTitle.textContent = '💪 ¡SIGUE PRACTICANDO!';
+                    resultsTitle.style.color = '#f97316';
+                }
             }
         }
         
         this.showMistakesReview();
         this.configureResultsButtons(percentage);
- // Guardar en Firebase si está en Modo Aventura
-if (this.adventureMode && this.userId) {
-    this.saveSessionToFirebase();
-}
 
-// Guardar resultado del desafío
-if (this.challengeMode && this.challengeCode) {
-    this.saveChallengeResult();
-}
+        // Guardar en Firebase si está en Modo Aventura
+        if (this.adventureMode && this.userId) {
+            this.saveSessionToFirebase();
+        }
+
+        // Guardar resultado del desafío
+        if (this.challengeMode && this.challengeCode) {
+            this.saveChallengeResult();
+        }
+
+        // 🆕 MARCAR ACTIVIDAD ASIGNADA COMO COMPLETADA
+        if (this.isAssignedPractice && this.assignmentId) {
+            this.completeAssignedActivity(percentage, finalTime);
+        }
 
         this.showScreen('results');
 
-
     } catch (error) {
         console.log('Error mostrando resultados:', error);
+    }
+};
+
+// 🆕 FUNCIÓN PARA COMPLETAR ACTIVIDAD ASIGNADA
+MultiBoost.prototype.completeAssignedActivity = function(percentage, timeSeconds) {
+    var self = this;
+    
+    try {
+        if (!window.db || !window.doc || !window.updateDoc) {
+            console.log('Firebase no disponible para completar actividad');
+            return;
+        }
+
+        console.log('📋 Marcando actividad asignada como completada:', this.assignmentId);
+        console.log('📊 Resultados: ' + percentage + '% en ' + timeSeconds + ' segundos');
+
+        var completionData = {
+            status: 'completed',
+            completedAt: new Date().toISOString(),
+            results: {
+                correct: this.stats.correct,
+                incorrect: this.stats.incorrect,
+                percentage: percentage,
+                timeSeconds: timeSeconds,
+                exercises: this.exerciseCount,
+                table: parseInt(this.practiceTable)
+            }
+        };
+
+        window.updateDoc(window.doc(window.db, 'assigned_activities', this.assignmentId), completionData)
+            .then(function() {
+                console.log('✅ Actividad asignada marcada como completada en Firebase');
+                
+                // Limpiar localStorage de asignación
+                localStorage.removeItem('assignmentId');
+                
+                // Mostrar mensaje especial en resultados
+                var successMessage = document.createElement('div');
+                successMessage.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: white; margin-bottom: 5px;">
+                            ¡Actividad Asignada Completada!
+                        </div>
+                        <div style="font-size: 0.9rem; color: white; opacity: 0.9;">
+                            Tu familia podrá ver tus resultados en el dashboard
+                        </div>
+                    </div>
+                `;
+                
+                var resultsContainer = document.querySelector('#results-screen .container');
+                if (resultsContainer) {
+                    resultsContainer.insertBefore(successMessage, resultsContainer.children[1]);
+                }
+                
+            })
+            .catch(function(error) {
+                console.error('❌ Error marcando actividad como completada:', error);
+            });
+
+    } catch (error) {
+        console.error('❌ Error en completeAssignedActivity:', error);
     }
 };
 
@@ -856,7 +893,7 @@ MultiBoost.prototype.showMistakesReview = function() {
     }
 };
 
-// Configurar botones de resultados - VERSIÓN ACTUALIZADA
+// Configurar botones de resultados - VERSIÓN ACTUALIZADA PARA ASIGNACIONES
 MultiBoost.prototype.configureResultsButtons = function(percentage) {
     try {
         // Configurar botones según el modo
@@ -867,7 +904,6 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
             document.getElementById('repeat-btn').style.display = 'none';
             document.getElementById('new-training-btn').style.display = 'none';
             
-         // Configurar botón home según usuario
             var homeBtn = document.getElementById('home-btn');
             if (this.participantType === 'logged') {
                 homeBtn.textContent = '🏠 Volver al Dashboard';
@@ -876,6 +912,26 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
                 homeBtn.textContent = '🏠 Volver al Inicio';
                 homeBtn.onclick = function() { window.location.href = 'index.html'; };
             }
+        } else if (this.isAssignedPractice) {
+            // 🆕 MODO ACTIVIDAD ASIGNADA
+            var homeBtn = document.getElementById('home-btn');
+            if (homeBtn) {
+                homeBtn.textContent = '🏠 Volver al Dashboard';
+                homeBtn.onclick = function() { window.location.href = 'dashboard.html'; };
+            }
+            
+            // Ocultar botón repetir para actividades asignadas
+            var repeatBtn = document.getElementById('repeat-btn');
+            if (repeatBtn) {
+                repeatBtn.style.display = 'none';
+            }
+            
+            // Cambiar texto del botón nuevo entrenamiento
+            var newTrainingBtn = document.getElementById('new-training-btn');
+            if (newTrainingBtn) {
+                newTrainingBtn.textContent = '🎯 Practicar Otra Tabla';
+            }
+            
         } else {
             // MODO NORMAL
             var repeatBtn = document.getElementById('repeat-btn');
@@ -895,6 +951,7 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
         console.log('Error configurando botones:', error);
     }
 };
+
 // Repetir entrenamiento
 MultiBoost.prototype.repeatTraining = function() {
     try {
@@ -910,6 +967,18 @@ MultiBoost.prototype.repeatTraining = function() {
 MultiBoost.prototype.newTraining = function() {
     try {
         console.log('🚀 Nuevo entrenamiento');
+        
+        // 🆕 LIMPIAR DATOS DE ASIGNACIÓN PARA NUEVO ENTRENAMIENTO LIBRE
+        if (this.isAssignedPractice) {
+            localStorage.removeItem('assignmentId');
+            localStorage.removeItem('practiceTable');
+            localStorage.removeItem('practiceExercises');
+            this.isAssignedPractice = false;
+            this.assignmentId = null;
+            this.practiceTable = null;
+            this.practiceExercises = null;
+        }
+        
         this.cleanupSession();
         this.showScreen('config');
     } catch (error) {
@@ -917,12 +986,11 @@ MultiBoost.prototype.newTraining = function() {
     }
 };
 
-// LIMPIEZA COMPLETA DE SESIÓN - ¡LA CLAVE DEL ARREGLO!
+// LIMPIEZA COMPLETA DE SESIÓN
 MultiBoost.prototype.cleanupSession = function() {
     try {
         console.log('🧹 Limpiando sesión...');
         
-        // Limpiar todos los timers
         if (this.timer) {
             clearInterval(this.timer);
             this.timer = null;
@@ -933,13 +1001,11 @@ MultiBoost.prototype.cleanupSession = function() {
             this.sessionTimer = null;
         }
         
-        // Resetear estado
         this.currentExercise = 0;
         this.exercises = [];
         this.timeLeft = 10;
         this.sessionStartTime = null;
         
-        // Limpiar interfaz de ejercicios
         var optionBtns = document.querySelectorAll('.option-btn');
         for (var i = 0; i < optionBtns.length; i++) {
            optionBtns[i].className = 'option-btn';
@@ -950,24 +1016,22 @@ MultiBoost.prototype.cleanupSession = function() {
            optionBtns[i].style.borderColor = '';
         }
         
-        // Resetear timer visual
         var timerEl = document.getElementById('timer-display');
         if (timerEl) {
             timerEl.textContent = '10';
             timerEl.className = 'timer';
         }
         
-        // Resetear barra de progreso
         var progressFill = document.getElementById('progress-fill');
         if (progressFill) {
             progressFill.style.width = '0%';
         }
         
-        // Resetear tiempo total
         var totalTimeEl = document.getElementById('total-time');
         if (totalTimeEl) {
             totalTimeEl.textContent = '00:00';
         }
+        
         this.lastCorrectPosition = -1;
         console.log('✅ Sesión completamente limpia');
     } catch (error) {
@@ -997,6 +1061,7 @@ MultiBoost.prototype.playIncorrectSound = function() {
 MultiBoost.prototype.playCelebrationSound = function() {
     console.log('🔊 ♪ Sonido: ¡Celebración!');
 };
+
 // Guardar sesión en Firebase
 MultiBoost.prototype.saveSessionToFirebase = function() {
     var self = this;
@@ -1013,7 +1078,6 @@ MultiBoost.prototype.saveSessionToFirebase = function() {
         var percentage = Math.round((this.stats.correct / totalExercises) * 100);
         var finalTime = Math.floor((new Date().getTime() - this.sessionStartTime) / 1000);
 
-        // Datos de la sesión
         var sessionData = {
             date: new Date().toISOString(),
             tables: this.selectedTables,
@@ -1024,13 +1088,12 @@ MultiBoost.prototype.saveSessionToFirebase = function() {
             totalTime: finalTime,
             mistakes: this.stats.mistakes,
             practiceTable: this.practiceTable || null,
-            mode: this.practiceTable ? 'specific' : 'general'
+            mode: this.practiceTable ? 'specific' : 'general',
+            wasAssignedPractice: this.isAssignedPractice || false // 🆕 IDENTIFICAR SI ERA ASIGNADA
         };
 
-        // Generar ID único para la sesión
         var sessionId = 'session_' + Date.now();
 
-        // Guardar sesión en Firestore
         window.setDoc(window.doc(window.db, 'sessions', this.userId + '_' + sessionId), sessionData)
             .then(function() {
                 console.log('✅ Sesión guardada exitosamente');
@@ -1050,7 +1113,6 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
     var self = this;
     
     try {
-        // Obtener progreso actual
         window.getDoc(window.doc(window.db, 'progress', this.userId))
             .then(function(docSnapshot) {
                 var currentProgress = docSnapshot.exists() ? docSnapshot.data() : {
@@ -1058,7 +1120,6 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
                     totalSessions: 0
                 };
 
-                // Actualizar progreso por tabla
                 for (var i = 0; i < self.selectedTables.length; i++) {
                     var table = self.selectedTables[i];
                     
@@ -1075,11 +1136,9 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
                     };
                 }
 
-                // Actualizar sesiones totales
                 currentProgress.totalSessions = (currentProgress.totalSessions || 0) + 1;
                 currentProgress.lastUpdated = new Date().toISOString();
 
-                // Guardar progreso actualizado
                 return window.setDoc(window.doc(window.db, 'progress', self.userId), currentProgress);
             })
             .then(function() {
@@ -1093,20 +1152,23 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
         console.error('Error en updateUserProgress:', error);
     }
 };
+
 // Configurar interfaz para práctica específica
 MultiBoost.prototype.setupSpecificPracticeInterface = function() {
     try {
-        // Ocultar configuración normal y mostrar específica
         document.getElementById('normal-config').style.display = 'none';
         document.getElementById('specific-practice-config').style.display = 'block';
         
-        // Actualizar título con la tabla específica
-        document.getElementById('specific-table-title').textContent = '🎯 Practicando Tabla del ' + this.practiceTable;
+        // 🆕 MENSAJE ESPECIAL PARA ACTIVIDADES ASIGNADAS
+        if (this.isAssignedPractice) {
+            document.getElementById('specific-table-title').textContent = '📋 Actividad Asignada: Tabla del ' + this.practiceTable;
+            document.getElementById('specific-table-title').style.color = '#f59e0b';
+        } else {
+            document.getElementById('specific-table-title').textContent = '🎯 Practicando Tabla del ' + this.practiceTable;
+        }
         
-        // Pre-configurar la tabla seleccionada
         this.selectedTables = [parseInt(this.practiceTable)];
         
-        // Configurar cantidad si viene predefinida
         if (this.practiceExercises) {
             this.exerciseCount = parseInt(this.practiceExercises);
         }
@@ -1127,25 +1189,27 @@ MultiBoost.prototype.bindSpecificTrainingButton = function() {
         });
     }
 };
+
 // Auto-iniciar práctica específica
 MultiBoost.prototype.autoStartSpecificPractice = function() {
     try {
         console.log('🚀 Auto-iniciando práctica específica para tabla del ' + this.practiceTable);
         
-        // Configurar automáticamente
+        // 🆕 LOG ESPECIAL PARA ACTIVIDADES ASIGNADAS
+        if (this.isAssignedPractice) {
+            console.log('📋 INICIANDO ACTIVIDAD ASIGNADA:', this.assignmentId);
+        }
+        
         this.selectedTables = [parseInt(this.practiceTable)];
         this.exerciseCount = parseInt(this.practiceExercises);
         
-        // Limpiar sesión e inicializar
         this.cleanupSession();
         this.resetStats();
         this.generateExercises();
         
-        // Iniciar timers
         this.sessionStartTime = new Date().getTime();
         this.startSessionTimer();
         
-        // Ir directo a ejercicios
         this.currentExercise = 0;
         this.showNextExercise();
         this.showScreen('exercise');
@@ -1153,29 +1217,25 @@ MultiBoost.prototype.autoStartSpecificPractice = function() {
         console.log('✅ Práctica específica iniciada automáticamente');
     } catch (error) {
         console.log('Error en auto-inicio:', error);
-        // Si falla, usar flujo normal
         this.showScreen('welcome');
     }
 };
+
 // Auto-iniciar desafío
 MultiBoost.prototype.autoStartChallenge = function() {
     try {
         console.log('🏆 Auto-iniciando desafío ' + this.challengeCode);
         
-        // Configurar automáticamente
         this.selectedTables = [parseInt(this.challengeTable)];
         this.exerciseCount = parseInt(this.challengeExercises);
         
-        // Limpiar sesión e inicializar
         this.cleanupSession();
         this.resetStats();
         this.generateExercises();
         
-        // Iniciar timers
         this.sessionStartTime = new Date().getTime();
         this.startSessionTimer();
         
-        // Ir directo a ejercicios
         this.currentExercise = 0;
         this.showNextExercise();
         this.showScreen('exercise');
@@ -1186,30 +1246,23 @@ MultiBoost.prototype.autoStartChallenge = function() {
         this.showScreen('welcome');
     }
 };
-// Guardar resultado del desafío - VERSIÓN CON DEBUG MEJORADO
+
+// Guardar resultado del desafío
 MultiBoost.prototype.saveChallengeResult = function() {
     var self = this;
     
     try {
-        // Verificar que estamos en modo desafío
         if (!this.challengeMode || !this.challengeCode) {
             console.log('❌ No estamos en modo desafío');
             return;
         }
 
-        // Verificar que Firebase esté disponible
         if (!window.db || !window.doc || !window.updateDoc || !window.arrayUnion) {
-            console.log('❌ Firebase no disponible. Verificando...');
-            console.log('db:', !!window.db);
-            console.log('doc:', !!window.doc);
-            console.log('updateDoc:', !!window.updateDoc);
-            console.log('arrayUnion:', !!window.arrayUnion);
+            console.log('❌ Firebase no disponible para desafío');
             return;
         }
 
         console.log('💾 Guardando resultado del desafío...');
-        console.log('🏆 Código del desafío:', this.challengeCode);
-        console.log('👤 Participante:', this.participantName);
 
         var totalExercises = this.stats.correct + this.stats.incorrect;
         var percentage = Math.round((this.stats.correct / totalExercises) * 100);
@@ -1223,31 +1276,23 @@ MultiBoost.prototype.saveChallengeResult = function() {
             timestamp: new Date().toISOString()
         };
 
-        console.log('📊 Datos a guardar:', resultData);
-
-        // Actualizar el documento del desafío añadiendo el resultado
         window.updateDoc(window.doc(window.db, 'challenges', this.challengeCode), {
             results: window.arrayUnion(resultData)
         }).then(function() {
             console.log('✅ Resultado del desafío guardado exitosamente');
-            console.log('🔄 Redirigiendo a ranking en 3 segundos...');
             
-          // En lugar de redireccionar, cargar ranking aquí
-if (self.challengeMode && self.challengeCode) {
-    self.loadChallengeRanking();
-}
+            if (self.challengeMode && self.challengeCode) {
+                self.loadChallengeRanking();
+            }
         }).catch(function(error) {
             console.error('❌ Error guardando resultado del desafío:', error);
-            console.error('Detalles del error:', error.message);
-            
-            // Si falla, al menos mostrar que completó el desafío
-            alert('Desafío completado, pero hubo un problema guardando el resultado. Código: ' + self.challengeCode);
         });
 
     } catch (error) {
         console.error('❌ Error crítico en saveChallengeResult:', error);
     }
 };
+
 // Función para volver al inicio
 window.goToHome = function() {
     console.log('Navegando al inicio desde tablas');
@@ -1259,16 +1304,7 @@ window.goToHome = function() {
     }
 };
 
-// Inicializar MultiBoost
-(function() {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            window.multiBoost = new MultiBoost();
-        });
-    } else {
-        window.multiBoost = new MultiBoost();
-    }
-    // Cargar ranking del desafío para mostrar en resultados
+// Cargar ranking del desafío para mostrar en resultados
 MultiBoost.prototype.loadChallengeRanking = function() {
     var self = this;
     
@@ -1301,7 +1337,6 @@ MultiBoost.prototype.loadChallengeRanking = function() {
 // Mostrar el ranking en la pantalla de resultados
 MultiBoost.prototype.displayChallengeRanking = function(results) {
     try {
-        // Ordenar resultados por score y tiempo
         var sortedResults = results.sort(function(a, b) {
             if (b.score !== a.score) return b.score - a.score;
             return a.time - b.time;
@@ -1349,6 +1384,7 @@ MultiBoost.prototype.displayChallengeRanking = function(results) {
         console.error('Error mostrando ranking:', error);
     }
 };
+
 // Repetir desafío específico
 MultiBoost.prototype.repeatChallenge = function() {
     try {
@@ -1375,6 +1411,7 @@ MultiBoost.prototype.showMistakesModal = function() {
         console.log('Error mostrando errores:', error);
     }
 };
+
 // Vincular eventos de nuevos botones
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
@@ -1393,4 +1430,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1000);
 });
+
+// Inicializar MultiBoost
+(function() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            window.multiBoost = new MultiBoost();
+        });
+    } else {
+        window.multiBoost = new MultiBoost();
+    }
 })();
