@@ -40,7 +40,16 @@
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
-        
+        .btn-card-family {
+    background: linear-gradient(135deg, #10b981, #059669);
+    transition: all 0.3s ease;
+    transform: translateY(0);
+       }
+
+         .btn-card-family:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
+           }
         .floating-emoji {
             animation: float 3s ease-in-out infinite;
         }
@@ -152,7 +161,7 @@
             </div>
             
             <!-- Opciones de Entrenamiento -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-4xl mx-auto">
                 
                 <!-- Opción 1: Tablas de Multiplicar -->
                 <div onclick="goToTablas()" class="btn-card rounded-3xl p-8 cursor-pointer border border-white border-opacity-20">
@@ -195,7 +204,26 @@
                         🔥 ¡Desafío Matemático Avanzado!
                     </div>
                 </div>
-                
+                <!-- Opción 3: Seguimiento Parental -->
+<div onclick="openFamilyLogin()" class="btn-card-family rounded-3xl p-8 cursor-pointer border border-white border-opacity-20">
+    <div class="text-6xl mb-6">👨‍👩‍👧‍👦</div>
+    <h2 class="text-3xl font-bold mb-4 text-white">Seguimiento Parental</h2>
+    <p class="text-lg mb-6 opacity-90">
+        Dashboard familiar para seguir el progreso y asignar tareas a tus hijos
+    </p>
+    <div class="bg-white bg-opacity-20 rounded-2xl p-4 mb-6">
+        <div class="text-sm opacity-80 mb-2">Características:</div>
+        <div class="text-sm space-y-1">
+            <div>✓ Ver progreso de todos los hijos</div>
+            <div>✓ Asignar tareas personalizadas</div>
+            <div>✓ Reportes de rendimiento</div>
+            <div>✓ Control total familiar</div>
+        </div>
+    </div>
+    <div class="text-white font-bold text-lg">
+        👨‍👩‍👧‍👦 ¡Acceder al Dashboard Familiar!
+    </div>
+</div>
             </div>
             
             <!-- Footer info -->
@@ -271,6 +299,188 @@
                 this.style.transform = 'translateY(0) scale(1)';
             });
         });
+
+        // === FUNCIONES DE ACCESO FAMILIAR ===
+
+// Abrir modal de login familiar
+function openFamilyLogin() {
+    console.log('🔐 Abriendo modal de login familiar');
+    const modal = document.getElementById('family-login-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Limpiar campos
+    document.getElementById('family-email').value = '';
+    document.getElementById('family-password').value = '';
+    document.getElementById('login-error').classList.add('hidden');
+}
+
+// Cerrar modal de login familiar  
+function closeFamilyLogin() {
+    console.log('❌ Cerrando modal de login familiar');
+    const modal = document.getElementById('family-login-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Manejar el formulario de login
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('family-login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleFamilyLogin();
+        });
+    }
+});
+
+// Función principal de login
+async function handleFamilyLogin() {
+    console.log('🚀 Iniciando proceso de login familiar');
+    
+    const email = document.getElementById('family-email').value;
+    const password = document.getElementById('family-password').value;
+    const loginBtn = document.getElementById('login-btn');
+    const loadingDiv = document.getElementById('login-loading');
+    const errorDiv = document.getElementById('login-error');
+    
+    // Validaciones básicas
+    if (!email || !password) {
+        showLoginError('Por favor completa todos los campos');
+        return;
+    }
+    
+    if (!email.includes('@')) {
+        showLoginError('Por favor ingresa un email válido');
+        return;
+    }
+    
+    // Mostrar loading
+    loginBtn.style.display = 'none';
+    loadingDiv.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
+    
+    try {
+        // SIMULACIÓN DE LOGIN (TEMPORAL)
+        // En el siguiente paso implementaremos Firebase Auth real
+        await simulateLogin(email, password);
+        
+        console.log('✅ Login exitoso');
+        
+        // Redireccionar al dashboard
+        window.location.href = 'family-dashboard.html';
+        
+    } catch (error) {
+        console.error('❌ Error en login:', error);
+        showLoginError(error.message || 'Error de autenticación');
+        
+        // Restaurar UI
+        loginBtn.style.display = 'block';
+        loadingDiv.classList.add('hidden');
+    }
+}
+
+// Función temporal de simulación (la reemplazaremos con Firebase)
+async function simulateLogin(email, password) {
+    // Simular delay de red
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Credenciales temporales para testing
+    const validCredentials = [
+        { email: 'familia@test.com', password: '123456' },
+        { email: 'papa@multiboost.com', password: 'papamulti' },
+        { email: 'mama@multiboost.com', password: 'mamamulti' }
+    ];
+    
+    const isValid = validCredentials.some(cred => 
+        cred.email === email && cred.password === password
+    );
+    
+    if (!isValid) {
+        throw new Error('Email o contraseña incorrectos');
+    }
+    
+    // Simular almacenamiento de sesión temporal
+    localStorage.setItem('multiboost_family_session', JSON.stringify({
+        email: email,
+        loginTime: Date.now(),
+        isAuthenticated: true
+    }));
+}
+
+// Mostrar error de login
+function showLoginError(message) {
+    const errorDiv = document.getElementById('login-error');
+    const errorMessage = document.getElementById('error-message');
+    
+    errorMessage.textContent = message;
+    errorDiv.classList.remove('hidden');
+}
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('family-login-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            closeFamilyLogin();
+        }
+    }
+});
+
+console.log('✅ Sistema de login familiar cargado');
     </script>
+    <!-- MODAL DE LOGIN FAMILIAR -->
+<div id="family-login-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-auto">
+        <!-- Header del Modal -->
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">👨‍👩‍👧‍👦 Acceso Familiar</h2>
+            <p class="text-gray-600">Ingresa tus credenciales para acceder al dashboard</p>
+        </div>
+
+        <!-- Formulario de Login -->
+        <form id="family-login-form" class="space-y-4">
+            <!-- Email -->
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">📧 Email Familiar:</label>
+                <input type="email" id="family-email" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
+                       placeholder="familia@ejemplo.com">
+            </div>
+
+            <!-- Contraseña -->
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">🔒 Contraseña:</label>
+                <input type="password" id="family-password" required 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none"
+                       placeholder="Tu contraseña familiar">
+            </div>
+
+            <!-- Mensaje de Error -->
+            <div id="login-error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+                <span id="error-message">Error de autenticación</span>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex flex-col space-y-3 pt-4">
+                <button type="submit" id="login-btn" 
+                        class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-600 hover:to-blue-600 transition-all">
+                    🚀 Acceder al Dashboard
+                </button>
+                
+                <button type="button" onclick="closeFamilyLogin()" 
+                        class="w-full bg-gray-400 text-white font-bold py-3 px-6 rounded-xl hover:bg-gray-500 transition-all">
+                    ❌ Cancelar
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading Spinner -->
+        <div id="login-loading" class="hidden text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p class="text-gray-600 mt-2">Verificando credenciales...</p>
+        </div>
+    </div>
+</div>
 </body>
 </html>
