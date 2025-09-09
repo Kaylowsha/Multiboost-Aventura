@@ -204,7 +204,7 @@
     <!-- FIREBASE Y JAVASCRIPT LIMPIO -->
     <script type="module">
         import { auth, db } from './firebase-config.js';
-        import { collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { collection, getDocs, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         console.log('🚀 Dashboard Familiar - VERSIÓN LIMPIA');
 
@@ -532,30 +532,74 @@ function renderDetailedTables(progressData) {
             showNotification('⚡', 'Asignación', `Abriendo asignador para ${student.name}`);
         };
 
-        window.assignTable = function(tableNumber) {
-            if (!currentStudentForModal) return;
-            
-            showNotification('✅', 'Actividad Asignada', `Tabla ${tableNumber} asignada a ${currentStudentForModal.name}`);
-            closeQuickAssignModal();
+       window.assignTable = async function(tableNumber) {
+    if (!currentStudentForModal) {
+        console.error('❌ No hay estudiante seleccionado');
+        return;
+    }
+    
+    console.log(`🎯 Asignando tabla ${tableNumber} a ${currentStudentForModal.name}`);
+    
+    try {
+        // Determinar prioridad basada en el progreso actual
+        const tableData = currentStudentForModal.progress?.tables?.[tableNumber];
+        let priority = 'normal';
+        if (!tableData || tableData.sessions === 0) {
+            priority = 'high'; // Nueva tabla
+        } else if (tableData.accuracy < 50) {
+            priority = 'urgent'; // Tabla crítica
+        } else if (tableData.accuracy < 80) {
+            priority = 'high'; // Necesita mejora
+        }
+        
+        // Crear datos de la asignación
+        const assignmentData = {
+            studentId: currentStudentForModal.id,
+            studentName: currentStudentForModal.name,
+            assignedBy: 'family_dashboard',
+            table: tableNumber,
+            exercises: 20, // Por defecto 20 ejercicios
+            priority: priority,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            description: `Practicar tabla del ${tableNumber}`,
+            completedAt: null
         };
-
-        window.closeStudentModal = function() {
-            document.getElementById('student-detail-modal').style.display = 'none';
-        };
-
-        window.closeQuickAssignModal = function() {
-            document.getElementById('quick-assign-modal').style.display = 'none';
-        };
-
-        window.refreshDashboard = function() {
-            location.reload();
-        };
-
-        window.logout = function() {
-            if (confirm('¿Cerrar sesión?')) {
-                window.location.href = 'index.html';
-            }
-        };
+        
+        // Generar ID único para la asignación
+        const assignmentId = 'assignment_' + Date.now() + '_' + tableNumber;
+        
+        // Guardar en Firebase
+        await setDoc(doc(db, 'assigned_activities', assignmentId), assignmentData);
+        
+        console.log('✅ Asignación guardada en Firebase:', assignmentId);
+        
+        // Determinar emoji y mensaje según prioridad
+        let emoji = '✅';
+        let priorityText = 'Normal';
+        if (priority === 'urgent') {
+            emoji = '🚨';
+            priorityText = 'URGENTE';
+        } else if (priority === 'high') {
+            emoji = '⚡';
+            priorityText = 'Alta';
+        }
+        
+        // Mostrar notificación de éxito
+        showNotification(
+            emoji,
+            'Actividad Asignada',
+            `Tabla ${tableNumber} asignada a ${currentStudentForModal.name} (Prioridad: ${priorityText})`
+        );
+        
+        // Cerrar modal de asignación
+        closeQuickAssignModal();
+        
+    } catch (error) {
+        console.error('❌ Error guardando asignación:', error);
+        showNotification('❌', 'Error', 'Error asignando actividad. Intenta de nuevo.');
+    }
+};
 
         function showNotification(icon, title, message) {
             const notification = document.getElementById('notification');
