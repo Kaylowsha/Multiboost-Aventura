@@ -181,7 +181,7 @@ async function registerUser() {
         const user = userCredential.user;
 
         // 🆕 ENVIAR EMAIL DE VERIFICACIÓN
-        await user.sendEmailVerification(user);
+        await window.sendEmailVerification(user);
         console.log('📧 Email de verificación enviado a:', email);
 
         // Generar código único
@@ -329,7 +329,7 @@ async function loginUser() {
             try {
                 const user = window.auth.currentUser;
                 if (user) {
-                    await user.sendEmailVerification(user);
+                    await window.sendEmailVerification(user);
                     showVerificationMessage('Email de verificación reenviado. Revisa tu bandeja de entrada.', 'success');
                 } else {
                     showVerificationMessage('Error: Usuario no encontrado. Intenta registrarte de nuevo.', 'error');
@@ -355,7 +355,7 @@ async function loginUser() {
                 const user = window.auth.currentUser;
                 if (user) {
                     // Recargar los datos del usuario para obtener estado actualizado
-                    await user.reload(user);
+                    await window.reload(user);
                     
                     if (user.emailVerified) {
                         showVerificationMessage('¡Email verificado exitosamente! Redirigiendo...', 'success');
