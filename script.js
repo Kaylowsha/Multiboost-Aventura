@@ -1,5 +1,5 @@
 // MULTIBOOST - ENTRENAMIENTO DE MULTIPLICACIONES
-// Versión con completado de actividades asignadas
+// Versión corregida sin errores de sintaxis
 
 function MultiBoost() {
     // Estado de la aplicación
@@ -30,24 +30,26 @@ function MultiBoost() {
     this.participantName = localStorage.getItem('participantName');
     this.participantType = localStorage.getItem('participantType');
 
-    // 🆕 ACTIVIDAD ASIGNADA - VERSIÓN MEJORADA
-this.assignedTaskData = localStorage.getItem('assignedTask');
-if (this.assignedTaskData) {
-    try {
-    var taskData = JSON.parse(this.assignedTaskData);
-    this.assignmentId = taskData.taskId;
-    this.practiceTable = taskData.tableNumber.toString();
-    this.practiceExercises = taskData.exerciseCount ? taskData.exerciseCount.toString() : '20';
-    this.isAssignedPractice = true;
-    console.log('📋 Tarea asignada detectada:', taskData);
-} catch (error) {
-    console.log('Error parseando tarea asignada:', error);
+    // 🆕 ACTIVIDAD ASIGNADA - VERSIÓN ESTABLE
+    this.assignedTaskData = null;
+    this.assignmentId = null;
     this.isAssignedPractice = false;
-}
-} else {
-    this.assignmentId = localStorage.getItem('assignmentId');
-    this.isAssignedPractice = this.assignmentId !== null && this.assignmentId !== undefined;
-}
+
+    try {
+        var assignedTask = localStorage.getItem('assignedTask');
+        if (assignedTask) {
+            this.assignedTaskData = JSON.parse(assignedTask);
+            this.assignmentId = this.assignedTaskData.taskId;
+            this.practiceTable = this.assignedTaskData.tableNumber ? this.assignedTaskData.tableNumber.toString() : null;
+            this.practiceExercises = this.assignedTaskData.exerciseCount ? this.assignedTaskData.exerciseCount.toString() : '20';
+            this.isAssignedPractice = true;
+            console.log('📋 Tarea asignada detectada:', this.assignedTaskData);
+        }
+    } catch (error) {
+        console.log('⚠️ Error parseando tarea asignada, ignorando:', error);
+        localStorage.removeItem('assignedTask');
+        this.isAssignedPractice = false;
+    }
     
     // Estadísticas
     this.stats = {
@@ -594,53 +596,13 @@ MultiBoost.prototype.updateTimerDisplay = function() {
     }
 };
 
-// Timer de sesión
+// Timer de sesión - VERSIÓN CORREGIDA
 MultiBoost.prototype.startSessionTimer = function() {
     var self = this;
     
     try {
         if (this.sessionTimer) {
             clearInterval(this.sessionTimer);
-        }
-        
-        this.sessionTimer = setInterval(function() {
-            var elapsed = Math.floor((new Date().getTime() - self.sessionStartTime) / 1000);
-            var minutes = Math.floor(elapsed / 60);
-            var seconds = elapsed % 60;
-            
-            var timeEl = document.getElementById('total-time');
-            if (timeEl) {
-                var minStr = minutes < 10 ? '0' + minutes : minutes.toString();
-                var secStr = seconds < 10 ? '0' + seconds : seconds.toString();
-                timeEl.textContent = minStr + ':' + secStr;
-            }
-        }, 1000);
-    } catch (error) {
-        console.log('Error con timer de sesión:', error);
-    }
-};
-// NUEVO: Preparar datos para Firebase
-const sessionData = {
-    tables: this.selectedTables,
-    totalExercises: this.stats.correct + this.stats.incorrect,
-    correct: this.stats.correct,
-    incorrect: this.stats.incorrect,
-    totalTime: Math.floor((new Date().getTime() - this.sessionStartTime) / 1000),
-    exercises: this.exercises.map(ex => ({
-        table: ex.table,
-        multiplicand: ex.multiplicand,
-        correctAnswer: ex.correctAnswer,
-        userAnswer: ex.userAnswer || null,
-        isCorrect: ex.isCorrect || false
-    }))
-};
-
-// NUEVO: Guardar en Firebase si está en modo aventura
-saveSessionToFirebase(sessionData).then(saved => {
-    if (saved) {
-        console.log('🎉 Datos guardados exitosamente en Firebase');
-    }
-});
         }
         
         this.sessionTimer = setInterval(function() {
@@ -770,19 +732,14 @@ MultiBoost.prototype.updateStatsDisplay = function() {
     }
 };
 
-
-        // 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
+// 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
 MultiBoost.prototype.showResults = function() {
     try {
         console.log('🏁 Entrenamiento completado');
         
-       if (this.sessionTimer) {
+        if (this.sessionTimer) {
             clearInterval(this.sessionTimer);
         }
-        
-        var totalExercises = this.stats.correct + this.stats.incorrect;
-        var percentage = Math.round((this.stats.correct / totalExercises) * 100);
-        var finalTime = Math.floor((new Date().getTime() - this.sessionStartTime) / 1000);
         
         var totalExercises = this.stats.correct + this.stats.incorrect;
         var percentage = Math.round((this.stats.correct / totalExercises) * 100);
@@ -893,20 +850,15 @@ MultiBoost.prototype.completeAssignedActivity = function(percentage, timeSeconds
                 
                 // Limpiar localStorage de asignación
                 localStorage.removeItem('assignmentId');
+                localStorage.removeItem('assignedTask');
                 
                 // Mostrar mensaje especial en resultados
                 var successMessage = document.createElement('div');
-                successMessage.innerHTML = `
-                    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: white; margin-bottom: 5px;">
-                            ¡Actividad Asignada Completada!
-                        </div>
-                        <div style="font-size: 0.9rem; color: white; opacity: 0.9;">
-                            Tu familia podrá ver tus resultados en el dashboard
-                        </div>
-                    </div>
-                `;
+                successMessage.innerHTML = '<div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 15px; margin: 20px 0; text-align: center;">' +
+                    '<div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>' +
+                    '<div style="font-size: 1.2rem; font-weight: bold; color: white; margin-bottom: 5px;">¡Actividad Asignada Completada!</div>' +
+                    '<div style="font-size: 0.9rem; color: white; opacity: 0.9;">Tu familia podrá ver tus resultados en el dashboard</div>' +
+                    '</div>';
                 
                 var resultsContainer = document.querySelector('#results-screen .container');
                 if (resultsContainer) {
@@ -959,18 +911,25 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
         // Configurar botones según el modo
         if (this.challengeMode && this.challengeCode) {
             // MODO DESAFÍO
-            document.getElementById('repeat-challenge-btn').style.display = 'inline-block';
-            document.getElementById('show-mistakes-btn').style.display = 'inline-block';
-            document.getElementById('repeat-btn').style.display = 'none';
-            document.getElementById('new-training-btn').style.display = 'none';
+            var repeatChallengeBtn = document.getElementById('repeat-challenge-btn');
+            var showMistakesBtn = document.getElementById('show-mistakes-btn');
+            var repeatBtn = document.getElementById('repeat-btn');
+            var newTrainingBtn = document.getElementById('new-training-btn');
+            
+            if (repeatChallengeBtn) repeatChallengeBtn.style.display = 'inline-block';
+            if (showMistakesBtn) showMistakesBtn.style.display = 'inline-block';
+            if (repeatBtn) repeatBtn.style.display = 'none';
+            if (newTrainingBtn) newTrainingBtn.style.display = 'none';
             
             var homeBtn = document.getElementById('home-btn');
-            if (this.participantType === 'logged') {
-                homeBtn.textContent = '🏠 Volver al Dashboard';
-                homeBtn.onclick = function() { window.location.href = 'dashboard.html'; };
-            } else {
-                homeBtn.textContent = '🏠 Volver al Inicio';
-                homeBtn.onclick = function() { window.location.href = 'index.html'; };
+            if (homeBtn) {
+                if (this.participantType === 'logged') {
+                    homeBtn.textContent = '🏠 Volver al Dashboard';
+                    homeBtn.onclick = function() { window.location.href = 'dashboard.html'; };
+                } else {
+                    homeBtn.textContent = '🏠 Volver al Inicio';
+                    homeBtn.onclick = function() { window.location.href = 'index.html'; };
+                }
             }
         } else if (this.isAssignedPractice) {
             // 🆕 MODO ACTIVIDAD ASIGNADA
@@ -992,6 +951,12 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
                 newTrainingBtn.textContent = '🎯 Practicar Otra Tabla';
             }
             
+            // Ocultar botones de desafío
+            var repeatChallengeBtn = document.getElementById('repeat-challenge-btn');
+            var showMistakesBtn = document.getElementById('show-mistakes-btn');
+            if (repeatChallengeBtn) repeatChallengeBtn.style.display = 'none';
+            if (showMistakesBtn) showMistakesBtn.style.display = 'none';
+            
         } else {
             // MODO NORMAL
             var repeatBtn = document.getElementById('repeat-btn');
@@ -1004,8 +969,10 @@ MultiBoost.prototype.configureResultsButtons = function(percentage) {
                 }
             }
             
-            document.getElementById('repeat-challenge-btn').style.display = 'none';
-            document.getElementById('show-mistakes-btn').style.display = 'none';
+            var repeatChallengeBtn = document.getElementById('repeat-challenge-btn');
+            var showMistakesBtn = document.getElementById('show-mistakes-btn');
+            if (repeatChallengeBtn) repeatChallengeBtn.style.display = 'none';
+            if (showMistakesBtn) showMistakesBtn.style.display = 'none';
         }
     } catch (error) {
         console.log('Error configurando botones:', error);
@@ -1031,6 +998,7 @@ MultiBoost.prototype.newTraining = function() {
         // 🆕 LIMPIAR DATOS DE ASIGNACIÓN PARA NUEVO ENTRENAMIENTO LIBRE
         if (this.isAssignedPractice) {
             localStorage.removeItem('assignmentId');
+            localStorage.removeItem('assignedTask');
             localStorage.removeItem('practiceTable');
             localStorage.removeItem('practiceExercises');
             this.isAssignedPractice = false;
@@ -1149,7 +1117,7 @@ MultiBoost.prototype.saveSessionToFirebase = function() {
             mistakes: this.stats.mistakes,
             practiceTable: this.practiceTable || null,
             mode: this.practiceTable ? 'specific' : 'general',
-            wasAssignedPractice: this.isAssignedPractice || false // 🆕 IDENTIFICAR SI ERA ASIGNADA
+            wasAssignedPractice: this.isAssignedPractice || false
         };
 
         var sessionId = 'session_' + Date.now();
@@ -1216,15 +1184,21 @@ MultiBoost.prototype.updateUserProgress = function(sessionPercentage) {
 // Configurar interfaz para práctica específica
 MultiBoost.prototype.setupSpecificPracticeInterface = function() {
     try {
-        document.getElementById('normal-config').style.display = 'none';
-        document.getElementById('specific-practice-config').style.display = 'block';
+        var normalConfig = document.getElementById('normal-config');
+        var specificConfig = document.getElementById('specific-practice-config');
+        
+        if (normalConfig) normalConfig.style.display = 'none';
+        if (specificConfig) specificConfig.style.display = 'block';
         
         // 🆕 MENSAJE ESPECIAL PARA ACTIVIDADES ASIGNADAS
-        if (this.isAssignedPractice) {
-            document.getElementById('specific-table-title').textContent = '📋 Actividad Asignada: Tabla del ' + this.practiceTable;
-            document.getElementById('specific-table-title').style.color = '#f59e0b';
-        } else {
-            document.getElementById('specific-table-title').textContent = '🎯 Practicando Tabla del ' + this.practiceTable;
+        var titleEl = document.getElementById('specific-table-title');
+        if (titleEl) {
+            if (this.isAssignedPractice) {
+                titleEl.textContent = '📋 Actividad Asignada: Tabla del ' + this.practiceTable;
+                titleEl.style.color = '#f59e0b';
+            } else {
+                titleEl.textContent = '🎯 Practicando Tabla del ' + this.practiceTable;
+            }
         }
         
         this.selectedTables = [parseInt(this.practiceTable)];
@@ -1353,17 +1327,6 @@ MultiBoost.prototype.saveChallengeResult = function() {
     }
 };
 
-// Función para volver al inicio
-window.goToHome = function() {
-    console.log('Navegando al inicio desde tablas');
-    // Si está en Modo Aventura, volver al dashboard
-    if (localStorage.getItem('adventureMode') === 'true') {
-        window.location.href = 'dashboard.html';
-    } else {
-        window.location.href = 'index.html';
-    }
-};
-
 // Cargar ranking del desafío para mostrar en resultados
 MultiBoost.prototype.loadChallengeRanking = function() {
     var self = this;
@@ -1460,17 +1423,76 @@ MultiBoost.prototype.repeatChallenge = function() {
 MultiBoost.prototype.showMistakesModal = function() {
     try {
         var mistakesContainer = document.getElementById('mistakes-review');
+        var showMistakesBtn = document.getElementById('show-mistakes-btn');
+        
         if (mistakesContainer && mistakesContainer.style.display === 'none') {
             mistakesContainer.style.display = 'block';
-            document.getElementById('show-mistakes-btn').textContent = '❌ Ocultar Errores';
+            if (showMistakesBtn) showMistakesBtn.textContent = '❌ Ocultar Errores';
         } else {
-            mistakesContainer.style.display = 'none';
-            document.getElementById('show-mistakes-btn').textContent = '📋 Ver Mis Errores';
+            if (mistakesContainer) mistakesContainer.style.display = 'none';
+            if (showMistakesBtn) showMistakesBtn.textContent = '📋 Ver Mis Errores';
         }
     } catch (error) {
         console.log('Error mostrando errores:', error);
     }
 };
+
+// INTEGRACIÓN FIREBASE PARA GUARDAR PROGRESO - VERSIÓN COMPATIBLE
+function saveSessionToFirebase(sessionData) {
+    console.log('🔥 Guardando sesión en Firebase...');
+    
+    try {
+        // Verificar si estamos en modo aventura
+        var adventureMode = localStorage.getItem('adventureMode');
+        var userId = localStorage.getItem('userId');
+        
+        if (!adventureMode || !userId) {
+            console.log('❌ No está en modo aventura, saltando guardado Firebase');
+            return Promise.resolve(false);
+        }
+
+        // Verificar que Firebase esté disponible
+        if (!window.db) {
+            console.log('❌ Firebase no disponible');
+            return Promise.resolve(false);
+        }
+
+        console.log('✅ Modo aventura detectado, guardando para usuario:', userId);
+
+        // Crear documento de sesión
+        var sessionDoc = {
+            studentId: userId,
+            date: new Date(),
+            tablesPracticed: sessionData.tables,
+            totalExercises: sessionData.totalExercises,
+            correct: sessionData.correct,
+            incorrect: sessionData.incorrect,
+            totalTime: sessionData.totalTime,
+            accuracy: Math.round((sessionData.correct / sessionData.totalExercises) * 100),
+            exercises: sessionData.exercises || []
+        };
+
+        // Guardar usando Firebase
+        if (window.addDoc && window.collection) {
+            return window.addDoc(window.collection(window.db, 'sessions'), sessionDoc)
+                .then(function(sessionRef) {
+                    console.log('✅ Sesión guardada con ID:', sessionRef.id);
+                    return true;
+                })
+                .catch(function(error) {
+                    console.error('❌ Error guardando en Firebase:', error);
+                    return false;
+                });
+        } else {
+            console.log('❌ Funciones Firebase no disponibles');
+            return Promise.resolve(false);
+        }
+
+    } catch (error) {
+        console.error('❌ Error guardando en Firebase:', error);
+        return Promise.resolve(false);
+    }
+}
 
 // Vincular eventos de nuevos botones
 document.addEventListener('DOMContentLoaded', function() {
@@ -1490,162 +1512,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1000);
 });
-// INTEGRACIÓN FIREBASE PARA GUARDAR PROGRESO
-async function saveSessionToFirebase(sessionData) {
-    console.log('🔥 Guardando sesión en Firebase...');
-    
-    try {
-        // Verificar si estamos en modo aventura
-        const adventureMode = localStorage.getItem('adventureMode');
-        const userId = localStorage.getItem('userId');
-        
-        if (!adventureMode || !userId) {
-            console.log('❌ No está en modo aventura, saltando guardado Firebase');
-            return false;
-        }
 
-        // Verificar que Firebase esté disponible
-        if (!window.db) {
-            console.log('❌ Firebase no disponible');
-            return false;
-        }
-
-        console.log('✅ Modo aventura detectado, guardando para usuario:', userId);
-
-        // 1. GUARDAR SESIÓN EN COLLECTION 'sessions'
-        const sessionDoc = {
-            studentId: userId,
-            date: new Date(),
-            tablesPracticed: sessionData.tables,
-            totalExercises: sessionData.totalExercises,
-            correct: sessionData.correct,
-            incorrect: sessionData.incorrect,
-            totalTime: sessionData.totalTime,
-            accuracy: Math.round((sessionData.correct / sessionData.totalExercises) * 100),
-            exercises: sessionData.exercises || []
-        };
-
-        const sessionsRef = window.collection(window.db, 'sessions');
-        const sessionRef = await window.addDoc(sessionsRef, sessionDoc);
-        console.log('✅ Sesión guardada con ID:', sessionRef.id);
-
-        // 2. ACTUALIZAR PROGRESO GLOBAL
-        await updateProgressInFirebase(userId, sessionData);
-
-        // 3. MARCAR ACTIVIDAD ASIGNADA COMO COMPLETADA (si aplica)
-        await markAssignedTaskCompleted(userId, sessionData);
-
-        return true;
-
-    } catch (error) {
-        console.error('❌ Error guardando en Firebase:', error);
-        return false;
-    }
-}
-
-// Actualizar progreso global del estudiante
-async function updateProgressInFirebase(userId, sessionData) {
-    try {
-        console.log('📊 Actualizando progreso global...');
-        
-        const progressRef = window.doc(window.db, 'progress', userId);
-        const progressDoc = await window.getDoc(progressRef);
-        
-        let progressData = {};
-        
-        if (progressDoc.exists()) {
-            progressData = progressDoc.data();
-        } else {
-            progressData = {
-                tables: {},
-                totalSessions: 0,
-                globalAccuracy: 0
-            };
-        }
-
-        // Actualizar estadísticas por tabla
-        sessionData.tables.forEach(table => {
-            if (!progressData.tables[table]) {
-                progressData.tables[table] = {
-                    sessions: 0,
-                    accuracy: 0,
-                    lastPracticed: new Date()
-                };
-            }
-            
-            const tableData = progressData.tables[table];
-            const newAccuracy = Math.round((sessionData.correct / sessionData.totalExercises) * 100);
-            
-            // Promedio ponderado de precisión
-            tableData.accuracy = Math.round(
-                (tableData.accuracy * tableData.sessions + newAccuracy) / (tableData.sessions + 1)
-            );
-            tableData.sessions += 1;
-            tableData.lastPracticed = new Date();
-        });
-
-        // Actualizar estadísticas globales
-        progressData.totalSessions += 1;
-        
-        // Calcular precisión global promedio
-        const allAccuracies = Object.values(progressData.tables).map(t => t.accuracy);
-        progressData.globalAccuracy = allAccuracies.length > 0 
-            ? Math.round(allAccuracies.reduce((sum, acc) => sum + acc, 0) / allAccuracies.length)
-            : 0;
-
-        // Guardar en Firebase
-        await window.setDoc(progressRef, progressData);
-        console.log('✅ Progreso actualizado exitosamente');
-
-    } catch (error) {
-        console.error('❌ Error actualizando progreso:', error);
-    }
-}
-
-// Marcar actividad asignada como completada
-async function markAssignedTaskCompleted(userId, sessionData) {
-    try {
-        // Verificar si hay una tarea asignada específica
-        const assignedTask = localStorage.getItem('assignedTask');
-        if (!assignedTask) {
-            console.log('ℹ️ No hay tarea asignada específica');
-            return;
-        }
-
-        const taskData = JSON.parse(assignedTask);
-        console.log('📝 Marcando tarea como completada:', taskData.taskId);
-
-        // Actualizar el documento de actividad asignada
-        const activityRef = window.doc(window.db, 'assigned_activities', taskData.taskId);
-        await window.updateDoc(activityRef, {
-            status: 'completed',
-            completedAt: new Date(),
-            results: {
-                correct: sessionData.correct,
-                incorrect: sessionData.incorrect,
-                percentage: Math.round((sessionData.correct / sessionData.totalExercises) * 100),
-                totalTime: sessionData.totalTime
-            }
-        });
-
-        console.log('✅ Actividad asignada marcada como completada');
-        
-        // Limpiar localStorage
-        localStorage.removeItem('assignedTask');
-
-    } catch (error) {
-        console.error('❌ Error marcando tarea como completada:', error);
-    }
-}
-// Inicializar MultiBoost
-(function() {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            window.multiBoost = new MultiBoost();
-        });
-    } else {
-        window.multiBoost = new MultiBoost();
-    }
 // Función global para volver al inicio
 window.goToHome = function() {
     console.log('Navegando al inicio desde tablas');
@@ -1655,4 +1522,15 @@ window.goToHome = function() {
         window.location.href = 'index.html';
     }
 };
+
+// Inicializar MultiBoost
+(function() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            window.multiBoost = new MultiBoost();
+        });
+    } else {
+        window.multiBoost = new MultiBoost();
+    }
 })();
+
