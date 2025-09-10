@@ -143,7 +143,17 @@
                     🔄 Actualizar
                 </button>
             </div>
+<!-- Class Details Section (hidden by default) -->
+        <div id="class-details" class="glass-card rounded-2xl p-6 mt-6" style="display: none;">
+            <div id="class-details-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
 
+        <!-- Class Overview (main classes grid) -->
+        <div id="class-overview">
+            <!-- This wraps the existing classes section -->
+        </div>
             <!-- Empty State -->
             <div id="empty-state" class="text-center py-12" style="display: none;">
                 <div class="text-6xl mb-4">📖</div>
@@ -161,7 +171,12 @@
         </div>
 
     </div>
-
+<!-- Class Details Section (hidden by default) -->
+        <div id="class-details" class="glass-card rounded-2xl p-6 mt-6" style="display: none;">
+            <div id="class-details-content">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
     <!-- Create Class Modal -->
     <div id="create-class-modal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50" style="display: none;">
         <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4">
@@ -515,13 +530,124 @@
             successModal.style.display = 'none';
         }
 
-        // Open Classroom (placeholder for future implementation)
+      // Open Classroom - Now shows detailed view
         function openClassroom(classroomId) {
-            console.log('Abriendo clase:', classroomId);
-            // TODO: Navigate to classroom detail view
-            alert('Funcionalidad de detalle de clase - próximamente');
+            console.log('🔍 Abriendo detalle de clase:', classroomId);
+            
+            // Find the classroom data
+            const classData = teacherClasses.find(c => c.id === classroomId);
+            if (!classData) {
+                console.error('Clase no encontrada');
+                return;
+            }
+            
+            showClassDetails(classData);
         }
 
+        // Show detailed view of a class
+        function showClassDetails(classData) {
+            console.log('🔍 Mostrando detalles de clase:', classData.className);
+            
+            // Limpiar contenido anterior
+            const container = document.getElementById('class-details-content');
+            container.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">${classData.className}</h3>
+                            <p class="text-gray-600">Código: <span class="font-mono bg-blue-100 px-2 py-1 rounded">${classData.classCode}</span></p>
+                        </div>
+                        <button onclick="hideClassDetails()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
+                            ← Volver
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-lg font-bold text-gray-800 mb-4">👥 Estudiantes Inscritos</h4>
+                        <div id="students-list" class="space-y-3">
+                            <div class="text-center text-gray-500 py-8">
+                                <div class="text-4xl mb-2">⏳</div>
+                                <div>Cargando estudiantes...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Mostrar la sección de detalles
+            document.getElementById('class-overview').style.display = 'none';
+            document.getElementById('class-details').style.display = 'block';
+
+            // Cargar estudiantes de la clase
+            loadClassStudents(classData.classCode, classData.id);
+        }
+
+        // Cargar lista de estudiantes de una clase específica
+        async function loadClassStudents(classCode, classroomId) {
+            console.log('👥 Cargando estudiantes de clase:', classCode);
+            
+            try {
+                const studentsSnapshot = await db.collection('classroom_students')
+                    .where('classroomId', '==', classroomId)
+                    .where('isActive', '==', true)
+                    .get();
+                
+                const studentsList = document.getElementById('students-list');
+                
+                if (studentsSnapshot.empty) {
+                    studentsList.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <div class="text-4xl mb-2">👥</div>
+                            <div>No hay estudiantes inscritos aún</div>
+                            <div class="text-sm mt-2">Comparte el código <strong>${classCode}</strong> con tus estudiantes</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let studentsHTML = '';
+
+                studentsSnapshot.forEach(doc => {
+                    const studentData = doc.data();
+                    studentsHTML += `
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                        ${studentData.studentName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-gray-800">${studentData.studentName}</div>
+                                        <div class="text-sm text-gray-500">Código: ${studentData.studentCode}</div>
+                                    </div>
+                                </div>
+                                <button onclick="assignActivityToStudent('${studentData.studentId}', '${studentData.studentName}')" 
+                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
+                                    📝 Asignar Actividad
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                studentsList.innerHTML = studentsHTML;
+                console.log('✅ Estudiantes cargados exitosamente');
+
+            } catch (error) {
+                console.error('❌ Error cargando estudiantes:', error);
+            }
+        }
+
+        // Ocultar detalles de clase y volver a overview
+        function hideClassDetails() {
+            document.getElementById('class-details').style.display = 'none';
+            document.getElementById('class-overview').style.display = 'block';
+        }
+
+        // Asignar actividad a un estudiante específico
+        function assignActivityToStudent(studentId, studentName) {
+            alert(`Asignar actividad a ${studentName} - Próximamente`);
+        }
         // Refresh Classes
         async function refreshClasses() {
             await loadDashboardData();
