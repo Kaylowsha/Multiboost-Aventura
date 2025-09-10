@@ -1794,6 +1794,88 @@ function closeClassAssignModal() {
     document.getElementById('assign-class-loading').style.display = 'none';
     document.getElementById('assign-class-form').reset();
 }
+        // Manejador del formulario de asignación grupal
+document.getElementById('assign-class-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const table = document.getElementById('assign-class-table').value;
+    const exercises = document.getElementById('assign-class-exercises').value;
+    const message = document.getElementById('assign-class-message').value.trim();
+    
+    if (!table) {
+        alert('Por favor selecciona una tabla de multiplicar');
+        return;
+    }
+    
+    try {
+        // Mostrar loading
+        document.getElementById('assign-class-form').style.display = 'none';
+        document.getElementById('assign-class-loading').style.display = 'block';
+        
+        // Obtener estudiantes de la clase
+        const studentsSnapshot = await db.collection('classroom_students')
+            .where('classroomId', '==', window.currentClassAssignmentData.classroomId)
+            .where('isActive', '==', true)
+            .get();
+        
+        console.log('👥 Asignando a', studentsSnapshot.size, 'estudiantes');
+        
+        // Crear actividades para cada estudiante
+        const batch = db.batch();
+        let assignedCount = 0;
+        
+        studentsSnapshot.forEach(doc => {
+            const studentData = doc.data();
+            
+            // Crear documento de actividad individual
+            const activityRef = db.collection('assigned_activities').doc();
+            const activityData = {
+                studentId: studentData.studentId,
+                studentName: studentData.studentName,
+                teacherId: currentTeacher.id,
+                teacherName: currentTeacher.name,
+                classroomId: window.currentClassAssignmentData.classroomId,
+                className: window.currentClassAssignmentData.className,
+                tableNumber: parseInt(table),
+                exerciseCount: parseInt(exercises),
+                message: message || `Actividad de clase: Practica la tabla del ${table}`,
+                status: 'pending',
+                assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                assignedType: 'class', // Nuevo campo para identificar origen
+                dueDate: null
+            };
+            
+            batch.set(activityRef, activityData);
+            assignedCount++;
+        });
+        
+        // Ejecutar todas las asignaciones
+        await batch.commit();
+        
+        console.log('✅ Actividades asignadas a', assignedCount, 'estudiantes');
+        
+        // Cerrar modal y mostrar confirmación
+        closeClassAssignModal();
+        alert(`✅ Actividad asignada a toda la clase "${window.currentClassAssignmentData.className}"\n\n` +
+              `📊 Tabla: ${table}\n` +
+              `🎯 Ejercicios: ${exercises}\n` +
+              `👥 Estudiantes: ${assignedCount}\n` +
+              `💬 Mensaje: ${message || 'Actividad de clase: Practica la tabla del ' + table}`);
+        
+        // Actualizar vista de actividades si está activa
+        if (document.getElementById('activities-tab').classList.contains('active')) {
+            loadAssignedActivities();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error asignando actividad grupal:', error);
+        alert('Error al asignar la actividad. Inténtalo nuevamente.');
+        
+        // Resetear estado del formulario
+        document.getElementById('assign-class-form').style.display = 'block';
+        document.getElementById('assign-class-loading').style.display = 'none';
+    }
+});
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
