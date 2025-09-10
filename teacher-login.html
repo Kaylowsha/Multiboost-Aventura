@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Portal Docente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #f093fb;
+            box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.2);
+        }
+    </style>
+</head>
+<body class="text-white">
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="text-6xl mb-4 animate-bounce">🎓</div>
+            <div class="text-xl font-bold">Cargando Portal Docente...</div>
+        </div>
+    </div>
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-bold mb-2">🎓 MultiBoost</h1>
+                <h2 class="text-2xl font-bold text-yellow-300 mb-2">Portal Docente</h2>
+                <p class="text-lg opacity-90">Gestiona tus clases y estudiantes</p>
+            </div>
+
+            <!-- Login/Register Form -->
+            <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+                
+                <!-- Toggle Buttons -->
+                <div class="flex mb-6 bg-white bg-opacity-20 rounded-2xl p-1">
+                    <button id="login-tab" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all bg-white text-purple-600">
+                        Iniciar Sesión
+                    </button>
+                    <button id="register-tab" class="flex-1 py-3 px-4 rounded-xl font-bold transition-all text-white hover:bg-white hover:bg-opacity-20">
+                        Registrarse
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Email:</label>
+                            <input type="email" id="login-email" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="profesor@colegio.cl" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Contraseña:</label>
+                            <input type="password" id="login-password" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn-primary w-full py-4 px-6 rounded-2xl font-bold text-white text-lg">
+                            🚀 Acceder al Portal
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" style="display: none;">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Nombre Completo:</label>
+                            <input type="text" id="register-name" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="Ana González Martínez" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Email:</label>
+                            <input type="email" id="register-email" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="ana.gonzalez@colegio.cl" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Colegio/Institución:</label>
+                            <input type="text" id="register-school" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="Colegio San José" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold mb-2">Contraseña:</label>
+                            <input type="password" id="register-password" class="input-field w-full px-4 py-3 rounded-xl text-gray-800 font-medium" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn-primary w-full py-4 px-6 rounded-2xl font-bold text-white text-lg">
+                            🎓 Crear Cuenta Docente
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Error/Success Messages -->
+                <div id="message-container" class="mt-4 text-center" style="display: none;">
+                    <div id="message-text" class="px-4 py-3 rounded-xl font-bold"></div>
+                </div>
+
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-6">
+                <a href="index.html" class="text-white text-lg font-bold hover:text-yellow-300 transition-colors">
+                    🏠 ← Volver al Inicio
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        console.log('🎓 Portal Docente - Iniciando...');
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOBzv5Sm8trrNhLtOyU8HBRT9fVOsVzOo",
+            authDomain: "multiboost-aventura.firebaseapp.com",
+            projectId: "multiboost-aventura",
+            storageBucket: "multiboost-aventura.appspot.com",
+            messagingSenderId: "970046756421",
+            appId: "1:970046756421:web:73e32ec1e5e30bdf36c7ea"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const messageContainer = document.getElementById('message-container');
+        const messageText = document.getElementById('message-text');
+        const loadingScreen = document.getElementById('loading-screen');
+
+        // Hide loading screen when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 1000);
+        });
+
+        // Tab switching
+        loginTab.addEventListener('click', () => {
+            switchToLogin();
+        });
+
+        registerTab.addEventListener('click', () => {
+            switchToRegister();
+        });
+
+        function switchToLogin() {
+            loginTab.classList.add('bg-white', 'text-purple-600');
+            loginTab.classList.remove('text-white');
+            registerTab.classList.remove('bg-white', 'text-purple-600');
+            registerTab.classList.add('text-white');
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            hideMessage();
+        }
+
+        function switchToRegister() {
+            registerTab.classList.add('bg-white', 'text-purple-600');
+            registerTab.classList.remove('text-white');
+            loginTab.classList.remove('bg-white', 'text-purple-600');
+            loginTab.classList.add('text-white');
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            hideMessage();
+        }
+
+        // Form submissions
+        loginForm.addEventListener('submit', handleLogin);
+        registerForm.addEventListener('submit', handleRegister);
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Iniciando sesión...', 'loading');
+                
+                // Sign in with Firebase Auth
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Check if user is a teacher
+                const teacherDoc = await db.collection('teachers').doc(user.uid).get();
+                
+                if (!teacherDoc.exists) {
+                    showMessage('Este email no está registrado como docente', 'error');
+                    await auth.signOut();
+                    return;
+                }
+
+                showMessage('¡Bienvenido/a! Redirigiendo...', 'success');
+                
+                // Store teacher session
+                sessionStorage.setItem('teacherSession', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    loginTime: Date.now()
+                }));
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'teacher-dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error en login:', error);
+                let message = 'Error al iniciar sesión';
+                
+                if (error.code === 'auth/user-not-found') {
+                    message = 'Email no registrado';
+                } else if (error.code === 'auth/wrong-password') {
+                    message = 'Contraseña incorrecta';
+                } else if (error.code === 'auth/invalid-email') {
+                    message = 'Email inválido';
+                }
+                
+                showMessage(message, 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const school = document.getElementById('register-school').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            if (!name || !email || !school || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Creando cuenta...', 'loading');
+
+                // Create user with Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Create teacher profile in Firestore
+                await db.collection('teachers').doc(user.uid).set({
+                    name: name,
+                    email: email,
+                    school: school,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isActive: true
+                });
+
+                showMessage('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+
+                // Store teacher session
+                sessionStorage.setItem('teacherSession', JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    loginTime: Date.now()
+                }));
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'teacher-dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error en registro:', error);
+                let message = 'Error al crear la cuenta';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    message = 'Este email ya está registrado';
+                } else if (error.code === 'auth/invalid-email') {
+                    message = 'Email inválido';
+                } else if (error.code === 'auth/weak-password') {
+                    message = 'Contraseña muy débil';
+                }
+                
+                showMessage(message, 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            messageText.textContent = text;
+            messageContainer.style.display = 'block';
+            
+            // Style based on type
+            messageText.className = 'px-4 py-3 rounded-xl font-bold ';
+            
+            if (type === 'error') {
+                messageText.className += 'bg-red-500 text-white';
+            } else if (type === 'success') {
+                messageText.className += 'bg-green-500 text-white';
+            } else if (type === 'loading') {
+                messageText.className += 'bg-blue-500 text-white';
+            }
+        }
+
+        function hideMessage() {
+            messageContainer.style.display = 'none';
+        }
+
+        // Check if already logged in
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Check if it's a teacher
+                try {
+                    const teacherDoc = await db.collection('teachers').doc(user.uid).get();
+                    if (teacherDoc.exists) {
+                        console.log('Docente ya autenticado, redirigiendo...');
+                        window.location.href = 'teacher-dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Error verificando sesión:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
