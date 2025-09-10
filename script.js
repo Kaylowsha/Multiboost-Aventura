@@ -737,7 +737,42 @@ MultiBoost.prototype.showResults = function() {
         
         if (this.sessionTimer) {
             clearInterval(this.sessionTimer);
+            
         }
+        // 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
+MultiBoost.prototype.showResults = function() {
+    try {
+        console.log('🏁 Entrenamiento completado');
+        
+        if (this.sessionTimer) {
+            clearInterval(this.sessionTimer);
+            // NUEVO: Preparar datos para Firebase
+        const sessionData = {
+            tables: this.selectedTables,
+            totalExercises: this.stats.correct + this.stats.incorrect,
+            correct: this.stats.correct,
+            incorrect: this.stats.incorrect,
+            totalTime: Math.floor((new Date().getTime() - this.sessionStartTime) / 1000),
+            exercises: this.exercises.map(ex => ({
+                table: ex.table,
+                multiplicand: ex.multiplicand,
+                correctAnswer: ex.correctAnswer,
+                userAnswer: ex.userAnswer || null,
+                isCorrect: ex.isCorrect || false
+            }))
+        };
+
+        // NUEVO: Guardar en Firebase si está en modo aventura
+        saveSessionToFirebase(sessionData).then(saved => {
+            if (saved) {
+                console.log('🎉 Datos guardados exitosamente en Firebase');
+            }
+        });
+        }
+        
+        var totalExercises = this.stats.correct + this.stats.incorrect;
+        var percentage = Math.round((this.stats.correct / totalExercises) * 100);
+        var finalTime = Math.floor((new Date().getTime() - this.sessionStartTime) / 1000);
         
         var totalExercises = this.stats.correct + this.stats.incorrect;
         var percentage = Math.round((this.stats.correct / totalExercises) * 100);
@@ -1445,7 +1480,153 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 1000);
 });
+// INTEGRACIÓN FIREBASE PARA GUARDAR PROGRESO
+async function saveSessionToFirebase(sessionData) {
+    console.log('🔥 Guardando sesión en Firebase...');
+    
+    try {
+        // Verificar si estamos en modo aventura
+        const adventureMode = localStorage.getItem('adventureMode');
+        const userId = localStorage.getItem('userId');
+        
+        if (!adventureMode || !userId) {
+            console.log('❌ No está en modo aventura, saltando guardado Firebase');
+            return false;
+        }
 
+        // Verificar que Firebase esté disponible
+        if (!window.db) {
+            console.log('❌ Firebase no disponible');
+            return false;
+        }
+
+        console.log('✅ Modo aventura detectado, guardando para usuario:', userId);
+
+        // 1. GUARDAR SESIÓN EN COLLECTION 'sessions'
+        const sessionDoc = {
+            studentId: userId,
+            date: new Date(),
+            tablesPracticed: sessionData.tables,
+            totalExercises: sessionData.totalExercises,
+            correct: sessionData.correct,
+            incorrect: sessionData.incorrect,
+            totalTime: sessionData.totalTime,
+            accuracy: Math.round((sessionData.correct / sessionData.totalExercises) * 100),
+            exercises: sessionData.exercises || []
+        };
+
+        const sessionsRef = window.collection(window.db, 'sessions');
+        const sessionRef = await window.addDoc(sessionsRef, sessionDoc);
+        console.log('✅ Sesión guardada con ID:', sessionRef.id);
+
+        // 2. ACTUALIZAR PROGRESO GLOBAL
+        await updateProgressInFirebase(userId, sessionData);
+
+        // 3. MARCAR ACTIVIDAD ASIGNADA COMO COMPLETADA (si aplica)
+        await markAssignedTaskCompleted(userId, sessionData);
+
+        return true;
+
+    } catch (error) {
+        console.error('❌ Error guardando en Firebase:', error);
+        return false;
+    }
+}
+
+// Actualizar progreso global del estudiante
+async function updateProgressInFirebase(userId, sessionData) {
+    try {
+        console.log('📊 Actualizando progreso global...');
+        
+        const progressRef = window.doc(window.db, 'progress', userId);
+        const progressDoc = await window.getDoc(progressRef);
+        
+        let progressData = {};
+        
+        if (progressDoc.exists()) {
+            progressData = progressDoc.data();
+        } else {
+            progressData = {
+                tables: {},
+                totalSessions: 0,
+                globalAccuracy: 0
+            };
+        }
+
+        // Actualizar estadísticas por tabla
+        sessionData.tables.forEach(table => {
+            if (!progressData.tables[table]) {
+                progressData.tables[table] = {
+                    sessions: 0,
+                    accuracy: 0,
+                    lastPracticed: new Date()
+                };
+            }
+            
+            const tableData = progressData.tables[table];
+            const newAccuracy = Math.round((sessionData.correct / sessionData.totalExercises) * 100);
+            
+            // Promedio ponderado de precisión
+            tableData.accuracy = Math.round(
+                (tableData.accuracy * tableData.sessions + newAccuracy) / (tableData.sessions + 1)
+            );
+            tableData.sessions += 1;
+            tableData.lastPracticed = new Date();
+        });
+
+        // Actualizar estadísticas globales
+        progressData.totalSessions += 1;
+        
+        // Calcular precisión global promedio
+        const allAccuracies = Object.values(progressData.tables).map(t => t.accuracy);
+        progressData.globalAccuracy = allAccuracies.length > 0 
+            ? Math.round(allAccuracies.reduce((sum, acc) => sum + acc, 0) / allAccuracies.length)
+            : 0;
+
+        // Guardar en Firebase
+        await window.setDoc(progressRef, progressData);
+        console.log('✅ Progreso actualizado exitosamente');
+
+    } catch (error) {
+        console.error('❌ Error actualizando progreso:', error);
+    }
+}
+
+// Marcar actividad asignada como completada
+async function markAssignedTaskCompleted(userId, sessionData) {
+    try {
+        // Verificar si hay una tarea asignada específica
+        const assignedTask = localStorage.getItem('assignedTask');
+        if (!assignedTask) {
+            console.log('ℹ️ No hay tarea asignada específica');
+            return;
+        }
+
+        const taskData = JSON.parse(assignedTask);
+        console.log('📝 Marcando tarea como completada:', taskData.taskId);
+
+        // Actualizar el documento de actividad asignada
+        const activityRef = window.doc(window.db, 'assigned_activities', taskData.taskId);
+        await window.updateDoc(activityRef, {
+            status: 'completed',
+            completedAt: new Date(),
+            results: {
+                correct: sessionData.correct,
+                incorrect: sessionData.incorrect,
+                percentage: Math.round((sessionData.correct / sessionData.totalExercises) * 100),
+                totalTime: sessionData.totalTime
+            }
+        });
+
+        console.log('✅ Actividad asignada marcada como completada');
+        
+        // Limpiar localStorage
+        localStorage.removeItem('assignedTask');
+
+    } catch (error) {
+        console.error('❌ Error marcando tarea como completada:', error);
+    }
+}
 // Inicializar MultiBoost
 (function() {
     if (document.readyState === 'loading') {
