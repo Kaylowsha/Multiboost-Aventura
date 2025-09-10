@@ -1578,9 +1578,10 @@ function renderStudentsProgress(studentsData) {
         // Determinar estado del estudiante
         let statusColor = 'text-gray-300';
         let statusIcon = '😐';
-        let statusText = 'Sin actividad';
-        
-        if (totalSessions > 0) {
+        let statusText = 'Sin práctica aún';
+let helpText = '';
+
+if (totalSessions > 0) {
             if (avgAccuracy >= 80) {
                 statusColor = 'text-green-300';
                 statusIcon = '🌟';
@@ -1633,12 +1634,17 @@ function renderStudentsProgress(studentsData) {
                     </div>
                 </div>
                 
-                ${mostPracticedTables ? `
-                    <div class="bg-white bg-opacity-10 rounded-lg p-3">
-                        <div class="text-sm font-bold mb-1">📊 Tablas más practicadas:</div>
-                        <div class="text-sm">${mostPracticedTables}</div>
-                    </div>
-                ` : ''}
+               ${mostPracticedTables ? `
+    <div class="bg-white bg-opacity-10 rounded-lg p-3">
+        <div class="text-sm font-bold mb-1">📊 Tablas más practicadas:</div>
+        <div class="text-sm">${mostPracticedTables}</div>
+    </div>
+` : totalSessions === 0 ? `
+    <div class="bg-yellow-500 bg-opacity-20 rounded-lg p-3 border border-yellow-400">
+        <div class="text-sm font-bold mb-1">💡 Próximo paso:</div>
+        <div class="text-sm">El estudiante debe ingresar a MultiBoost y completar las actividades asignadas para generar datos de progreso.</div>
+    </div>
+` : ''}
             </div>
         `;
     }).join('');
