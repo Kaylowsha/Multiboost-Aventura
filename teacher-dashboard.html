@@ -1505,12 +1505,12 @@ async function loadClassProgress() {
             const progressDoc = await db.collection('progress').doc(studentData.studentId).get();
             const progressData = progressDoc.exists ? progressDoc.data() : null;
             
-            // Cargar sesiones recientes
-            const sessionsSnapshot = await db.collection('sessions')
-                .where('studentId', '==', studentData.studentId)
-                .orderBy('date', 'desc')
-                .limit(10)
-                .get();
+           // Cargar sesiones recientes
+const sessionsSnapshot = await db.collection('sessions')
+    .where('studentId', '==', studentData.studentId)
+    .orderBy('date', 'desc')
+    .limit(10)
+    .get();
             
             const sessions = [];
             sessionsSnapshot.forEach(sessionDoc => {
