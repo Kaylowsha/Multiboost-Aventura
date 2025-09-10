@@ -963,9 +963,9 @@
                 joinButton.textContent = '🚀 Unirse a la Clase';
             }
         };
-       // FUNCIÓN REAL PARA CARGAR CLASES DEL ESTUDIANTE
+       // FUNCIÓN REAL PARA CARGAR CLASES DEL ESTUDIANTE - FIREBASE COMPLETA
         window.loadStudentClasses = async function() {
-            console.log('📚 Cargando clases del estudiante...');
+            console.log('📚 Cargando clases del estudiante desde Firebase...');
             
             if (!currentUser) {
                 console.log('❌ No hay usuario logueado');
@@ -976,24 +976,111 @@
                 const classList = document.getElementById('classes-list');
                 const noClasses = document.getElementById('no-classes');
                 
-                // Mostrar loading temporal
-                classList.innerHTML = '<div class="text-center py-4">⏳ Cargando clases...</div>';
+                // Mostrar loading
+                classList.innerHTML = '<div class="text-center py-4">⏳ Cargando tus clases...</div>';
                 noClasses.style.display = 'none';
                 
-                // SIMULAR: Por ahora mostrar mensaje de prueba
-                console.log('🔧 Función preparada para Firebase - usando datos de prueba');
+                // Consultar clases del estudiante desde Firebase
+                const studentClassesQuery = query(
+                    collection(db, 'student_classes'),
+                    where('studentId', '==', currentUser.uid),
+                    where('isActive', '==', true)
+                );
                 
-                setTimeout(() => {
+                const snapshot = await getDocs(studentClassesQuery);
+                
+                if (snapshot.empty) {
+                    console.log('📚 No hay clases encontradas en Firebase');
                     classList.innerHTML = '';
                     noClasses.style.display = 'block';
-                    console.log('✅ LoadStudentClasses lista para implementación Firebase');
-                }, 1000);
+                    return;
+                }
+                
+                // Procesar clases encontradas
+                const classes = [];
+                snapshot.forEach(doc => {
+                    const classData = doc.data();
+                    classes.push({ 
+                        id: doc.id, 
+                        ...classData,
+                        // Convertir timestamp a fecha si es necesario
+                        joinedAt: classData.joinedAt?.toDate ? classData.joinedAt.toDate() : new Date(classData.joinedAt)
+                    });
+                });
+                
+                console.log('📚 Clases encontradas:', classes.length, classes);
+                
+                // Renderizar clases encontradas
+                classList.innerHTML = classes.map(classInfo => `
+                    <div class="class-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="text-2xl">📚</div>
+                            <div class="text-xs bg-white bg-opacity-30 px-2 py-1 rounded-lg">
+                                ${classInfo.grade || 'Sin nivel'}
+                            </div>
+                        </div>
+                        
+                        <h3 class="font-bold text-lg mb-2">${classInfo.className}</h3>
+                        
+                        <div class="text-sm opacity-80 mb-3">
+                            👨‍🏫 ${classInfo.teacherName}
+                        </div>
+                        
+                        <div class="text-sm opacity-80 mb-4">
+                            🏫 ${classInfo.school || 'Escuela'}
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-20 rounded-xl p-3 mb-4">
+                            <div class="text-xs opacity-75 mb-1">Código de clase:</div>
+                            <div class="font-bold text-yellow-300">${classInfo.classCode}</div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="opacity-75">
+                                📅 ${formatJoinDate(classInfo.joinedAt)}
+                            </span>
+                            <button onclick="viewClassActivities('${classInfo.classroomId}', '${classInfo.className}')" 
+                                    class="px-3 py-1 bg-blue-500 hover:bg-blue-600 rounded-lg text-xs font-bold">
+                                Ver Actividades
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                noClasses.style.display = 'none';
                 
             } catch (error) {
-                console.error('❌ Error cargando clases:', error);
+                console.error('❌ Error cargando clases desde Firebase:', error);
                 const classList = document.getElementById('classes-list');
-                classList.innerHTML = '<div class="text-center py-4 text-red-300">❌ Error cargando clases</div>';
+                classList.innerHTML = '<div class="text-center py-4 text-red-300">❌ Error cargando clases desde Firebase</div>';
             }
+        };
+
+        // FUNCIÓN AUXILIAR PARA FORMATEAR FECHA
+        function formatJoinDate(date) {
+            if (!date) return 'Fecha desconocida';
+            
+            const joinDate = date instanceof Date ? date : new Date(date);
+            const now = new Date();
+            const diffTime = Math.abs(now - joinDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'Hoy';
+            if (diffDays === 2) return 'Ayer';
+            if (diffDays <= 7) return `Hace ${diffDays} días`;
+            if (diffDays <= 30) return `Hace ${Math.ceil(diffDays / 7)} semanas`;
+            
+            return joinDate.toLocaleDateString('es-CL', {
+                day: 'numeric',
+                month: 'short',
+                year: joinDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+
+        // FUNCIÓN PLACEHOLDER PARA VER ACTIVIDADES
+        window.viewClassActivities = function(classroomId, className) {
+            console.log('📋 Viendo actividades de:', className, classroomId);
+            alert(`Próximamente: Actividades de "${className}"`);
         };
         console.log('🎮 Dashboard con actividades asignadas cargado correctamente');
     </script>
