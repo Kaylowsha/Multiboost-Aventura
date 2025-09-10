@@ -217,7 +217,69 @@
             </div>
         </div>
     </div>
+<!-- Assign Activity Modal -->
+    <div id="assign-activity-modal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50" style="display: none;">
+        <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6 text-center">📝 Asignar Actividad</h3>
+            
+            <div id="assign-student-info" class="bg-white bg-opacity-20 rounded-2xl p-4 mb-6 text-center">
+                <div class="text-4xl mb-2">👤</div>
+                <div class="font-bold text-lg" id="assign-student-name">Nombre Estudiante</div>
+                <div class="text-sm opacity-75" id="assign-student-code">Código EST_ABC123</div>
+            </div>
 
+            <form id="assign-activity-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Tabla de Multiplicar:</label>
+                        <select id="assign-table" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium" required>
+                            <option value="">Seleccionar tabla...</option>
+                            <option value="2">Tabla del 2</option>
+                            <option value="3">Tabla del 3</option>
+                            <option value="4">Tabla del 4</option>
+                            <option value="5">Tabla del 5</option>
+                            <option value="6">Tabla del 6</option>
+                            <option value="7">Tabla del 7</option>
+                            <option value="8">Tabla del 8</option>
+                            <option value="9">Tabla del 9</option>
+                            <option value="10">Tabla del 10</option>
+                            <option value="11">Tabla del 11</option>
+                            <option value="12">Tabla del 12</option>
+                            <option value="13">Tabla del 13</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Cantidad de Ejercicios:</label>
+                        <select id="assign-exercises" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium" required>
+                            <option value="10">10 ejercicios</option>
+                            <option value="20">20 ejercicios</option>
+                            <option value="30">30 ejercicios</option>
+                            <option value="40">40 ejercicios</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Mensaje para el estudiante:</label>
+                        <textarea id="assign-message" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium h-24 resize-none" placeholder="Ej: Practica la tabla del 7 para el examen del viernes"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeAssignModal()" class="flex-1 py-3 px-4 rounded-xl font-bold bg-gray-500 hover:bg-gray-600 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 btn-primary py-3 px-4 rounded-xl font-bold">
+                        📝 Asignar Actividad
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading State -->
+            <div id="assign-loading" class="text-center py-6" style="display: none;">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <div class="font-bold">Asignando actividad...</div>
+            </div>
+        </div>
+    </div>
     <!-- Success Message Modal -->
     <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50" style="display: none;">
         <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4 text-center">
@@ -639,10 +701,81 @@
             document.getElementById('class-overview').style.display = 'block';
         }
 
-        // Asignar actividad a un estudiante específico
+     // Asignar actividad a un estudiante específico
         function assignActivityToStudent(studentId, studentName) {
-            alert(`Asignar actividad a ${studentName} - Próximamente`);
+            console.log('📝 Abriendo modal de asignación para:', studentName);
+            
+            // Configurar información del estudiante en el modal
+            document.getElementById('assign-student-name').textContent = studentName;
+            document.getElementById('assign-student-code').textContent = `ID: ${studentId}`;
+            
+            // Guardar datos del estudiante para uso posterior
+            window.currentAssignmentData = {
+                studentId: studentId,
+                studentName: studentName
+            };
+            
+            // Mostrar modal
+            document.getElementById('assign-activity-modal').style.display = 'flex';
         }
+
+        // Cerrar modal de asignación
+        function closeAssignModal() {
+            document.getElementById('assign-activity-modal').style.display = 'none';
+            document.getElementById('assign-activity-form').style.display = 'block';
+            document.getElementById('assign-loading').style.display = 'none';
+            document.getElementById('assign-activity-form').reset();
+        }
+        // Manejar envío del formulario de asignación
+        document.getElementById('assign-activity-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const table = document.getElementById('assign-table').value;
+            const exercises = document.getElementById('assign-exercises').value;
+            const message = document.getElementById('assign-message').value.trim();
+            
+            if (!table) {
+                alert('Por favor selecciona una tabla de multiplicar');
+                return;
+            }
+            
+            try {
+                // Mostrar loading
+                document.getElementById('assign-activity-form').style.display = 'none';
+                document.getElementById('assign-loading').style.display = 'block';
+                
+                // Crear documento de actividad asignada
+                const activityData = {
+                    studentId: window.currentAssignmentData.studentId,
+                    studentName: window.currentAssignmentData.studentName,
+                    teacherId: currentTeacher.id,
+                    teacherName: currentTeacher.name,
+                    tableNumber: parseInt(table),
+                    exerciseCount: parseInt(exercises),
+                    message: message || `Practica la tabla del ${table}`,
+                    status: 'pending',
+                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    dueDate: null // Por ahora sin fecha límite
+                };
+                
+                // Guardar en Firebase
+                await db.collection('assigned_activities').add(activityData);
+                
+                console.log('✅ Actividad asignada exitosamente');
+                
+                // Cerrar modal y mostrar confirmación
+                closeAssignModal();
+                alert(`✅ Actividad asignada a ${window.currentAssignmentData.studentName}\n\nTabla: ${table}\nEjercicios: ${exercises}\nMensaje: ${message || 'Practica la tabla del ' + table}`);
+                
+            } catch (error) {
+                console.error('❌ Error asignando actividad:', error);
+                alert('Error al asignar la actividad. Inténtalo nuevamente.');
+                
+                // Resetear estado del formulario
+                document.getElementById('assign-activity-form').style.display = 'block';
+                document.getElementById('assign-loading').style.display = 'none';
+            }
+        });
         // Refresh Classes
         async function refreshClasses() {
             await loadDashboardData();
