@@ -499,70 +499,10 @@
             }
         }
 
-        // NUEVA FUNCIÓN: Renderizar actividades asignadas
+     // NUEVA FUNCIÓN: Renderizar actividades asignadas
         function renderAssignments() {
-            const container = document.getElementById('assignments-container');
-            const noAssignments = document.getElementById('no-assignments');
-            const assignmentsSection = document.getElementById('assignments-section');
-            
-            if (userAssignments.length === 0) {
-                assignmentsSection.style.display = 'none';
-                return;
-            }
-
-            assignmentsSection.style.display = 'block';
-            noAssignments.style.display = 'none';
-            container.innerHTML = '';
-
-            userAssignments.forEach((assignment) => {
-                const priorityClass = assignment.priority === 'urgent' ? 'priority-urgent' : 
-                                   assignment.priority === 'high' ? 'priority-high' : 'priority-normal';
-                
-                const priorityEmoji = assignment.priority === 'urgent' ? '🚨' : 
-                                    assignment.priority === 'high' ? '⚡' : '✅';
-                
-                const priorityText = assignment.priority === 'urgent' ? 'URGENTE' : 
-                                   assignment.priority === 'high' ? 'ALTA PRIORIDAD' : 'NORMAL';
-
-                const priorityColor = assignment.priority === 'urgent' ? 'text-red-300' : 
-                                    assignment.priority === 'high' ? 'text-yellow-300' : 'text-green-300';
-
-                // Calcular tiempo desde asignación
-                const assignedDate = new Date(assignment.createdAt);
-                const now = new Date();
-                const diffHours = Math.floor((now - assignedDate) / (1000 * 60 * 60));
-                const timeText = diffHours < 1 ? 'Hace unos minutos' : 
-                               diffHours < 24 ? `Hace ${diffHours} horas` : 
-                               `Hace ${Math.floor(diffHours / 24)} días`;
-
-                const assignmentCard = `
-                    <div class="assignment-card bg-white bg-opacity-20 rounded-xl p-4 ${priorityClass}">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="text-2xl">${priorityEmoji}</div>
-                            <div class="text-xs opacity-60">${timeText}</div>
-                        </div>
-                        
-                        <div class="text-center mb-4">
-                            <h3 class="text-xl font-bold mb-2">Tabla del ${assignment.table}</h3>
-                            <p class="text-sm ${priorityColor} font-bold">${priorityText}</p>
-                            <p class="text-sm opacity-75 mt-1">${assignment.exercises} ejercicios</p>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <button onclick="practiceAssignment('${assignment.id}', ${assignment.table}, ${assignment.exercises})" 
-                                    class="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 font-bold text-white">
-                                🚀 Practicar Ahora
-                            </button>
-                            <button onclick="postponeAssignment('${assignment.id}')" 
-                                    class="w-full py-2 px-4 rounded-lg bg-gray-500 hover:bg-gray-600 font-bold text-white text-sm">
-                                ⏰ Practicar Más Tarde
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                container.innerHTML += assignmentCard;
-            });
+            // Esta función ya no se usa - las tareas se muestran en loadAssignedTasks
+            console.log('📋 renderAssignments() - función obsoleta, usando loadAssignedTasks()');
         }
 
         // NUEVA FUNCIÓN: Configurar listener en tiempo real para asignaciones
@@ -1076,76 +1016,92 @@
             console.log('📋 Viendo actividades de:', className, classroomId);
             alert(`Próximamente: Actividades de "${className}"`);
         };
-        // Cargar tareas asignadas al estudiante
-        async function loadAssignedTasks() {
-            console.log('📝 Cargando tareas asignadas...');
-            
-            try {
-                const tasksSnapshot = await getDocs(query(
-                    collection(db, 'assigned_activities'),
-                    where('studentId', '==', currentUser.uid),
-                    where('status', '==', 'pending')
-                ));
-                
-                const tasksList = document.getElementById('assigned-tasks-list');
-                
-                if (tasksSnapshot.empty) {
-                    tasksList.innerHTML = `
-                        <div class="text-center text-gray-500 py-8">
-                            <div class="text-4xl mb-2">✅</div>
-                            <div class="text-lg font-bold">¡No hay tareas pendientes!</div>
-                            <div class="text-sm mt-2">Todas las actividades están completadas</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                let tasksHTML = '';
-                
-                tasksSnapshot.forEach(doc => {
-                    const task = doc.data();
-                    const assignedDate = task.assignedAt ? task.assignedAt.toDate().toLocaleDateString('es-CL') : 'Hoy';
-                    
-                    tasksHTML += `
-                        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h4 class="text-xl font-bold text-yellow-300">📚 Tabla del ${task.tableNumber}</h4>
-                                    <p class="text-sm opacity-75">Asignada por: ${task.teacherName}</p>
-                                    <p class="text-sm opacity-75">Fecha: ${assignedDate}</p>
-                                </div>
-                                <div class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                    PENDIENTE
-                                </div>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <p class="text-white mb-2">${task.message}</p>
-                                <p class="text-sm text-blue-300">🎯 ${task.exerciseCount} ejercicios</p>
-                            </div>
-                            
-                            <button onclick="startAssignedTask('${doc.id}', ${task.tableNumber}, ${task.exerciseCount})" 
-                                    class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-500 hover:to-blue-600 transition-all">
-                                🚀 Comenzar Actividad
-                            </button>
-                        </div>
-                    `;
-                });
-                
-                tasksList.innerHTML = tasksHTML;
-                console.log('✅ Tareas cargadas exitosamente');
-                
-            } catch (error) {
-                console.error('❌ Error cargando tareas:', error);
-                document.getElementById('assigned-tasks-list').innerHTML = `
-                    <div class="text-center text-red-500 py-8">
-                        <div class="text-4xl mb-2">⚠️</div>
-                        <div>Error cargando tareas</div>
-                    </div>
-                `;
-            }
+       // Cargar tareas asignadas al estudiante
+async function loadAssignedTasks() {
+    console.log('📝 Cargando tareas asignadas...');
+    
+    try {
+        const tasksSnapshot = await getDocs(query(
+            collection(db, 'assigned_activities'),
+            where('studentId', '==', currentUser.uid),
+            where('status', '==', 'pending')
+        ));
+        
+        const tasksList = document.getElementById('assigned-tasks-list');
+        
+        if (tasksSnapshot.empty) {
+            tasksList.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">✅</div>
+                    <div class="text-lg font-bold">¡No hay tareas pendientes!</div>
+                    <div class="text-sm mt-2">Todas las actividades están completadas</div>
+                </div>
+            `;
+            return;
         }
-
+        
+        let tasksHTML = '';
+        
+        tasksSnapshot.forEach(doc => {
+            const task = doc.data();
+            console.log('📝 Procesando tarea:', task);
+            
+            // Manejo seguro de fecha
+            let assignedDate = 'Hoy';
+            if (task.assignedAt) {
+                try {
+                    if (task.assignedAt.toDate) {
+                        assignedDate = task.assignedAt.toDate().toLocaleDateString('es-CL');
+                    } else if (task.assignedAt.seconds) {
+                        assignedDate = new Date(task.assignedAt.seconds * 1000).toLocaleDateString('es-CL');
+                    } else {
+                        assignedDate = new Date(task.assignedAt).toLocaleDateString('es-CL');
+                    }
+                } catch (dateError) {
+                    console.log('Error procesando fecha:', dateError);
+                    assignedDate = 'Fecha reciente';
+                }
+            }
+            
+            tasksHTML += `
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h4 class="text-xl font-bold text-yellow-300">📚 Tabla del ${task.tableNumber}</h4>
+                            <p class="text-sm opacity-75">Asignada por: ${task.teacherName}</p>
+                            <p class="text-sm opacity-75">Fecha: ${assignedDate}</p>
+                        </div>
+                        <div class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                            PENDIENTE
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-white mb-2">${task.message}</p>
+                        <p class="text-sm text-blue-300">🎯 ${task.exerciseCount} ejercicios</p>
+                    </div>
+                    
+                    <button onclick="startAssignedTask('${doc.id}', ${task.tableNumber}, ${task.exerciseCount})" 
+                            class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-500 hover:to-blue-600 transition-all">
+                        🚀 Comenzar Actividad
+                    </button>
+                </div>
+            `;
+        });
+        
+        tasksList.innerHTML = tasksHTML;
+        console.log('✅ Tareas cargadas exitosamente');
+        
+    } catch (error) {
+        console.error('❌ Error cargando tareas:', error);
+        document.getElementById('assigned-tasks-list').innerHTML = `
+            <div class="text-center text-red-500 py-8">
+                <div class="text-4xl mb-2">⚠️</div>
+                <div>Error cargando tareas: ${error.message}</div>
+            </div>
+        `;
+    }
+}
         // Iniciar tarea asignada específica
         window.startAssignedTask = function(taskId, tableNumber, exerciseCount) {
             console.log(`🚀 Iniciando tarea: Tabla ${tableNumber}, ${exerciseCount} ejercicios`);
