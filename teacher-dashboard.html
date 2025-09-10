@@ -1235,20 +1235,15 @@
         function renderActivities(activities, filter = 'all') {
             const container = document.getElementById('activities-list');
             
-           // DEBUG: Mostrar datos reales de actividades
-console.log('🔍 DEBUG - Actividades recibidas:', activities);
-console.log('🔍 DEBUG - Filtro aplicado:', filter);
+          // Filtrar actividades correctamente
+console.log('🔍 Filtrando', activities.length, 'actividades con filtro:', filter);
 
-// Filtrar actividades
 const filteredActivities = activities.filter(activity => {
-    console.log('🔍 DEBUG - Actividad:', activity.studentName, '| Estado:', activity.status, '| Tipo:', typeof activity.status);
-    
     if (filter === 'all') return true;
     return activity.status === filter;
 });
 
-console.log('🔍 DEBUG - Actividades filtradas:', filteredActivities);
-
+console.log('✅ Resultado:', filteredActivities.length, 'actividades filtradas');
             if (filteredActivities.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8">
@@ -1335,7 +1330,7 @@ console.log('🔍 DEBUG - Actividades filtradas:', filteredActivities);
             document.getElementById('stats-pending').textContent = pending;
         }
 
-        // Filtrar actividades
+        // Filtrar actividades (VERSIÓN CORREGIDA)
         function filterActivities(filter) {
             console.log('🔍 Filtrando actividades por:', filter);
             
@@ -1345,12 +1340,12 @@ console.log('🔍 DEBUG - Actividades filtradas:', filteredActivities);
             });
             document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
             
-            // Re-cargar actividades con filtro (implementación simple)
-            loadAssignedActivities().then(() => {
-                // El filtro se aplicará en renderActivities
-                const activities = window.currentActivities || [];
-                renderActivities(activities, filter);
-            });
+            // Usar actividades ya cargadas en lugar de recargar
+            const activities = window.currentActivities || [];
+            console.log('🔍 DEBUG - Usando actividades existentes:', activities);
+            
+            // Aplicar filtro directo
+            renderActivities(activities, filter);
         }
 
         // Refrescar actividades
