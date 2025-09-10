@@ -222,6 +222,7 @@
                     </div>
                 </div>
             </div>
+            
 <!-- SISTEMA DE PESTAÑAS -->
             <div class="tabs-container">
                 <div class="tabs-nav">
@@ -244,39 +245,163 @@
             
             <!-- PESTAÑA: PRÁCTICA LIBRE -->
             <div id="content-practice" class="tab-content active">
-            <!-- NUEVA SECCIÓN: ACTIVIDADES ASIGNADAS -->
-            <div id="assignments-section" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6" style="display: none;">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">📋 MIS ACTIVIDADES ASIGNADAS</h2>
-                    <button onclick="refreshAssignments()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm">
-                        🔄 Actualizar
-                    </button>
-                </div>
-                
-                <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Se llenan dinámicamente -->
+                <!-- MODOS DE ENTRENAMIENTO -->
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center">🎮 MODOS DE ENTRENAMIENTO</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Tablas de Multiplicar -->
+                        <div onclick="goToTablas()" class="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                            <div class="text-5xl mb-4 text-center">🎯</div>
+                            <h3 class="text-2xl font-bold mb-2 text-center">Tablas de Multiplicar</h3>
+                            <p class="text-center opacity-90 mb-4">
+                                Practica las tablas del 2 al 13 con opción múltiple y timer
+                            </p>
+                            <div class="text-center">
+                                <div class="text-white font-bold">🚀 ¡Comenzar Entrenamiento!</div>
+                            </div>
+                        </div>
+
+                        <!-- Multiplicación Avanzada -->
+                        <div onclick="goToAvanzado()" class="bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                            <div class="text-5xl mb-4 text-center">🔥</div>
+                            <h3 class="text-2xl font-bold mb-2 text-center">Multiplicación Avanzada</h3>
+                            <p class="text-center opacity-90 mb-4">
+                                Multiplicaciones complejas con números grandes y teclado numérico
+                            </p>
+                            <div class="text-center">
+                                <div class="text-white font-bold">🔥 ¡Desafío Matemático!</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Crear Desafío -->
+                        <div onclick="goToCreateChallenge()" class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300">
+                            <div class="text-5xl mb-4 text-center">🏆</div>
+                            <h3 class="text-2xl font-bold mb-2 text-center">Crear Desafío</h3>
+                            <p class="text-center opacity-90 mb-4">
+                                Crea un desafío personalizado y compártelo con código único
+                            </p>
+                            <div class="text-center">
+                                <div class="text-white font-bold text-lg">🎯 ¡Desafiar a Otros!</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="no-assignments" class="text-center py-8 opacity-60" style="display: none;">
-                    <div class="text-4xl mb-4">📚</div>
-                    <p class="text-lg">No tienes actividades asignadas por ahora</p>
-                    <p class="text-sm opacity-75">¡Puedes practicar cualquier tabla que quieras!</p>
+                <!-- UNIRSE A DESAFÍO -->
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center">🏆 UNIRSE A DESAFÍO</h2>
+                    
+                    <div class="max-w-md mx-auto">
+                        <p class="text-center mb-6 opacity-90">
+                            ¿Tienes un código de desafío? Ingrésalo aquí y compite con tu perfil
+                        </p>
+                        
+                        <div class="flex flex-col gap-4">
+                            <input 
+                                type="text" 
+                                id="dashboard-challenge-code" 
+                                placeholder="Ingresa código D12345" 
+                                class="px-6 py-4 rounded-2xl text-black font-bold text-xl text-center border-4 border-white border-opacity-30 focus:border-yellow-400 focus:outline-none"
+                                maxlength="6"
+                                style="text-transform: uppercase;"
+                            >
+                            <button 
+                                onclick="joinChallengeAsUser()" 
+                                class="px-8 py-4 rounded-2xl text-xl font-bold bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white shadow-lg"
+                            >
+                                🎯 Unirse con Mi Perfil
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mt-4 text-sm opacity-75">
+                            Tu nombre de perfil aparecerá en el ranking
+                        </div>
+                    </div>
                 </div>
             </div>
-</div>
+            <!-- FIN PESTAÑA: PRÁCTICA LIBRE -->
+
+            <!-- PESTAÑA: MIS CLASES -->
+            <div id="content-classes" class="tab-content">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center">📚 MIS CLASES</h2>
+                    
+                    <!-- FORMULARIO UNIRSE A CLASE -->
+                    <div class="join-class-form mb-6">
+                        <div class="text-center mb-4">
+                            <h3 class="text-xl font-bold mb-2">🔗 Unirse a una Clase</h3>
+                            <p class="opacity-80">Ingresa el código que te dio tu profesor</p>
+                        </div>
+                        
+                        <div class="max-w-md mx-auto">
+                            <div class="flex flex-col gap-4">
+                                <input 
+                                    type="text" 
+                                    id="class-code-input" 
+                                    placeholder="CLS_ABC123" 
+                                    class="form-input"
+                                    maxlength="10"
+                                >
+                                <button onclick="joinClassroom()" class="btn-join">
+                                    🚀 Unirse a la Clase
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LISTA DE CLASES -->
+                    <div id="student-classes-container">
+                        <h3 class="text-xl font-bold mb-4">📖 Mis Clases Actuales</h3>
+                        <div id="classes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Se llenan dinámicamente -->
+                        </div>
+                        
+                        <div id="no-classes" class="text-center py-8 opacity-60">
+                            <div class="text-4xl mb-4">📚</div>
+                            <p class="text-lg">Aún no estás en ninguna clase</p>
+                            <p class="text-sm opacity-75">Pídele a tu profesor el código de clase</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN PESTAÑA: MIS CLASES -->
+
+            <!-- PESTAÑA: TAREAS -->
+            <div id="content-assignments" class="tab-content">
+                <!-- ACTIVIDADES ASIGNADAS -->
+                <div id="assignments-section" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6" style="display: none;">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">📋 MIS ACTIVIDADES ASIGNADAS</h2>
+                        <button onclick="refreshAssignments()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    
+                    <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Se llenan dinámicamente -->
+                    </div>
+
+                    <div id="no-assignments" class="text-center py-8 opacity-60" style="display: none;">
+                        <div class="text-4xl mb-4">📚</div>
+                        <p class="text-lg">No tienes actividades asignadas por ahora</p>
+                        <p class="text-sm opacity-75">¡Puedes practicar cualquier tabla que quieras!</p>
+                    </div>
+                </div>
+            </div>
             <!-- FIN PESTAÑA: TAREAS -->
 
             <!-- PESTAÑA: MI PROGRESO -->
             <div id="content-progress" class="tab-content">
-            <!-- PROGRESO POR TABLA -->
-            <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
-                <h2 class="text-2xl font-bold mb-6 text-center">📊 MI PROGRESO POR TABLA</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="progress-grid">
-                    <!-- Se llena dinámicamente -->
+                <!-- PROGRESO POR TABLA -->
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center">📊 MI PROGRESO POR TABLA</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="progress-grid">
+                        <!-- Se llena dinámicamente -->
+                    </div>
                 </div>
             </div>
-</div>
             <!-- FIN PESTAÑA: MI PROGRESO -->
             <!-- MODOS DE ENTRENAMIENTO -->
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
