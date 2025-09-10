@@ -1069,11 +1069,11 @@
             document.getElementById('class-details').style.display = 'block';
 
             // Cargar estudiantes de la clase
-            loadClassStudents(classData.classCode, classData.id);
+           loadClassStudents(classData.classCode, classData.id, classData.className);
         }
 
         // Cargar lista de estudiantes de una clase específica
-        async function loadClassStudents(classCode, classroomId) {
+      async function loadClassStudents(classCode, classroomId, className) {
             console.log('👥 Cargando estudiantes de clase:', classCode);
             
             try {
@@ -1111,7 +1111,7 @@
                                         <div class="text-sm text-gray-500">Código: ${studentData.studentCode}</div>
                                     </div>
                                 </div>
-<button onclick="assignActivityToStudent('${studentData.studentId}', '${studentData.studentName}', '${classData.id}', '${classData.className}')"
+<button onclick="assignActivityToStudent('${studentData.studentId}', '${studentData.studentName}', '${classroomId}', '${className}')"
                                         class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
                                     📝 Asignar Actividad
                                 </button>
