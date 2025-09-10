@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiBoost - Dashboard Docente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .class-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .class-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-4px);
+        }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #f093fb;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <div class="text-xl font-bold">Cargando Dashboard...</div>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="glass-card p-4 m-4 rounded-2xl">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">🎓 Dashboard Docente</h1>
+                <p id="teacher-info" class="text-sm opacity-75">Cargando...</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="createNewClass()" class="btn-primary px-4 py-2 rounded-xl font-bold text-sm">
+                    ➕ Nueva Clase
+                </button>
+                <button onclick="logout()" class="btn-secondary px-4 py-2 rounded-xl font-bold text-sm">
+                    🚪 Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-4">
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card rounded-2xl p-6 text-center">
+                <div class="text-3xl font-bold text-yellow-300" id="total-classes">0</div>
+                <div class="text-sm opacity-75">Clases Activas</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center">
+                <div class="text-3xl font-bold text-green-300" id="total-students">0</div>
+                <div class="text-sm opacity-75">Estudiantes</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center">
+                <div class="text-3xl font-bold text-blue-300" id="total-activities">0</div>
+                <div class="text-sm opacity-75">Actividades</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center">
+                <div class="text-3xl font-bold text-purple-300" id="avg-performance">--</div>
+                <div class="text-sm opacity-75">Rendimiento Promedio</div>
+            </div>
+        </div>
+
+        <!-- Classes Section -->
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">📚 Mis Clases</h2>
+                <button onclick="refreshClasses()" class="text-white hover:text-yellow-300 transition-colors">
+                    🔄 Actualizar
+                </button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-12" style="display: none;">
+                <div class="text-6xl mb-4">📖</div>
+                <h3 class="text-xl font-bold mb-2">¡Crea tu primera clase!</h3>
+                <p class="text-lg opacity-75 mb-6">Comienza organizando a tus estudiantes en grupos</p>
+                <button onclick="createNewClass()" class="btn-primary px-6 py-3 rounded-2xl font-bold">
+                    ➕ Crear Primera Clase
+                </button>
+            </div>
+
+            <!-- Classes Grid -->
+            <div id="classes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Classes will be loaded here dynamically -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Create Class Modal -->
+    <div id="create-class-modal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50" style="display: none;">
+        <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold mb-6 text-center">➕ Crear Nueva Clase</h3>
+            
+            <form id="create-class-form">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Nombre de la Clase:</label>
+                        <input type="text" id="class-name" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium" placeholder="Ej: 5°B Matemáticas" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Curso/Nivel:</label>
+                        <select id="class-grade" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="4° Básico">4° Básico</option>
+                            <option value="5° Básico">5° Básico</option>
+                            <option value="6° Básico">6° Básico</option>
+                            <option value="7° Básico">7° Básico</option>
+                            <option value="8° Básico">8° Básico</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Descripción (Opcional):</label>
+                        <textarea id="class-description" class="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-medium h-24 resize-none" placeholder="Descripción de la clase..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeCreateClassModal()" class="flex-1 py-3 px-4 rounded-xl font-bold bg-gray-500 hover:bg-gray-600 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 btn-primary py-3 px-4 rounded-xl font-bold">
+                        Crear Clase
+                    </button>
+                </div>
+            </form>
+
+            <!-- Loading State -->
+            <div id="create-class-loading" class="text-center py-6" style="display: none;">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <div class="font-bold">Creando clase...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 modal flex items-center justify-center z-50" style="display: none;">
+        <div class="glass-card rounded-3xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-2xl font-bold mb-4">¡Clase Creada!</h3>
+            <div class="bg-white bg-opacity-20 rounded-2xl p-4 mb-6">
+                <p class="font-bold mb-2">Código de la clase:</p>
+                <div class="text-3xl font-bold text-yellow-300" id="new-class-code">CLS_ABC123</div>
+                <p class="text-sm opacity-75 mt-2">Comparte este código con tus estudiantes</p>
+            </div>
+            <button onclick="closeSuccessModal()" class="btn-primary px-6 py-3 rounded-2xl font-bold">
+                ¡Entendido!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        console.log('🎓 Dashboard Docente - Iniciando...');
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOBzv5Sm8trrNhLtOyU8HBRT9fVOsVzOo",
+            authDomain: "multiboost-aventura.firebaseapp.com",
+            projectId: "multiboost-aventura",
+            storageBucket: "multiboost-aventura.appspot.com",
+            messagingSenderId: "970046756421",
+            appId: "1:970046756421:web:73e32ec1e5e30bdf36c7ea"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Global variables
+        let currentTeacher = null;
+        let teacherClasses = [];
+
+        // DOM Elements
+        const loadingScreen = document.getElementById('loading-screen');
+        const teacherInfo = document.getElementById('teacher-info');
+        const createClassModal = document.getElementById('create-class-modal');
+        const successModal = document.getElementById('success-modal');
+        const createClassForm = document.getElementById('create-class-form');
+        const createClassLoading = document.getElementById('create-class-loading');
+
+        // Initialize Dashboard
+        async function initDashboard() {
+            try {
+                // Check authentication
+                const teacherSession = sessionStorage.getItem('teacherSession');
+                if (!teacherSession) {
+                    console.log('No hay sesión docente');
+                    window.location.href = 'teacher-login.html';
+                    return;
+                }
+
+                const session = JSON.parse(teacherSession);
+                
+                // Load teacher data
+                const teacherDoc = await db.collection('teachers').doc(session.uid).get();
+                if (!teacherDoc.exists) {
+                    console.log('Docente no encontrado');
+                    sessionStorage.removeItem('teacherSession');
+                    window.location.href = 'teacher-login.html';
+                    return;
+                }
+
+                currentTeacher = { id: teacherDoc.id, ...teacherDoc.data() };
+                
+                // Update UI
+                teacherInfo.textContent = `${currentTeacher.name} - ${currentTeacher.school}`;
+                
+                // Load dashboard data
+                await loadDashboardData();
+                
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+                
+                console.log('✅ Dashboard cargado correctamente');
+
+            } catch (error) {
+                console.error('Error inicializando dashboard:', error);
+                alert('Error cargando el dashboard. Por favor, inicia sesión nuevamente.');
+                window.location.href = 'teacher-login.html';
+            }
+        }
+
+        // Load Dashboard Data
+        async function loadDashboardData() {
+            try {
+                // Load teacher's classes
+                const classesSnapshot = await db.collection('classrooms')
+                    .where('teacherId', '==', currentTeacher.id)
+                    .where('isActive', '==', true)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                teacherClasses = [];
+                classesSnapshot.forEach(doc => {
+                    teacherClasses.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Update statistics
+                await updateStatistics();
+                
+                // Render classes
+                renderClasses();
+                
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        }
+
+        // Update Statistics
+        async function updateStatistics() {
+            try {
+                // Total classes
+                document.getElementById('total-classes').textContent = teacherClasses.length;
+
+                // Total students (count from all classes)
+                let totalStudents = 0;
+                for (const classroom of teacherClasses) {
+                    const studentsSnapshot = await db.collection('classroom_students')
+                        .where('classroomId', '==', classroom.id)
+                        .where('isActive', '==', true)
+                        .get();
+                    totalStudents += studentsSnapshot.size;
+                }
+                document.getElementById('total-students').textContent = totalStudents;
+
+                // TODO: Add activities and performance statistics when implemented
+                document.getElementById('total-activities').textContent = '0';
+                document.getElementById('avg-performance').textContent = '--';
+
+            } catch (error) {
+                console.error('Error actualizando estadísticas:', error);
+            }
+        }
+
+        // Render Classes
+        function renderClasses() {
+            const classesGrid = document.getElementById('classes-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (teacherClasses.length === 0) {
+                classesGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            classesGrid.style.display = 'grid';
+
+            classesGrid.innerHTML = teacherClasses.map(classroom => `
+                <div class="class-card rounded-2xl p-6 cursor-pointer" onclick="openClassroom('${classroom.id}')">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-2xl">📚</div>
+                        <div class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-lg">
+                            ${classroom.grade || 'Sin nivel'}
+                        </div>
+                    </div>
+                    
+                    <h3 class="font-bold text-lg mb-2">${classroom.className}</h3>
+                    
+                    ${classroom.description ? `<p class="text-sm opacity-75 mb-3">${classroom.description}</p>` : ''}
+                    
+                    <div class="bg-white bg-opacity-20 rounded-xl p-3 mb-4">
+                        <div class="text-xs opacity-75 mb-1">Código de clase:</div>
+                        <div class="font-bold text-yellow-300">${classroom.classCode}</div>
+                    </div>
+                    
+                    <div class="flex justify-between text-sm">
+                        <span>👥 <span id="students-count-${classroom.id}">...</span> estudiantes</span>
+                        <span>📅 ${formatDate(classroom.createdAt)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Load student counts for each class
+            teacherClasses.forEach(async (classroom) => {
+                try {
+                    const studentsSnapshot = await db.collection('classroom_students')
+                        .where('classroomId', '==', classroom.id)
+                        .where('isActive', '==', true)
+                        .get();
+                    
+                    const countElement = document.getElementById(`students-count-${classroom.id}`);
+                    if (countElement) {
+                        countElement.textContent = studentsSnapshot.size;
+                    }
+                } catch (error) {
+                    console.error('Error cargando estudiantes:', error);
+                }
+            });
+        }
+
+        // Create New Class
+        function createNewClass() {
+            createClassModal.style.display = 'flex';
+            document.getElementById('class-name').focus();
+        }
+
+        function closeCreateClassModal() {
+            createClassModal.style.display = 'none';
+            createClassForm.style.display = 'block';
+            createClassLoading.style.display = 'none';
+            createClassForm.reset();
+        }
+
+        // Handle Create Class Form
+        createClassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const className = document.getElementById('class-name').value.trim();
+            const grade = document.getElementById('class-grade').value;
+            const description = document.getElementById('class-description').value.trim();
+
+            if (!className || !grade) {
+                alert('Por favor completa los campos requeridos');
+                return;
+            }
+
+            try {
+                // Show loading
+                createClassForm.style.display = 'none';
+                createClassLoading.style.display = 'block';
+
+                // Generate unique class code
+                const classCode = await generateClassCode();
+
+                // Create classroom document
+                const classroomData = {
+                    teacherId: currentTeacher.id,
+                    teacherName: currentTeacher.name,
+                    className: className,
+                    grade: grade,
+                    description: description,
+                    classCode: classCode,
+                    school: currentTeacher.school,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isActive: true
+                };
+
+                const docRef = await db.collection('classrooms').add(classroomData);
+                console.log('✅ Clase creada con ID:', docRef.id);
+
+                // Close create modal and show success
+                closeCreateClassModal();
+                document.getElementById('new-class-code').textContent = classCode;
+                successModal.style.display = 'flex';
+
+                // Refresh dashboard data
+                await loadDashboardData();
+
+            } catch (error) {
+                console.error('Error creando clase:', error);
+                alert('Error al crear la clase. Inténtalo nuevamente.');
+                
+                // Reset form state
+                createClassForm.style.display = 'block';
+                createClassLoading.style.display = 'none';
+            }
+        });
+
+        // Generate Unique Class Code
+        async function generateClassCode() {
+            let isUnique = false;
+            let code = '';
+            
+            while (!isUnique) {
+                // Generate code format: CLS_ABC123
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const numbers = '0123456789';
+                
+                let randomLetters = '';
+                for (let i = 0; i < 3; i++) {
+                    randomLetters += letters.charAt(Math.floor(Math.random() * letters.length));
+                }
+                
+                let randomNumbers = '';
+                for (let i = 0; i < 3; i++) {
+                    randomNumbers += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                }
+                
+                code = `CLS_${randomLetters}${randomNumbers}`;
+                
+                // Check if code already exists
+                const existingClass = await db.collection('classrooms')
+                    .where('classCode', '==', code)
+                    .get();
+                
+                if (existingClass.empty) {
+                    isUnique = true;
+                }
+            }
+            
+            return code;
+        }
+
+        function closeSuccessModal() {
+            successModal.style.display = 'none';
+        }
+
+        // Open Classroom (placeholder for future implementation)
+        function openClassroom(classroomId) {
+            console.log('Abriendo clase:', classroomId);
+            // TODO: Navigate to classroom detail view
+            alert('Funcionalidad de detalle de clase - próximamente');
+        }
+
+        // Refresh Classes
+        async function refreshClasses() {
+            await loadDashboardData();
+            console.log('✅ Clases actualizadas');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await auth.signOut();
+                sessionStorage.removeItem('teacherSession');
+                window.location.href = 'teacher-login.html';
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+            }
+        }
+
+        // Utility Functions
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Hoy';
+            
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'Hoy';
+            if (diffDays === 2) return 'Ayer';
+            if (diffDays <= 7) return `Hace ${diffDays} días`;
+            
+            return date.toLocaleDateString('es-CL', { 
+                day: 'numeric', 
+                month: 'short' 
+            });
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
