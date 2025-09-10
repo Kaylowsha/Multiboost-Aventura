@@ -827,7 +827,7 @@
             }
         };
 
-       // FUNCIÓN REAL PARA UNIRSE A CLASE
+       /// FUNCIÓN REAL PARA UNIRSE A CLASE - VERSIÓN FIREBASE COMPLETA
         window.joinClassroom = async function() {
             const codeInput = document.getElementById('class-code-input');
             const joinButton = codeInput.parentElement.querySelector('.btn-join');
@@ -849,11 +849,120 @@
                 return;
             }
             
-            console.log('🔗 Intentando unirse a clase:', code);
-            alert('✅ Función Firebase lista - próximamente implementaremos la conexión real');
-            codeInput.value = '';
+            try {
+                console.log('🔗 Buscando clase con código:', code);
+                
+                // Deshabilitar botón durante proceso
+                joinButton.disabled = true;
+                joinButton.textContent = '⏳ Buscando clase...';
+                
+                // 1. Buscar si la clase existe
+                const classroomQuery = query(
+                    collection(db, 'classrooms'),
+                    where('classCode', '==', code),
+                    where('isActive', '==', true)
+                );
+                
+                const classroomSnapshot = await getDocs(classroomQuery);
+                
+                if (classroomSnapshot.empty) {
+                    alert('❌ Código de clase no encontrado.\n\nVerifica que:\n• El código sea correcto\n• La clase esté activa\n• Tu profesor haya creado la clase');
+                    return;
+                }
+                
+                // 2. Obtener datos de la clase
+                const classroomDoc = classroomSnapshot.docs[0];
+                const classroomData = classroomDoc.data();
+                const classroomId = classroomDoc.id;
+                
+                console.log('✅ Clase encontrada:', classroomData.className);
+                joinButton.textContent = '🔍 Verificando inscripción...';
+                
+                // 3. Verificar si ya está inscrito
+                const existingEnrollment = await getDoc(
+                    doc(db, 'classroom_students', `${classroomId}_${currentUser.uid}`)
+                );
+                
+                if (existingEnrollment.exists()) {
+                    alert(`ℹ️ Ya estás inscrito en la clase "${classroomData.className}"`);
+                    return;
+                }
+                
+                // 4. Obtener datos del estudiante
+                joinButton.textContent = '👤 Obteniendo perfil...';
+                const studentDoc = await getDoc(doc(db, 'students', currentUser.uid));
+                if (!studentDoc.exists()) {
+                    alert('❌ Error: No se encontró tu perfil de estudiante');
+                    return;
+                }
+                
+                const studentData = studentDoc.data();
+                
+                // 5. Crear inscripción en classroom_students
+                joinButton.textContent = '📝 Inscribiendo...';
+                const enrollmentData = {
+                    classroomId: classroomId,
+                    studentId: currentUser.uid,
+                    studentName: studentData.name,
+                    studentCode: studentData.studentCode,
+                    className: classroomData.className,
+                    teacherId: classroomData.teacherId,
+                    teacherName: classroomData.teacherName,
+                    school: classroomData.school,
+                    grade: classroomData.grade,
+                    joinedAt: new Date(),
+                    isActive: true
+                };
+                
+                await setDoc(
+                    doc(db, 'classroom_students', `${classroomId}_${currentUser.uid}`),
+                    enrollmentData
+                );
+                
+                // 6. Crear registro rápido en student_classes
+                const studentClassData = {
+                    studentId: currentUser.uid,
+                    classroomId: classroomId,
+                    classCode: code,
+                    className: classroomData.className,
+                    teacherName: classroomData.teacherName,
+                    school: classroomData.school,
+                    grade: classroomData.grade,
+                    joinedAt: new Date(),
+                    isActive: true
+                };
+                
+                await setDoc(
+                    doc(db, 'student_classes', `${currentUser.uid}_${classroomId}`),
+                    studentClassData
+                );
+                
+                console.log('✅ Inscripción completada exitosamente');
+                
+                // 7. Mostrar mensaje de éxito
+                alert(`🎉 ¡Éxito! Te has unido a la clase:\n\n📚 ${classroomData.className}\n👨‍🏫 Profesor: ${classroomData.teacherName}\n🏫 ${classroomData.school || 'Escuela'}`);
+                
+                // 8. Limpiar formulario y recargar clases
+                codeInput.value = '';
+                await loadStudentClasses();
+                
+            } catch (error) {
+                console.error('❌ Error uniéndose a clase:', error);
+                
+                if (error.code === 'permission-denied') {
+                    alert('❌ Error de permisos. Por favor:\n• Verifica tu conexión a internet\n• Cierra sesión y vuelve a entrar');
+                } else if (error.code === 'unavailable') {
+                    alert('❌ Servicio temporalmente no disponible.\nIntenta nuevamente en unos minutos.');
+                } else {
+                    alert('❌ Error inesperado al unirse a la clase.\nVerifica tu conexión e intenta nuevamente.');
+                }
+                
+            } finally {
+                // Rehabilitar botón
+                joinButton.disabled = false;
+                joinButton.textContent = '🚀 Unirse a la Clase';
+            }
         };
-
        // FUNCIÓN REAL PARA CARGAR CLASES DEL ESTUDIANTE
         window.loadStudentClasses = async function() {
             console.log('📚 Cargando clases del estudiante...');
