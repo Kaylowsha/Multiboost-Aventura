@@ -754,15 +754,7 @@ MultiBoost.prototype.updateStatsDisplay = function() {
     }
 };
 
-// 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
-MultiBoost.prototype.showResults = function() {
-    try {
-        console.log('🏁 Entrenamiento completado');
-        
-        if (this.sessionTimer) {
-            clearInterval(this.sessionTimer);
-            
-        }
+
         // 🆕 MOSTRAR RESULTADOS CON COMPLETADO DE ACTIVIDAD ASIGNADA
 MultiBoost.prototype.showResults = function() {
     try {
