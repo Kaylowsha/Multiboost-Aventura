@@ -1216,8 +1216,12 @@
                     activities.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Renderizar actividades
-                renderActivities(activities);
+               // Guardar actividades globalmente para filtros
+window.currentActivities = activities;
+console.log('💾 Actividades guardadas globalmente:', activities.length);
+
+// Renderizar actividades
+renderActivities(activities);
                 
                 // Mostrar estadísticas
                 updateActivitiesStats(activities);
