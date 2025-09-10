@@ -1012,10 +1012,138 @@
         }
 
         // FUNCIÓN PLACEHOLDER PARA VER ACTIVIDADES
-        window.viewClassActivities = function(classroomId, className) {
-            console.log('📋 Viendo actividades de:', className, classroomId);
-            alert(`Próximamente: Actividades de "${className}"`);
-        };
+       window.viewClassActivities = async function(classroomId, className) {
+    console.log('📋 Cargando actividades de clase:', className, classroomId);
+    
+    try {
+        // Mostrar loading temporal
+        const existingModal = document.getElementById('class-activities-modal');
+        if (existingModal) existingModal.remove();
+        
+        // Crear modal de actividades
+        const modalHTML = `
+            <div id="class-activities-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-3xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold">📋 Actividades de ${className}</h3>
+                        <button onclick="closeClassActivitiesModal()" class="text-4xl hover:bg-white hover:bg-opacity-20 rounded-full w-12 h-12 flex items-center justify-center">×</button>
+                    </div>
+                    <div id="class-activities-content">
+                        <div class="text-center py-8">
+                            <div class="text-4xl mb-4">⏳</div>
+                            <div>Cargando actividades...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Cargar actividades de esta clase específica
+        const activitiesSnapshot = await window.getDocs(window.query(
+            window.collection(window.db, 'assigned_activities'),
+            window.where('studentId', '==', currentUser.uid),
+            window.where('classroomId', '==', classroomId)
+        ));
+        
+        const activities = [];
+        activitiesSnapshot.forEach(doc => {
+            activities.push({ id: doc.id, ...doc.data() });
+        });
+        
+        renderClassActivities(activities, className);
+        
+    } catch (error) {
+        console.error('Error cargando actividades de clase:', error);
+        const content = document.getElementById('class-activities-content');
+        if (content) {
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-4xl mb-4">❌</div>
+                    <div>Error cargando actividades</div>
+                </div>
+            `;
+        }
+    }
+};
+
+        // Renderizar actividades de una clase específica
+function renderClassActivities(activities, className) {
+    const content = document.getElementById('class-activities-content');
+    
+    if (activities.length === 0) {
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="text-4xl mb-4">📚</div>
+                <h4 class="text-xl font-bold mb-2">Sin actividades asignadas</h4>
+                <p class="opacity-75">No tienes actividades pendientes en ${className}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    content.innerHTML = `
+        <div class="space-y-4">
+            ${activities.map(activity => {
+                const statusClass = activity.status === 'completed' ? 'bg-green-500' : 'bg-orange-500';
+                const statusIcon = activity.status === 'completed' ? '✅' : '⏳';
+                const statusText = activity.status === 'completed' ? 'Completada' : 'Pendiente';
+                
+                return `
+                    <div class="bg-white bg-opacity-10 rounded-xl p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="text-lg font-bold">📚 Tabla del ${activity.tableNumber}</h4>
+                                <p class="text-sm opacity-75">${activity.exerciseCount} ejercicios</p>
+                            </div>
+                            <span class="${statusClass} text-white px-3 py-1 rounded-full text-sm font-bold">
+                                ${statusIcon} ${statusText}
+                            </span>
+                        </div>
+                        
+                        ${activity.message ? `
+                            <div class="bg-white bg-opacity-10 rounded-lg p-3 mb-3">
+                                <p class="text-sm">${activity.message}</p>
+                            </div>
+                        ` : ''}
+                        
+                        ${activity.status === 'pending' ? `
+                            <button onclick="startAssignedTask('${activity.id}', ${activity.tableNumber}, ${activity.exerciseCount})" 
+                                    class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:from-green-500 hover:to-blue-600">
+                                🚀 Comenzar Actividad
+                            </button>
+                        ` : activity.results ? `
+                            <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                                <div class="text-sm font-bold mb-2">📊 Resultados:</div>
+                                <div class="grid grid-cols-3 gap-3 text-center">
+                                    <div>
+                                        <div class="font-bold text-green-300">${activity.results.correct}</div>
+                                        <div class="text-xs opacity-75">Correctas</div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-red-300">${activity.results.incorrect}</div>
+                                        <div class="text-xs opacity-75">Incorrectas</div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-blue-300">${activity.results.percentage}%</div>
+                                        <div class="text-xs opacity-75">Precisión</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+// Cerrar modal de actividades
+window.closeClassActivitiesModal = function() {
+    const modal = document.getElementById('class-activities-modal');
+    if (modal) modal.remove();
+};
        // Cargar tareas asignadas al estudiante
 async function loadAssignedTasks() {
     console.log('📝 Cargando tareas asignadas...');
