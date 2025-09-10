@@ -1214,8 +1214,9 @@
                         loadAssignedActivities();
                     break;
                 case 'progress':
-                    console.log('📊 Pestaña progreso - funcionalidad futura');
-                    break;
+    console.log('📊 Cargando pestaña progreso');
+    loadProgressClasses();
+    break;
                 case 'students':
                     console.log('👥 Pestaña estudiantes - funcionalidad futura');
                     break;
@@ -1439,6 +1440,240 @@ console.log('✅ Resultado:', filteredActivities.length, 'actividades filtradas'
                 console.error('Error actualizando estadísticas:', error);
             }
         }
+        // FUNCIONES DE ANÁLISIS DE PROGRESO
+async function loadProgressClasses() {
+    console.log('📊 Cargando clases para análisis de progreso');
+    
+    const selector = document.getElementById('progress-class-selector');
+    if (!selector) return;
+    
+    // Limpiar selector
+    selector.innerHTML = '<option value="">Seleccionar clase...</option>';
+    
+    // Cargar clases del profesor
+    teacherClasses.forEach(classroom => {
+        const option = document.createElement('option');
+        option.value = classroom.id;
+        option.textContent = `${classroom.className} (${classroom.grade})`;
+        selector.appendChild(option);
+    });
+    
+    console.log('✅ Clases cargadas en selector de progreso:', teacherClasses.length);
+}
+
+async function loadClassProgress() {
+    const selector = document.getElementById('progress-class-selector');
+    const selectedClassId = selector.value;
+    
+    if (!selectedClassId) {
+        // Ocultar contenido si no hay selección
+        document.getElementById('progress-overview').style.display = 'none';
+        document.getElementById('progress-students-list').style.display = 'none';
+        document.getElementById('progress-students-loading').style.display = 'block';
+        document.getElementById('progress-students-empty').style.display = 'none';
+        return;
+    }
+    
+    console.log('📊 Analizando progreso de clase:', selectedClassId);
+    
+    try {
+        // Mostrar loading
+        document.getElementById('progress-loading').style.display = 'inline-block';
+        document.getElementById('progress-students-loading').style.display = 'block';
+        document.getElementById('progress-students-list').style.display = 'none';
+        document.getElementById('progress-overview').style.display = 'none';
+        
+        // Cargar estudiantes de la clase
+        const studentsSnapshot = await db.collection('classroom_students')
+            .where('classroomId', '==', selectedClassId)
+            .where('isActive', '==', true)
+            .get();
+        
+        if (studentsSnapshot.empty) {
+            document.getElementById('progress-students-loading').style.display = 'none';
+            document.getElementById('progress-students-empty').style.display = 'block';
+            document.getElementById('progress-loading').style.display = 'none';
+            return;
+        }
+        
+        // Procesar datos de estudiantes
+        const studentsData = [];
+        for (const doc of studentsSnapshot.docs) {
+            const studentData = doc.data();
+            
+            // Cargar progreso del estudiante
+            const progressDoc = await db.collection('progress').doc(studentData.studentId).get();
+            const progressData = progressDoc.exists ? progressDoc.data() : null;
+            
+            // Cargar sesiones recientes
+            const sessionsSnapshot = await db.collection('sessions')
+                .where('studentId', '==', studentData.studentId)
+                .orderBy('date', 'desc')
+                .limit(10)
+                .get();
+            
+            const sessions = [];
+            sessionsSnapshot.forEach(sessionDoc => {
+                sessions.push(sessionDoc.data());
+            });
+            
+            studentsData.push({
+                ...studentData,
+                progress: progressData,
+                recentSessions: sessions
+            });
+        }
+        
+        // Mostrar resultados
+        renderStudentsProgress(studentsData);
+        updateProgressOverview(studentsData);
+        
+        // Ocultar loading
+        document.getElementById('progress-loading').style.display = 'none';
+        document.getElementById('progress-students-loading').style.display = 'none';
+        
+        console.log('✅ Progreso cargado para', studentsData.length, 'estudiantes');
+        
+    } catch (error) {
+        console.error('❌ Error cargando progreso:', error);
+        document.getElementById('progress-loading').style.display = 'none';
+        document.getElementById('progress-students-loading').style.display = 'none';
+        document.getElementById('progress-students-empty').style.display = 'block';
+    }
+}
+
+function renderStudentsProgress(studentsData) {
+    const container = document.getElementById('progress-students-list');
+    
+    if (studentsData.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.innerHTML = studentsData.map(student => {
+        const progress = student.progress;
+        const sessions = student.recentSessions;
+        
+        // Calcular estadísticas básicas
+        const totalSessions = sessions.length;
+        const avgAccuracy = sessions.length > 0 ? 
+            Math.round(sessions.reduce((sum, s) => sum + (s.correct / (s.correct + s.incorrect) * 100), 0) / sessions.length) : 0;
+        
+        // Identificar tablas más practicadas
+        const tableStats = {};
+        sessions.forEach(session => {
+            if (session.tablesPracticed) {
+                session.tablesPracticed.forEach(table => {
+                    tableStats[table] = (tableStats[table] || 0) + 1;
+                });
+            }
+        });
+        
+        const mostPracticedTables = Object.entries(tableStats)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 3)
+            .map(([table]) => table)
+            .join(', ');
+        
+        // Determinar estado del estudiante
+        let statusColor = 'text-gray-300';
+        let statusIcon = '😐';
+        let statusText = 'Sin actividad';
+        
+        if (totalSessions > 0) {
+            if (avgAccuracy >= 80) {
+                statusColor = 'text-green-300';
+                statusIcon = '🌟';
+                statusText = 'Excelente';
+            } else if (avgAccuracy >= 60) {
+                statusColor = 'text-yellow-300';
+                statusIcon = '👍';
+                statusText = 'Bien';
+            } else {
+                statusColor = 'text-red-300';
+                statusIcon = '📚';
+                statusText = 'Necesita práctica';
+            }
+        }
+        
+        return `
+            <div class="bg-white bg-opacity-10 rounded-xl p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            ${student.studentName.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${student.studentName}</h3>
+                            <p class="text-sm opacity-75">Código: ${student.studentCode}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl mb-1">${statusIcon}</div>
+                        <div class="text-sm font-bold ${statusColor}">${statusText}</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="text-center">
+                        <div class="text-xl font-bold text-blue-300">${totalSessions}</div>
+                        <div class="text-xs opacity-75">Sesiones</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xl font-bold text-green-300">${avgAccuracy}%</div>
+                        <div class="text-xs opacity-75">Precisión</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xl font-bold text-yellow-300">${progress?.totalSessions || 0}</div>
+                        <div class="text-xs opacity-75">Total histórico</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xl font-bold text-purple-300">${progress?.globalAccuracy || 0}%</div>
+                        <div class="text-xs opacity-75">Global</div>
+                    </div>
+                </div>
+                
+                ${mostPracticedTables ? `
+                    <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                        <div class="text-sm font-bold mb-1">📊 Tablas más practicadas:</div>
+                        <div class="text-sm">${mostPracticedTables}</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+    
+    container.style.display = 'block';
+    document.getElementById('progress-overview').style.display = 'grid';
+}
+
+function updateProgressOverview(studentsData) {
+    const totalSessions = studentsData.reduce((sum, s) => sum + s.recentSessions.length, 0);
+    const totalAccuracy = studentsData.length > 0 ? 
+        Math.round(studentsData.reduce((sum, s) => {
+            const sessions = s.recentSessions;
+            return sum + (sessions.length > 0 ? 
+                sessions.reduce((acc, session) => acc + (session.correct / (session.correct + session.incorrect) * 100), 0) / sessions.length : 0);
+        }, 0) / studentsData.length) : 0;
+    
+    const activeStudents = studentsData.filter(s => s.recentSessions.length > 0).length;
+    const criticalStudents = studentsData.filter(s => {
+        const sessions = s.recentSessions;
+        if (sessions.length === 0) return false;
+        const avgAccuracy = sessions.reduce((sum, session) => sum + (session.correct / (session.correct + session.incorrect) * 100), 0) / sessions.length;
+        return avgAccuracy < 50;
+    }).length;
+    
+    document.getElementById('total-sessions').textContent = totalSessions;
+    document.getElementById('avg-accuracy').textContent = totalAccuracy + '%';
+    document.getElementById('active-students').textContent = activeStudents;
+    document.getElementById('critical-tables').textContent = criticalStudents;
+}
+
+function refreshProgress() {
+    console.log('🔄 Refrescando análisis de progreso');
+    loadClassProgress();
+}
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
