@@ -34,16 +34,16 @@ function MultiBoost() {
 this.assignedTaskData = localStorage.getItem('assignedTask');
 if (this.assignedTaskData) {
     try {
-        var taskData = JSON.parse(this.assignedTaskData);
-        this.assignmentId = taskData.taskId;
-        this.practiceTable = taskData.tableNumber.toString();
-        this.practiceExercises = taskData.exerciseCount ? taskData.exerciseCount.toString() : '20';
-        this.isAssignedPractice = true;
-        console.log('📋 Tarea asignada detectada:', taskData);
-    } catch (error) {
-        console.log('Error parseando tarea asignada:', error);
-        this.isAssignedPractice = false;
-    }
+    var taskData = JSON.parse(this.assignedTaskData);
+    this.assignmentId = taskData.taskId;
+    this.practiceTable = taskData.tableNumber.toString();
+    this.practiceExercises = taskData.exerciseCount ? taskData.exerciseCount.toString() : '20';
+    this.isAssignedPractice = true;
+    console.log('📋 Tarea asignada detectada:', taskData);
+} catch (error) {
+    console.log('Error parseando tarea asignada:', error);
+    this.isAssignedPractice = false;
+}
 } else {
     this.assignmentId = localStorage.getItem('assignmentId');
     this.isAssignedPractice = this.assignmentId !== null && this.assignmentId !== undefined;
@@ -1652,4 +1652,16 @@ async function markAssignedTaskCompleted(userId, sessionData) {
     } else {
         window.multiBoost = new MultiBoost();
     }
+    // Función para volver al inicio
+function goToHome() {
+    console.log('Navegando al inicio desde tablas');
+    if (localStorage.getItem('adventureMode') === 'true') {
+        window.location.href = 'dashboard.html';
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+// Hacer función global
+window.goToHome = goToHome;
 })();
