@@ -30,9 +30,24 @@ function MultiBoost() {
     this.participantName = localStorage.getItem('participantName');
     this.participantType = localStorage.getItem('participantType');
 
-    // 🆕 ACTIVIDAD ASIGNADA
+    // 🆕 ACTIVIDAD ASIGNADA - VERSIÓN MEJORADA
+this.assignedTaskData = localStorage.getItem('assignedTask');
+if (this.assignedTaskData) {
+    try {
+        var taskData = JSON.parse(this.assignedTaskData);
+        this.assignmentId = taskData.taskId;
+        this.practiceTable = taskData.tableNumber.toString();
+        this.practiceExercises = taskData.exerciseCount ? taskData.exerciseCount.toString() : '20';
+        this.isAssignedPractice = true;
+        console.log('📋 Tarea asignada detectada:', taskData);
+    } catch (error) {
+        console.log('Error parseando tarea asignada:', error);
+        this.isAssignedPractice = false;
+    }
+} else {
     this.assignmentId = localStorage.getItem('assignmentId');
     this.isAssignedPractice = this.assignmentId !== null && this.assignmentId !== undefined;
+}
     
     // Estadísticas
     this.stats = {
