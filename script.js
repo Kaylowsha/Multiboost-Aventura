@@ -1646,16 +1646,13 @@ async function markAssignedTaskCompleted(userId, sessionData) {
     } else {
         window.multiBoost = new MultiBoost();
     }
-    // Función para volver al inicio
-function goToHome() {
+// Función global para volver al inicio
+window.goToHome = function() {
     console.log('Navegando al inicio desde tablas');
     if (localStorage.getItem('adventureMode') === 'true') {
         window.location.href = 'dashboard.html';
     } else {
         window.location.href = 'index.html';
     }
-}
-
-// Hacer función global
-window.goToHome = goToHome;
+};
 })();
