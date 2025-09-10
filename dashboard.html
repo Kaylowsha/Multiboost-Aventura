@@ -367,29 +367,23 @@
             </div>
             <!-- FIN PESTAÑA: MIS CLASES -->
 
-            <!-- PESTAÑA: TAREAS -->
-            <div id="content-assignments" class="tab-content">
-                <!-- ACTIVIDADES ASIGNADAS -->
-                <div id="assignments-section" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6" style="display: none;">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">📋 MIS ACTIVIDADES ASIGNADAS</h2>
-                        <button onclick="refreshAssignments()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-bold text-sm">
-                            🔄 Actualizar
-                        </button>
-                    </div>
-                    
-                    <div id="assignments-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Se llenan dinámicamente -->
-                    </div>
-
-                    <div id="no-assignments" class="text-center py-8 opacity-60" style="display: none;">
-                        <div class="text-4xl mb-4">📚</div>
-                        <p class="text-lg">No tienes actividades asignadas por ahora</p>
-                        <p class="text-sm opacity-75">¡Puedes practicar cualquier tabla que quieras!</p>
-                    </div>
-                </div>
+         <!-- PESTAÑA: TAREAS -->
+<div id="content-assignments" class="tab-content">
+    <div class="text-center">
+        <div class="text-6xl mb-4">📝</div>
+        <h3 class="text-2xl font-bold mb-4">Tareas Asignadas</h3>
+        
+        <!-- Lista de tareas -->
+        <div id="assigned-tasks-list" class="space-y-4">
+            <!-- Las tareas se cargarán aquí dinámicamente -->
+            <div class="text-center text-gray-500 py-8">
+                <div class="text-4xl mb-2">⏳</div>
+                <div>Cargando tareas...</div>
             </div>
-            <!-- FIN PESTAÑA: TAREAS -->
+        </div>
+    </div>
+</div>
+<!-- FIN PESTAÑA: TAREAS -->
 
             <!-- PESTAÑA: MI PROGRESO -->
             <div id="content-progress" class="tab-content">
@@ -820,7 +814,7 @@
                 if (tabName === 'classes') {
                     loadStudentClasses();
                 } else if (tabName === 'assignments') {
-                    refreshAssignments();
+                     loadAssignedTasks();
                 } else if (tabName === 'progress') {
                     renderProgressGrid();
                 }
@@ -1081,6 +1075,81 @@
         window.viewClassActivities = function(classroomId, className) {
             console.log('📋 Viendo actividades de:', className, classroomId);
             alert(`Próximamente: Actividades de "${className}"`);
+        };
+        // Cargar tareas asignadas al estudiante
+        async function loadAssignedTasks() {
+            console.log('📝 Cargando tareas asignadas...');
+            
+            try {
+                const tasksSnapshot = await getDocs(query(
+                    collection(db, 'assigned_activities'),
+                    where('studentId', '==', currentUser.uid),
+                    where('status', '==', 'pending')
+                ));
+                
+                const tasksList = document.getElementById('assigned-tasks-list');
+                
+                if (tasksSnapshot.empty) {
+                    tasksList.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <div class="text-4xl mb-2">✅</div>
+                            <div class="text-lg font-bold">¡No hay tareas pendientes!</div>
+                            <div class="text-sm mt-2">Todas las actividades están completadas</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let tasksHTML = '';
+                
+                tasksSnapshot.forEach(doc => {
+                    const task = doc.data();
+                    const assignedDate = task.assignedAt ? task.assignedAt.toDate().toLocaleDateString('es-CL') : 'Hoy';
+                    
+                    tasksHTML += `
+                        <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="text-xl font-bold text-yellow-300">📚 Tabla del ${task.tableNumber}</h4>
+                                    <p class="text-sm opacity-75">Asignada por: ${task.teacherName}</p>
+                                    <p class="text-sm opacity-75">Fecha: ${assignedDate}</p>
+                                </div>
+                                <div class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    PENDIENTE
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <p class="text-white mb-2">${task.message}</p>
+                                <p class="text-sm text-blue-300">🎯 ${task.exerciseCount} ejercicios</p>
+                            </div>
+                            
+                            <button onclick="startAssignedTask('${doc.id}', ${task.tableNumber}, ${task.exerciseCount})" 
+                                    class="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl hover:from-green-500 hover:to-blue-600 transition-all">
+                                🚀 Comenzar Actividad
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                tasksList.innerHTML = tasksHTML;
+                console.log('✅ Tareas cargadas exitosamente');
+                
+            } catch (error) {
+                console.error('❌ Error cargando tareas:', error);
+                document.getElementById('assigned-tasks-list').innerHTML = `
+                    <div class="text-center text-red-500 py-8">
+                        <div class="text-4xl mb-2">⚠️</div>
+                        <div>Error cargando tareas</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Iniciar tarea asignada específica
+        window.startAssignedTask = function(taskId, tableNumber, exerciseCount) {
+            console.log(`🚀 Iniciando tarea: Tabla ${tableNumber}, ${exerciseCount} ejercicios`);
+            alert(`Comenzando práctica:\nTabla del ${tableNumber}\n${exerciseCount} ejercicios\n\n¡Próximamente se integrará con el modo de práctica!`);
         };
         console.log('🎮 Dashboard con actividades asignadas cargado correctamente');
     </script>
