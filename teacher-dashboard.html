@@ -1235,11 +1235,19 @@
         function renderActivities(activities, filter = 'all') {
             const container = document.getElementById('activities-list');
             
-            // Filtrar actividades
-            const filteredActivities = activities.filter(activity => {
-                if (filter === 'all') return true;
-                return activity.status === filter;
-            });
+           // DEBUG: Mostrar datos reales de actividades
+console.log('🔍 DEBUG - Actividades recibidas:', activities);
+console.log('🔍 DEBUG - Filtro aplicado:', filter);
+
+// Filtrar actividades
+const filteredActivities = activities.filter(activity => {
+    console.log('🔍 DEBUG - Actividad:', activity.studentName, '| Estado:', activity.status, '| Tipo:', typeof activity.status);
+    
+    if (filter === 'all') return true;
+    return activity.status === filter;
+});
+
+console.log('🔍 DEBUG - Actividades filtradas:', filteredActivities);
 
             if (filteredActivities.length === 0) {
                 container.innerHTML = `
