@@ -590,8 +590,8 @@
                     teacherClasses.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Update statistics
-                await updateStatistics();
+             // Update statistics (enhanced version)
+              await updateStatisticsEnhanced();
                 
                 // Render classes
                 renderClasses();
