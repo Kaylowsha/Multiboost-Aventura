@@ -1043,7 +1043,7 @@
                                         <div class="text-sm text-gray-500">Código: ${studentData.studentCode}</div>
                                     </div>
                                 </div>
-                                <button onclick="assignActivityToStudent('${studentData.studentId}', '${studentData.studentName}')" 
+<button onclick="assignActivityToStudent('${studentData.studentId}', '${studentData.studentName}', '${classData.id}', '${classData.className}')"
                                         class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
                                     📝 Asignar Actividad
                                 </button>
@@ -1065,25 +1065,24 @@
             document.getElementById('class-details').style.display = 'none';
             document.getElementById('class-overview').style.display = 'block';
         }
-
-     // Asignar actividad a un estudiante específico
-        function assignActivityToStudent(studentId, studentName) {
-            console.log('📝 Abriendo modal de asignación para:', studentName);
-            
-            // Configurar información del estudiante en el modal
-            document.getElementById('assign-student-name').textContent = studentName;
-            document.getElementById('assign-student-code').textContent = `ID: ${studentId}`;
-            
-            // Guardar datos del estudiante para uso posterior
-            window.currentAssignmentData = {
-                studentId: studentId,
-                studentName: studentName
-            };
-            
-            // Mostrar modal
-            document.getElementById('assign-activity-modal').style.display = 'flex';
-        }
-
+function assignActivityToStudent(studentId, studentName, classroomId, className) {
+    console.log('📝 Abriendo modal de asignación para:', studentName, 'en clase:', className);
+    
+    // Configurar información del estudiante en el modal
+    document.getElementById('assign-student-name').textContent = studentName;
+    document.getElementById('assign-student-code').textContent = `Clase: ${className}`;
+    
+    // Guardar datos del estudiante Y LA CLASE para uso posterior
+    window.currentAssignmentData = {
+        studentId: studentId,
+        studentName: studentName,
+        classroomId: classroomId,        // ← NUEVO
+        className: className              // ← NUEVO
+    };
+    
+    // Mostrar modal
+    document.getElementById('assign-activity-modal').style.display = 'flex';
+}
         // Cerrar modal de asignación
         function closeAssignModal() {
             document.getElementById('assign-activity-modal').style.display = 'none';
@@ -1110,18 +1109,20 @@
                 document.getElementById('assign-loading').style.display = 'block';
                 
                 // Crear documento de actividad asignada
-                const activityData = {
-                    studentId: window.currentAssignmentData.studentId,
-                    studentName: window.currentAssignmentData.studentName,
-                    teacherId: currentTeacher.id,
-                    teacherName: currentTeacher.name,
-                    tableNumber: parseInt(table),
-                    exerciseCount: parseInt(exercises),
-                    message: message || `Practica la tabla del ${table}`,
-                    status: 'pending',
-                    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    dueDate: null // Por ahora sin fecha límite
-                };
+               const activityData = {
+    studentId: window.currentAssignmentData.studentId,
+    studentName: window.currentAssignmentData.studentName,
+    teacherId: currentTeacher.id,
+    teacherName: currentTeacher.name,
+    classroomId: window.currentAssignmentData.classroomId,    // ← NUEVO
+    className: window.currentAssignmentData.className,        // ← NUEVO
+    tableNumber: parseInt(table),
+    exerciseCount: parseInt(exercises),
+    message: message || `Practica la tabla del ${table}`,
+    status: 'pending',
+    assignedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    dueDate: null
+};
                 
                 // Guardar en Firebase
                 await db.collection('assigned_activities').add(activityData);
