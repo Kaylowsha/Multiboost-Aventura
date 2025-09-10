@@ -1103,10 +1103,27 @@ async function loadAssignedTasks() {
     }
 }
         // Iniciar tarea asignada específica
-        window.startAssignedTask = function(taskId, tableNumber, exerciseCount) {
-            console.log(`🚀 Iniciando tarea: Tabla ${tableNumber}, ${exerciseCount} ejercicios`);
-            alert(`Comenzando práctica:\nTabla del ${tableNumber}\n${exerciseCount} ejercicios\n\n¡Próximamente se integrará con el modo de práctica!`);
-        };
+window.startAssignedTask = function(taskId, tableNumber, exerciseCount) {
+    console.log(`🚀 Iniciando tarea asignada: Tabla ${tableNumber}, ${exerciseCount} ejercicios`);
+    
+    // Guardar información de la tarea en localStorage
+    localStorage.setItem('assignedTask', JSON.stringify({
+        taskId: taskId,
+        tableNumber: tableNumber,
+        exerciseCount: exerciseCount,
+        isAssigned: true,
+        studentId: currentUser.uid
+    }));
+    
+    console.log('📦 Información de tarea guardada en localStorage');
+    
+    // Mantener el modo aventura y usuario
+    localStorage.setItem('adventureMode', 'true');
+    localStorage.setItem('userId', currentUser.uid);
+    
+    // Navegar a tablas.html
+    window.location.href = 'tablas.html';
+};
         console.log('🎮 Dashboard con actividades asignadas cargado correctamente');
     </script>
 
