@@ -459,18 +459,71 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA 4: PROGRESO -->
-            <div id="progress-tab" class="tab-content">
-                <div class="future-feature">
-                    <div class="icon">📊</div>
-                    <h3>Análisis de Progreso</h3>
-                    <p>Visualiza reportes detallados del rendimiento de tus estudiantes, identifica áreas de mejora y obtén estadísticas comparativas por tabla de multiplicar.</p>
-                    <div class="mt-4 text-sm opacity-60">
-                        📈 Funcionalidad en desarrollo
-                    </div>
+           <!-- PESTAÑA 4: PROGRESO -->
+<div id="progress-tab" class="tab-content">
+    <div class="glass-card rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold">📊 Análisis de Progreso</h2>
+            <button onclick="refreshProgress()" class="text-white hover:text-yellow-300 transition-colors">
+                🔄 Actualizar
+            </button>
+        </div>
+
+        <!-- Selector de Clase -->
+        <div class="bg-white bg-opacity-10 rounded-xl p-4 mb-6">
+            <div class="flex flex-wrap gap-3 items-center">
+                <span class="font-bold">Analizar clase:</span>
+                <select id="progress-class-selector" onchange="loadClassProgress()" class="bg-white text-gray-800 px-4 py-2 rounded-lg font-bold">
+                    <option value="">Seleccionar clase...</option>
+                </select>
+                <div id="progress-loading" class="text-sm opacity-75" style="display: none;">
+                    ⏳ Cargando datos...
                 </div>
             </div>
+        </div>
 
+        <!-- Estadísticas Generales -->
+        <div id="progress-overview" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" style="display: none;">
+            <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-blue-300" id="total-sessions">0</div>
+                <div class="text-sm opacity-75">Sesiones Totales</div>
+            </div>
+            <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-green-300" id="avg-accuracy">0%</div>
+                <div class="text-sm opacity-75">Precisión Promedio</div>
+            </div>
+            <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-yellow-300" id="active-students">0</div>
+                <div class="text-sm opacity-75">Estudiantes Activos</div>
+            </div>
+            <div class="bg-white bg-opacity-10 rounded-xl p-4 text-center">
+                <div class="text-2xl font-bold text-purple-300" id="critical-tables">0</div>
+                <div class="text-sm opacity-75">Tablas Críticas</div>
+            </div>
+        </div>
+
+        <!-- Lista de Estudiantes con Progreso -->
+        <div id="students-progress-container">
+            <!-- Loading State -->
+            <div id="progress-students-loading" class="text-center py-12">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <div class="text-lg">Esperando selección de clase...</div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="progress-students-empty" class="text-center py-12" style="display: none;">
+                <div class="text-6xl mb-4">📚</div>
+                <h3 class="text-xl font-bold mb-2">Selecciona una clase para ver el progreso</h3>
+                <p class="text-lg opacity-75">Elige una clase del menú desplegable para analizar el rendimiento de los estudiantes</p>
+            </div>
+
+            <!-- Students List -->
+            <div id="progress-students-list" class="space-y-4" style="display: none;">
+                <!-- Students progress will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
             <!-- PESTAÑA 5: ESTUDIANTES -->
             <div id="students-tab" class="tab-content">
                 <div class="future-feature">
