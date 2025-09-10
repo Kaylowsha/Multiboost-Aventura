@@ -600,9 +600,25 @@ MultiBoost.prototype.startSessionTimer = function() {
     
     try {
         if (this.sessionTimer) {
-    clearInterval(this.sessionTimer);
-}
-
+            clearInterval(this.sessionTimer);
+        }
+        
+        this.sessionTimer = setInterval(function() {
+            var elapsed = Math.floor((new Date().getTime() - self.sessionStartTime) / 1000);
+            var minutes = Math.floor(elapsed / 60);
+            var seconds = elapsed % 60;
+            
+            var timeEl = document.getElementById('total-time');
+            if (timeEl) {
+                var minStr = minutes < 10 ? '0' + minutes : minutes.toString();
+                var secStr = seconds < 10 ? '0' + seconds : seconds.toString();
+                timeEl.textContent = minStr + ':' + secStr;
+            }
+        }, 1000);
+    } catch (error) {
+        console.log('Error con timer de sesión:', error);
+    }
+};
 // NUEVO: Preparar datos para Firebase
 const sessionData = {
     tables: this.selectedTables,
@@ -760,30 +776,8 @@ MultiBoost.prototype.showResults = function() {
     try {
         console.log('🏁 Entrenamiento completado');
         
-        if (this.sessionTimer) {
+       if (this.sessionTimer) {
             clearInterval(this.sessionTimer);
-            // NUEVO: Preparar datos para Firebase
-        const sessionData = {
-            tables: this.selectedTables,
-            totalExercises: this.stats.correct + this.stats.incorrect,
-            correct: this.stats.correct,
-            incorrect: this.stats.incorrect,
-            totalTime: Math.floor((new Date().getTime() - this.sessionStartTime) / 1000),
-            exercises: this.exercises.map(ex => ({
-                table: ex.table,
-                multiplicand: ex.multiplicand,
-                correctAnswer: ex.correctAnswer,
-                userAnswer: ex.userAnswer || null,
-                isCorrect: ex.isCorrect || false
-            }))
-        };
-
-        // NUEVO: Guardar en Firebase si está en modo aventura
-        saveSessionToFirebase(sessionData).then(saved => {
-            if (saved) {
-                console.log('🎉 Datos guardados exitosamente en Firebase');
-            }
-        });
         }
         
         var totalExercises = this.stats.correct + this.stats.incorrect;
