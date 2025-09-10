@@ -222,7 +222,28 @@
                     </div>
                 </div>
             </div>
+<!-- SISTEMA DE PESTAÑAS -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-button active" onclick="switchTab('practice')" id="tab-practice">
+                        🎮 Práctica Libre
+                    </button>
+                    <button class="tab-button" onclick="switchTab('classes')" id="tab-classes">
+                        📚 Mis Clases
+                    </button>
+                    <button class="tab-button" onclick="switchTab('assignments')" id="tab-assignments">
+                        📋 Tareas
+                    </button>
+                    <button class="tab-button" onclick="switchTab('progress')" id="tab-progress">
+                        📊 Mi Progreso
+                    </button>
+                </div>
+            </div>
 
+            <!-- CONTENIDO DE PESTAÑAS -->
+            
+            <!-- PESTAÑA: PRÁCTICA LIBRE -->
+            <div id="content-practice" class="tab-content active">
             <!-- NUEVA SECCIÓN: ACTIVIDADES ASIGNADAS -->
             <div id="assignments-section" class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6" style="display: none;">
                 <div class="flex justify-between items-center mb-6">
@@ -242,7 +263,11 @@
                     <p class="text-sm opacity-75">¡Puedes practicar cualquier tabla que quieras!</p>
                 </div>
             </div>
+</div>
+            <!-- FIN PESTAÑA: TAREAS -->
 
+            <!-- PESTAÑA: MI PROGRESO -->
+            <div id="content-progress" class="tab-content">
             <!-- PROGRESO POR TABLA -->
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">📊 MI PROGRESO POR TABLA</h2>
@@ -251,7 +276,8 @@
                     <!-- Se llena dinámicamente -->
                 </div>
             </div>
-
+</div>
+            <!-- FIN PESTAÑA: MI PROGRESO -->
             <!-- MODOS DE ENTRENAMIENTO -->
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">🎮 MODOS DE ENTRENAMIENTO</h2>
@@ -294,7 +320,56 @@
                     </div>
                 </div>
             </div>
+</div>
+            <!-- FIN PESTAÑA: PRÁCTICA LIBRE -->
 
+            <!-- PESTAÑA: MIS CLASES -->
+            <div id="content-classes" class="tab-content">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center">📚 MIS CLASES</h2>
+                    
+                    <!-- FORMULARIO UNIRSE A CLASE -->
+                    <div class="join-class-form mb-6">
+                        <div class="text-center mb-4">
+                            <h3 class="text-xl font-bold mb-2">🔗 Unirse a una Clase</h3>
+                            <p class="opacity-80">Ingresa el código que te dio tu profesor</p>
+                        </div>
+                        
+                        <div class="max-w-md mx-auto">
+                            <div class="flex flex-col gap-4">
+                                <input 
+                                    type="text" 
+                                    id="class-code-input" 
+                                    placeholder="CLS_ABC123" 
+                                    class="form-input"
+                                    maxlength="10"
+                                >
+                                <button onclick="joinClassroom()" class="btn-join">
+                                    🚀 Unirse a la Clase
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LISTA DE CLASES -->
+                    <div id="student-classes-container">
+                        <h3 class="text-xl font-bold mb-4">📖 Mis Clases Actuales</h3>
+                        <div id="classes-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Se llenan dinámicamente -->
+                        </div>
+                        
+                        <div id="no-classes" class="text-center py-8 opacity-60">
+                            <div class="text-4xl mb-4">📚</div>
+                            <p class="text-lg">Aún no estás en ninguna clase</p>
+                            <p class="text-sm opacity-75">Pídele a tu profesor el código de clase</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN PESTAÑA: MIS CLASES -->
+
+            <!-- PESTAÑA: TAREAS -->
+            <div id="content-assignments" class="tab-content">
             <!-- UNIRSE A DESAFÍO -->
             <div class="bg-white bg-opacity-10 backdrop-blur-lg border border-white border-opacity-20 rounded-2xl p-6">
                 <h2 class="text-2xl font-bold mb-6 text-center">🏆 UNIRSE A DESAFÍO</h2>
@@ -715,7 +790,72 @@
                 }
             }, 1000);
         });
+// SISTEMA DE PESTAÑAS
+        window.switchTab = function(tabName) {
+            console.log('🔄 Cambiando a pestaña:', tabName);
+            
+            // Ocultar todas las pestañas
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Desactivar todos los botones
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Activar pestaña seleccionada
+            const targetContent = document.getElementById('content-' + tabName);
+            const targetButton = document.getElementById('tab-' + tabName);
+            
+            if (targetContent && targetButton) {
+                targetContent.classList.add('active');
+                targetButton.classList.add('active');
+                
+                // Cargar datos específicos según pestaña
+                if (tabName === 'classes') {
+                    loadStudentClasses();
+                } else if (tabName === 'assignments') {
+                    refreshAssignments();
+                } else if (tabName === 'progress') {
+                    renderProgressGrid();
+                }
+            }
+        };
 
+        // FUNCIÓN TEMPORAL PARA UNIRSE A CLASE (placeholder)
+        window.joinClassroom = function() {
+            const codeInput = document.getElementById('class-code-input');
+            const code = codeInput.value.trim().toUpperCase();
+            
+            if (!code) {
+                alert('Por favor ingresa un código de clase');
+                return;
+            }
+            
+            if (!code.match(/^CLS_[A-Z]{3}\d{3}$/)) {
+                alert('Código inválido. Formato correcto: CLS_ABC123');
+                return;
+            }
+            
+            console.log('🔗 Uniéndose a clase:', code);
+            alert('Función en desarrollo - Código: ' + code);
+            codeInput.value = '';
+        };
+
+        // FUNCIÓN TEMPORAL PARA CARGAR CLASES (placeholder)
+        window.loadStudentClasses = function() {
+            console.log('📚 Cargando clases del estudiante...');
+            
+            const classList = document.getElementById('classes-list');
+            const noClasses = document.getElementById('no-classes');
+            
+            // Por ahora mostrar mensaje de no clases
+            classList.innerHTML = '';
+            noClasses.style.display = 'block';
+        };
         console.log('🎮 Dashboard con actividades asignadas cargado correctamente');
     </script>
 
