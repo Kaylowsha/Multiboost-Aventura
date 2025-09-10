@@ -299,7 +299,7 @@
         // Load Dashboard Data
         async function loadDashboardData() {
             try {
-                // Load teacher's classes
+                // Load teacher's classes (now with index available)
                 const classesSnapshot = await db.collection('classrooms')
                     .where('teacherId', '==', currentTeacher.id)
                     .where('isActive', '==', true)
@@ -319,6 +319,9 @@
                 
             } catch (error) {
                 console.error('Error cargando datos:', error);
+                // Show empty state if error
+                document.getElementById('empty-state').style.display = 'block';
+                document.getElementById('classes-grid').style.display = 'none';
             }
         }
 
