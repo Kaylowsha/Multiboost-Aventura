@@ -1749,6 +1749,51 @@ function refreshProgress() {
     console.log('🔄 Refrescando análisis de progreso');
     loadClassProgress();
 }
+        // Función para asignar actividad a toda la clase
+function assignActivityToClass(classroomId, className) {
+    console.log('📚 Abriendo modal de asignación para toda la clase:', className);
+    
+    // Configurar información de la clase en el modal
+    document.getElementById('assign-class-name').textContent = className;
+    document.getElementById('assign-class-students').textContent = 'Cargando estudiantes...';
+    
+    // Guardar datos de la clase para uso posterior
+    window.currentClassAssignmentData = {
+        classroomId: classroomId,
+        className: className
+    };
+    
+    // Cargar conteo de estudiantes
+    loadClassStudentCount(classroomId);
+    
+    // Mostrar modal
+    document.getElementById('assign-class-modal').style.display = 'flex';
+}
+
+// Función auxiliar para cargar conteo de estudiantes
+async function loadClassStudentCount(classroomId) {
+    try {
+        const studentsSnapshot = await db.collection('classroom_students')
+            .where('classroomId', '==', classroomId)
+            .where('isActive', '==', true)
+            .get();
+        
+        const count = studentsSnapshot.size;
+        document.getElementById('assign-class-students').textContent = `${count} estudiantes`;
+        
+    } catch (error) {
+        console.error('Error cargando conteo:', error);
+        document.getElementById('assign-class-students').textContent = 'Error cargando';
+    }
+}
+
+// Función para cerrar modal de asignación de clase
+function closeClassAssignModal() {
+    document.getElementById('assign-class-modal').style.display = 'none';
+    document.getElementById('assign-class-form').style.display = 'block';
+    document.getElementById('assign-class-loading').style.display = 'none';
+    document.getElementById('assign-class-form').reset();
+}
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
