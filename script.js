@@ -600,7 +600,31 @@ MultiBoost.prototype.startSessionTimer = function() {
     
     try {
         if (this.sessionTimer) {
-            clearInterval(this.sessionTimer);
+    clearInterval(this.sessionTimer);
+}
+
+// NUEVO: Preparar datos para Firebase
+const sessionData = {
+    tables: this.selectedTables,
+    totalExercises: this.stats.correct + this.stats.incorrect,
+    correct: this.stats.correct,
+    incorrect: this.stats.incorrect,
+    totalTime: Math.floor((new Date().getTime() - this.sessionStartTime) / 1000),
+    exercises: this.exercises.map(ex => ({
+        table: ex.table,
+        multiplicand: ex.multiplicand,
+        correctAnswer: ex.correctAnswer,
+        userAnswer: ex.userAnswer || null,
+        isCorrect: ex.isCorrect || false
+    }))
+};
+
+// NUEVO: Guardar en Firebase si está en modo aventura
+saveSessionToFirebase(sessionData).then(saved => {
+    if (saved) {
+        console.log('🎉 Datos guardados exitosamente en Firebase');
+    }
+});
         }
         
         this.sessionTimer = setInterval(function() {
